@@ -13,7 +13,8 @@ class PARTICLERUSH_API URushCameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	void LookAtPoint(FVector worldPoint);
+
+	void LookAtRush();
 };

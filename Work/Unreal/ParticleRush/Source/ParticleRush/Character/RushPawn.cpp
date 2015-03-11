@@ -70,6 +70,7 @@ void ARushPawn::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	RushCameraComponent->LookAtRush();
 }
 
 // Called to bind functionality to input
