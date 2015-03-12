@@ -3,21 +3,25 @@
 #include "ParticleRush.h"
 #include "RushCameraComponent.h"
 
+/* Custom Headers */
 #include "RushPawn.h"
 
-void URushCameraComponent::LookAtPoint(FVector WorldPoint)
+void URushCameraComponent::LookAtPoint(FVector aWorldPoint)
 {
 	ARushPawn* rush = static_cast<ARushPawn*>(GetOwner());
 
-	if (rush != NULL)
-	{
-		FVector cameraLocation = this->GetComponentLocation();
-		
-		FVector lookAtDirection = WorldPoint - cameraLocation;
-		FRotator lookAtRotation = lookAtDirection.Rotation();
+	if (rush == NULL)
+		return;
 
-		this->SetWorldRotation(lookAtRotation);
-	}
+	
+	FVector cameraLocation = this->GetComponentLocation();
+	
+	FVector lookAtDirection = aWorldPoint - cameraLocation;
+	FRotator currentRotation = this->GetComponentRotation();
+	FRotator lookAtRotation = lookAtDirection.Rotation();
+	FRotator interpRotation = FMath::InterpEaseOut<FRotator>(currentRotation, lookAtRotation, LookAtEaseAlpha, LookAtEaseExp);
+	
+	this->SetWorldRotation(interpRotation);	
 }
 
 
@@ -25,11 +29,19 @@ void URushCameraComponent::LookAtRush()
 {
 	ARushPawn* rush = static_cast<ARushPawn*>(GetOwner());
 
-	if (rush != NULL)
-	{
-		FVector rushLocation = rush->GetActorLocation();
+	if (rush == NULL)
+		return;
 
-		LookAtPoint(rushLocation);
-	}
+	
+	FVector rushLocation = rush->GetActorLocation();
+
+	LookAtPoint(rushLocation);
 }
 
+
+void URushCameraComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	LookAtRush();
+}

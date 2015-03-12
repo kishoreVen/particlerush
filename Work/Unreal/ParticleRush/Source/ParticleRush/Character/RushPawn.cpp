@@ -3,7 +3,11 @@
 #include "ParticleRush.h"
 #include "RushPawn.h"
 
+#pragma region Logging Defines
+DEFINE_LOG_CATEGORY_STATIC(RushPawnEngineInfo, Log, All);
+#pragma endregion
 
+#pragma region Base Overrides
 // Sets default values
 ARushPawn::ARushPawn()
 {
@@ -13,17 +17,15 @@ ARushPawn::ARushPawn()
 	// Create the Collision Component and set it as root
 	RushCapsuleCollisionComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RushCollisionComponent"));
 	RushCapsuleCollisionComponent->InitCapsuleSize(34.0f, 24.0f);
-	RushCapsuleCollisionComponent->bShouldUpdatePhysicsVolume = true;
-	RushCapsuleCollisionComponent->SetSimulatePhysics(true);
-	RushCapsuleCollisionComponent->CanCharacterStepUpOn = ECB_No;
-	RushCapsuleCollisionComponent->bCheckAsyncSceneOnMove = false;
+	RushCapsuleCollisionComponent->bShouldUpdatePhysicsVolume = true;	
+	RushCapsuleCollisionComponent->CanCharacterStepUpOn = ECB_No;	
 	RushCapsuleCollisionComponent->bCanEverAffectNavigation = false;	
 	RushCapsuleCollisionComponent->SetCollisionProfileName(TEXT("RushCollisionProfile"));
 	RootComponent = RushCapsuleCollisionComponent;	
 
 	// Setup Movement Component
 	RushMovementComponent = CreateDefaultSubobject<URushMovementComponent>(TEXT("RushMovmentComponent"));
-	RushMovementComponent->UpdatedComponent = RushCapsuleCollisionComponent;
+	RushMovementComponent->UpdatedComponent = RushCapsuleCollisionComponent;	
 
 	// Establish Rush Skeletal Mesh Component
 	RushSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RushSkeletalMeshComponent"));
@@ -61,16 +63,13 @@ ARushPawn::ARushPawn()
 // Called when the game starts or when spawned
 void ARushPawn::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
 // Called every frame
 void ARushPawn::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
-	RushCameraComponent->LookAtRush();
 }
 
 // Called to bind functionality to input
@@ -78,5 +77,48 @@ void ARushPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	Super::SetupPlayerInputComponent(InputComponent);
 
+	check(InputComponent);
+
+	InputComponent->BindAxis("MoveForward", this, &ARushPawn::MoveForward);
+	InputComponent->BindAxis("TurnRight", this, &ARushPawn::TurnRight);
+	InputComponent->BindAxis("SharpTurn", this, &ARushPawn::ActivateSharpTurn);
 }
 
+// Return the correct movement component
+UPawnMovementComponent* ARushPawn::GetMovementComponent() const
+{
+	return RushMovementComponent;
+}
+#pragma endregion
+
+
+#pragma region Rush Input
+void ARushPawn::MoveForward(float value)
+{
+	if ((Controller == NULL) || (value == 0.0f))
+		return;
+	
+	FVector actorForward = GetActorForwardVector();
+	AddMovementInput(actorForward, value);	
+}
+
+
+void ARushPawn::TurnRight(float value)
+{
+	if (Controller == NULL)
+		return;
+
+	AddControllerYawInput(value);		
+}
+
+
+void ARushPawn::ActivateSharpTurn(float value)
+{
+	/*
+	if (Controller == NULL || value == 0.0f)
+		return;
+	
+	_sharpTurnTarget = Controller->GetControlRotation() + FRotator(0.0f, value * 90.0f, 0.0f);
+	*/
+}
+#pragma endregion

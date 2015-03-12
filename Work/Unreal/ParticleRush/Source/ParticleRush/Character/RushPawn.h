@@ -37,14 +37,18 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Lighting"))
 	class UPointLightComponent*				RushNavigationLight;
+
+	UPROPERTY()
+	struct FBasedMovementInfo BasedMovement;
 #pragma endregion
 
+#pragma region Base Overrides
 public:
 	// Sets default values for this pawn's properties
 	ARushPawn();
 
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() override;	
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
@@ -52,6 +56,33 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
+	// Return the correct movement component
+	virtual UPawnMovementComponent* GetMovementComponent() const override;
+#pragma endregion
+
 	
+#pragma region Rush Input
+protected:
+	/* Moves the character forward based on the Actor's world forward vector
+	* Value > 0.0f - Moves forward
+	* Value < 0.0f - Moves Backward
+	*/
+	UFUNCTION()
+		void MoveForward(float value);
+
+	/*
+	* Turns the character right based on the Turn speed
+	* value > 0.0f - Turns Right
+	* value < 0.0f - Turns Left
+	*/
+	UFUNCTION()
+		void TurnRight(float value);
+
+	/*
+	* Turn 90 degrees to execute sharp turn
+	*/
+	UFUNCTION()
+		void ActivateSharpTurn(float value);	
+#pragma endregion
 	
 };
