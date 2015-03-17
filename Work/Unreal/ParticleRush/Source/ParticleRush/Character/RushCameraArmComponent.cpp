@@ -3,21 +3,28 @@
 #include "ParticleRush.h"
 #include "RushCameraArmComponent.h"
 
+/* Engine Headers*/
+
 /* Custom Headers */
-#include "Character/RushPawn.h"
+#include "Character/RushCharacter.h"
 
 void URushCameraArmComponent::MaintainDistanceFromRush(float DeltaTime)
 {
-	ARushPawn* rush = static_cast<ARushPawn*>(GetOwner());
+	ARushCharacter* rush = static_cast<ARushCharacter*>(GetOwner());
 
 	if (rush == NULL)
 		return;
 
+	UCharacterMovementComponent* movementComponent = static_cast<UCharacterMovementComponent*>(rush->GetMovementComponent());
+
 	float currentArmLength = this->TargetArmLength;
+	float mappedSpeedOfRush = movementComponent->Velocity.Size();
 
-	float targetArmLength = DefaultDistanceFromRush;
+	mappedSpeedOfRush = FMath::GetMappedRangeValue(FVector2D(0.0f, movementComponent->GetMaxSpeed()), SpeedImpactOnArmCatchup, mappedSpeedOfRush);
 
-	float interolatedArmLength = FMath::FInterpTo(currentArmLength, targetArmLength, DeltaTime, 4.0f);
+	float targetArmLength = DefaultDistanceFromRush + mappedSpeedOfRush;
+
+	float interolatedArmLength = FMath::FInterpTo(currentArmLength, targetArmLength, DeltaTime, ArmCatchUpSpeed);
 	this->TargetArmLength = interolatedArmLength;	
 }
 

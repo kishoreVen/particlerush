@@ -12,11 +12,22 @@ UCLASS(Blueprintable)
 class PARTICLERUSH_API URushCameraArmComponent : public USpringArmComponent
 {
 	GENERATED_BODY()
+
+#pragma region Local Cache
+private:
+	float _rushLastFrameSpeedCache;
+#pragma endregion
 	
 #pragma region Blueprint Param Declerations
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
+	float ArmCatchUpSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
 	float DefaultDistanceFromRush;	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Target Lag Params"))
+	FVector2D SpeedImpactOnArmCatchup;
 #pragma endregion
 
 #pragma region Base Overrides

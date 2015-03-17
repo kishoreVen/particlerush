@@ -4,16 +4,10 @@
 #include "RushCameraComponent.h"
 
 /* Custom Headers */
-#include "RushPawn.h"
+#include "Character/RushCharacter.h"
 
 void URushCameraComponent::LookAtPoint(FVector aWorldPoint)
 {
-	ARushPawn* rush = static_cast<ARushPawn*>(GetOwner());
-
-	if (rush == NULL)
-		return;
-
-	
 	FVector cameraLocation = this->GetComponentLocation();
 	
 	FVector lookAtDirection = aWorldPoint - cameraLocation;
@@ -27,7 +21,7 @@ void URushCameraComponent::LookAtPoint(FVector aWorldPoint)
 
 void URushCameraComponent::LookAtRush()
 {
-	ARushPawn* rush = static_cast<ARushPawn*>(GetOwner());
+	ARushCharacter* rush = static_cast<ARushCharacter*>(GetOwner());
 
 	if (rush == NULL)
 		return;

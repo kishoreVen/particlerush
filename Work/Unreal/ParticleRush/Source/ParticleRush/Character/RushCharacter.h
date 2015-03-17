@@ -8,6 +8,8 @@
 /* Custom Headers */
 #include "HeroState.h"
 #include "HeroData.h"
+#include "RushCameraComponent.h"
+#include "RushCameraArmComponent.h"
 
 /* Defines */
 #include "Generic/ParticleRushDefines.h"
@@ -30,10 +32,10 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Camera"))
-	class USpringArmComponent* RushCameraBoom;
+	class URushCameraArmComponent* RushCameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Camera"))
-	class UCameraComponent* RushCamera;
+	class URushCameraComponent* RushCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Action"))
 	class USphereComponent* RushActionSphere;
@@ -127,16 +129,8 @@ public:
 #pragma region Rush Behaviors
 	#pragma region Common
 	private:
-		FDataVector2	_targetCameraParams;
-		float			_cameraParamsBlendingTime;
-
-		void ExecuteCameraParameterBlendPerTick(float deltaSeconds);
-
-		void SetCameraParameter(FDataVector2 value);
-
 		void UpdateMovementComponentParameters();
 
-		void UpdateCameraComponentParameters();		
 	public:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Data"))
 		struct FHeroData HeroData;

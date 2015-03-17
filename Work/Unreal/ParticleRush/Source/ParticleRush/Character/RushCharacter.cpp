@@ -16,17 +16,13 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	capsuleComponent->OnComponentHit.AddDynamic(this, &ARushCharacter::OnCapsuleCollision);
 
 	// Create a spring arm component
-	RushCameraBoom = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("RushCameraBoom"));
+	RushCameraBoom = ObjectInitializer.CreateDefaultSubobject<URushCameraArmComponent>(this, TEXT("RushCameraBoom"));
 	RushCameraBoom->AttachTo(capsuleComponent);
-	RushCameraBoom->TargetArmLength = 160.0f; // The camera follows at this distance behind the character	
-	RushCameraBoom->SocketOffset = FVector(0.f, 0.f, 60.f);
-	RushCameraBoom->bEnableCameraLag = true;
-	RushCameraBoom->bEnableCameraRotationLag = true;
-
+	
 	// Create camera component 
-	RushCamera = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("RushCamera"));
+	RushCamera = ObjectInitializer.CreateDefaultSubobject<URushCameraComponent>(this, TEXT("RushCamera"));
 	RushCamera->AttachTo(RushCameraBoom, USpringArmComponent::SocketName);
-	RushCamera->bUsePawnControlRotation = false; // Don't rotate camera with controller
+	RushCamera->bUsePawnControlRotation = false;
 
 	// Create action sphere component
 	RushActionSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RushActionSphere"));
@@ -44,11 +40,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 #pragma endregion
 
 #pragma region Behavior Parameter Setups
-	#pragma region Common
-	_targetCameraParams = FDataVector2(0.0f, 0.0f);
-	_cameraParamsBlendingTime = 12.0f;
-	#pragma endregion
-
 	#pragma region Turning
 	_targetMeshTurningRollAngle = 0.0f;
 	MeshTurningRollSpeed		= 35.0f;
@@ -100,7 +91,7 @@ void ARushCharacter::Tick(float DeltaSeconds)
 {
 	ExecuteActiveStateTicks(DeltaSeconds);
 
-	ExecuteCameraParameterBlendPerTick(DeltaSeconds);
+	//ExecuteCameraParameterBlendPerTick(DeltaSeconds);
 
 	ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
 
@@ -184,9 +175,9 @@ void ARushCharacter::ExecuteActiveStateTicks(float DeltaSeconds)
 void ARushCharacter::ActivateState(EHeroState::Type turnOnState)
 {
 	currentlyActiveStates |= (1 << turnOnState);
-
+/*
 	UpdateCameraComponentParameters();
-	UpdateMovementComponentParameters();
+	UpdateMovementComponentParameters();*/
 }
 
 
@@ -198,8 +189,8 @@ void ARushCharacter::DeactivateState(EHeroState::Type turnOffState)
 
 	currentlyActiveStates &= max;
 
-	UpdateCameraComponentParameters();
-	UpdateMovementComponentParameters();
+	/*UpdateCameraComponentParameters();
+	UpdateMovementComponentParameters();*/
 }
 
 
@@ -331,52 +322,6 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 
 
 #pragma region Rush Behaviors
-void ARushCharacter::ExecuteCameraParameterBlendPerTick(float DeltaSeconds)
-{
-	float lagSpeed = FMath::FInterpConstantTo(RushCameraBoom->CameraLagSpeed, _targetCameraParams.DataValue1, DeltaSeconds, _cameraParamsBlendingTime);
-	float rotationLagSpeed = FMath::FInterpTo(RushCameraBoom->CameraRotationLagSpeed, _targetCameraParams.DataValue2, DeltaSeconds, _cameraParamsBlendingTime);
-
-	RushCameraBoom->CameraLagSpeed = lagSpeed;
-	RushCameraBoom->CameraRotationLagSpeed = rotationLagSpeed;
-}
-
-
-void ARushCharacter::SetCameraParameter(FDataVector2 value)
-{
-	if (value.DataValue1 != TNumericLimits<float>().Max())
-	{
-		_targetCameraParams.DataValue1 = value.DataValue1;
-	}
-
-	if (value.DataValue2 != TNumericLimits<float>().Max())
-	{
-		_targetCameraParams.DataValue2 = value.DataValue2;
-	}
-}
-
-
-void ARushCharacter::UpdateCameraComponentParameters()
-{
-	if (IsStateActive(EHeroState::SharpTurn))
-	{
-		SetCameraParameter(HeroData.SharpTurnCameraLagSpeeds);
-		return;
-	}
-
-	if (IsStateActive(EHeroState::Boost))
-	{
-		SetCameraParameter(HeroData.BoostCameraLagSpeeds);
-		return;
-	}
-
-	if (IsStateActive(EHeroState::Walk))
-	{
-		SetCameraParameter(HeroData.WalkCameraLagSpeeds);
-		return;
-	}
-}
-
-
 void ARushCharacter::UpdateMovementComponentParameters()
 {
 	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
