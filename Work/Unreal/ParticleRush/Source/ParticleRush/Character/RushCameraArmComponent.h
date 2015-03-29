@@ -21,9 +21,6 @@ private:
 #pragma region Blueprint Param Declerations
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
-	float ArmCatchUpSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
 	float DefaultDistanceFromRush;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Target Lag Params"))
@@ -37,6 +34,6 @@ protected:
 
 #pragma region Helper Methods
 public:
-	void MaintainDistanceFromRush(float DeltaTime);
+	void DoCameraLag(float DeltaTime);
 #pragma endregion
 };
