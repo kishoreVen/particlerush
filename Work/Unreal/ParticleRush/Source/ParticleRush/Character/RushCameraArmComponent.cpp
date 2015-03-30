@@ -17,17 +17,6 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 
 	UCharacterMovementComponent* movementComponent = static_cast<UCharacterMovementComponent*>(rush->GetMovementComponent());
 
-	/*float currentArmLength = this->TargetArmLength;
-	float mappedSpeedOfRush = movementComponent->Velocity.Size();
-
-	mappedSpeedOfRush = FMath::GetMappedRangeValue(FVector2D(0.0f, movementComponent->GetMaxSpeed()), SpeedImpactOnArmCatchup, mappedSpeedOfRush);
-
-	float targetArmLength = DefaultDistanceFromRush + mappedSpeedOfRush;
-
-	float interolatedArmLength = FMath::FInterpTo(currentArmLength, targetArmLength, DeltaTime, ArmCatchUpSpeed);
-	this->TargetArmLength = interolatedArmLength;*/	
-
-
 	FRotator DesiredRot = GetComponentRotation();	
 
 	// Apply 'lag' to rotation if desired
