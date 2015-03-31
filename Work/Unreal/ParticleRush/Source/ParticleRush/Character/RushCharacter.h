@@ -6,10 +6,10 @@
 #include "GameFramework/Character.h"
 
 /* Custom Headers */
-#include "HeroState.h"
-#include "HeroData.h"
-#include "RushCameraComponent.h"
-#include "RushCameraArmComponent.h"
+#include "RushData.h"
+#include "RushState.h"
+#include "RushStateLayer.h"
+#include "RushStateManager.h"
 
 /* Defines */
 #include "Generic/ParticleRushDefines.h"
@@ -106,35 +106,14 @@ protected:
 	void BounceAgainstWall(const FHitResult& HitResult);
 #pragma endregion
 
-#pragma region State Management
-protected:
-	/** Function that will check if states that require ticking are active and execute them */
-	void ExecuteActiveStateTicks(float DeltaSeconds);
-
-	/** Contains a composite score of all active states */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Character State Management"))
-	int32 currentlyActiveStates;
-
-public:
-	/** Activates the given state */
-	void ActivateState(EHeroState::Type turnOnState);
-
-	/** De-Activates the given state */
-	void DeactivateState(EHeroState::Type turnOffState);
-
-	/** Checks if a given state is active */
-	bool IsStateActive(EHeroState::Type checkState);
-#pragma endregion
-
 #pragma region Rush Behaviors
-	#pragma region Common
-	private:
-		void UpdateMovementComponentParameters();
+#pragma region Common
+public:
+	RushStateManager RushStateManagerInstance;
 
-	public:
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Data"))
-		struct FHeroData HeroData;
-	#pragma endregion
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Data"))
+	struct FRushData RushData;
+#pragma endregion
 
 	#pragma region Turning
 private:

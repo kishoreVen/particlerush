@@ -22,6 +22,10 @@
 		{
 			"Name": "Phya",
 			"Enabled": true
+		},
+		{
+			"Name": "SoundVisualizations",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

@@ -2,12 +2,15 @@
 
 #include "ParticleRush.h"
 #include "RushCharacter.h"
-#include "LevelAssets/Wall/Wall.h"
+#include "Level/Obstacle/BounceObstacle.h"
 #include "Generic/Utilities.h"
+#include "RushCharacterMovementComponent.h"
+#include "RushCameraComponent.h"
+#include "RushCameraArmComponent.h"
 
 
 ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+: Super(ObjectInitializer.SetDefaultSubobjectClass<URushCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 #pragma region Component Definitions
 	// Create Capsule Component
@@ -35,10 +38,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	RushNavigationLight->AttachTo(RootComponent);
 #pragma endregion
 	
-#pragma region State Management Setup
-	currentlyActiveStates = (int32)0;
-#pragma endregion
-
 #pragma region Behavior Parameter Setups
 	#pragma region Turning
 	_targetMeshTurningRollAngle = 0.0f;
@@ -79,8 +78,7 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 #pragma region Base Class Overrides
 void ARushCharacter::BeginPlay()
 {
-	#pragma region OnBegin Setup
-	ActivateState(EHeroState::Walk);
+	#pragma region OnBegin Setup	
 	#pragma endregion
 
 	Super::BeginPlay();
@@ -89,10 +87,6 @@ void ARushCharacter::BeginPlay()
 
 void ARushCharacter::Tick(float DeltaSeconds)
 {
-	ExecuteActiveStateTicks(DeltaSeconds);
-
-	//ExecuteCameraParameterBlendPerTick(DeltaSeconds);
-
 	ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
 
 	Super::Tick(DeltaSeconds);
@@ -117,7 +111,7 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 void ARushCharacter::OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
 	#pragma region Is Collision with Wall?
-	AWall* collidedWall = dynamic_cast<AWall*>(OtherActor);
+	ABounceObstacle* collidedWall = dynamic_cast<ABounceObstacle*>(OtherActor);
 
 	if (collidedWall != NULL)
 	{
@@ -142,96 +136,22 @@ void ARushCharacter::OnRushActionSphereEndOverlap(class AActor* OtherActor, clas
 #pragma endregion
 
 
-#pragma region State Management Methods
-void ARushCharacter::ExecuteActiveStateTicks(float DeltaSeconds)
-{
-	if (IsStateActive(EHeroState::Walk))
-	{
-		//ExecuteMeshRotationPerTick(DeltaSeconds);
-	}
-
-	if (IsStateActive(EHeroState::Boost))
-	{
-		ExecuteBoostPerTick(DeltaSeconds);
-	}
-
-	if (IsStateActive(EHeroState::SharpTurn))
-	{
-		ExecuteSharpTurnPerTick(DeltaSeconds);
-	}
-
-	if (IsStateActive(EHeroState::HardStop))
-	{
-		ExecuteHardStopPerTick(DeltaSeconds);
-	}
-
-	if (IsStateActive(EHeroState::Bounce))
-	{
-		ExecuteBouncePerTick(DeltaSeconds);
-	}
-}
-
-
-void ARushCharacter::ActivateState(EHeroState::Type turnOnState)
-{
-	currentlyActiveStates |= (1 << turnOnState);
-/*
-	UpdateCameraComponentParameters();
-	UpdateMovementComponentParameters();*/
-}
-
-
-void ARushCharacter::DeactivateState(EHeroState::Type turnOffState)
-{
-	int32 max = (1 << EHeroState::Everything) - 1;
-
-	max ^= (1 << turnOffState);
-
-	currentlyActiveStates &= max;
-
-	/*UpdateCameraComponentParameters();
-	UpdateMovementComponentParameters();*/
-}
-
-
-bool ARushCharacter::IsStateActive(EHeroState::Type checkState)
-{
-	return !((currentlyActiveStates & (1 << checkState)) == 0);
-}
-
-#pragma endregion
-
-
 #pragma region Rush Input
 void ARushCharacter::MoveForward(float value)
 {
-	if (	!IsStateActive(EHeroState::Walk)
-		||  IsStateActive(EHeroState::HardStop)
-		)
-		return;
-
 	if ((Controller != NULL) && (value != 0.0f))
 	{
 		FVector actorForward = GetActorForwardVector();
-		AddMovementInput(actorForward, value);		
+		AddMovementInput(actorForward, value);
 	}
 }
 
 
 void ARushCharacter::TurnRight(float value)
 {
-	if (	IsStateActive(EHeroState::SharpTurn)
-		||  IsStateActive(EHeroState::HardStop)
-		||	IsStateActive(EHeroState::Bounce)
-		)
-		return;
-
-	if (IsStateActive(EHeroState::Walk))
+	if (Controller != NULL)
 	{
-		if (Controller != NULL)
-		{
-			AddControllerYawInput(value);
-		}
+		AddControllerYawInput(value);
 	}	
 
 	/* Mesh Rotation for smooth mesh movement */
@@ -241,56 +161,29 @@ void ARushCharacter::TurnRight(float value)
 
 void ARushCharacter::ActivateBoost()
 {
-	if (!IsStateActive(EHeroState::Walk))
-	{
-		return;
-	}
-
 	PerformBoost();
 }
 
 
 void ARushCharacter::ActivateSharpTurn(float value)
 {
-	if (	IsStateActive(EHeroState::SharpTurn) 
-		||	IsStateActive(EHeroState::HardStop) 
-		||	IsStateActive(EHeroState::Bounce)
-		)
-		return;
-
 	if (Controller != NULL && value != 0.0f && _sharpTurnTarget.IsNearlyZero())
 	{
 		_sharpTurnTarget = Controller->GetControlRotation() + FRotator(0.0f, value * 90.0f, 0.0f);
-		
-		ActivateState(EHeroState::SharpTurn);
 	}
 }
 
 
 void ARushCharacter::ActivateHardStop()
 {
-	if (	IsStateActive(EHeroState::SharpTurn) 
-		||	IsStateActive(EHeroState::HardStop) 
-		||	IsStateActive(EHeroState::Bounce)
-		||  IsStateActive(EHeroState::Air)
-		)
-		return;
-
-	_timeLeftForHardStopToEnd = HeroData.HardStopDriftDuration;
-	_hardTurnTarget = GetController()->GetControlRotation() + FRotator(0.0f, 180.0f, 0.0f);
-	ActivateState(EHeroState::HardStop);
+	_timeLeftForHardStopToEnd = RushData.HardStopDriftDuration;
+	_hardTurnTarget = GetController()->GetControlRotation() + FRotator(0.0f, 180.0f, 0.0f);	
 }
 
 
 void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 {
-	/* Check if it rush is bouncing */
-	if (IsStateActive(EHeroState::Bounce))
-		return;
-
-	DeactivateState(EHeroState::Walk);
-	ActivateState(EHeroState::Bounce);
-	_timeBeforeRegainingControlFromBounce = HeroData.BounceDuration;
+	_timeBeforeRegainingControlFromBounce = RushData.BounceDuration;
 
 	FVector rushHeading = GetActorForwardVector();
 	rushHeading.Z = 0.0f;
@@ -305,10 +198,10 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 
 	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
 	float jumpFactor = (movementComponent->Velocity.Size() / movementComponent->MaxWalkSpeed);
-	float bounceFactor = HeroData.BounceStrength.DataValue2 * jumpFactor;
-	bounceDirection.Z = jumpFactor * HeroData.BounceJumpFactor; //* normalZ;
+	float bounceFactor = RushData.BounceStrength.DataValue2 * jumpFactor;
+	bounceDirection.Z = jumpFactor * RushData.BounceJumpFactor; //* normalZ;
 
-	bounceFactor = FMath::Max<float>(bounceFactor, HeroData.BounceStrength.DataValue1);
+	bounceFactor = FMath::Max<float>(bounceFactor, RushData.BounceStrength.DataValue1);
 
 	movementComponent->AddImpulse(bounceDirection * bounceFactor, true);
 
@@ -320,54 +213,7 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 }
 #pragma endregion
 
-
 #pragma region Rush Behaviors
-void ARushCharacter::UpdateMovementComponentParameters()
-{
-	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
-
-	if (IsStateActive(EHeroState::HardStop))
-	{
-		movementComponent->MaxAcceleration = HeroData.WalkAcceleration;
-		movementComponent->MaxWalkSpeed = HeroData.WalkSpeed;
-		movementComponent->BrakingDecelerationWalking = HeroData.WalkDeceleration  * HeroData.HardStopBreakingFactor;
-		movementComponent->GroundFriction = HeroData.HardStopGroundFriction;
-
-		return;
-	}
-
-	if (IsStateActive(EHeroState::Bounce))
-	{
-		movementComponent->MaxAcceleration = HeroData.WalkAcceleration * HeroData.BounceFactor;
-		movementComponent->MaxWalkSpeed = HeroData.WalkSpeed * HeroData.BounceFactor;
-		movementComponent->BrakingDecelerationWalking = HeroData.WalkDeceleration / (HeroData.BounceFactor * HeroData.BounceFactor);
-		movementComponent->GroundFriction = 0.0f;
-
-		return;
-	}
-
-	if (IsStateActive(EHeroState::Boost))
-	{
-		movementComponent->MaxAcceleration = HeroData.WalkAcceleration * HeroData.BoostFactor;
-		movementComponent->MaxWalkSpeed = HeroData.WalkSpeed * HeroData.BoostFactor;
-		movementComponent->BrakingDecelerationWalking = HeroData.WalkDeceleration / HeroData.BoostFactor;
-		movementComponent->GroundFriction = HeroData.WalkGroundFriction / HeroData.BoostFactor;
-
-		return;
-	}
-
-	if (IsStateActive(EHeroState::Walk))
-	{
-		movementComponent->MaxAcceleration = HeroData.WalkAcceleration;
-		movementComponent->MaxWalkSpeed = HeroData.WalkSpeed;
-		movementComponent->BrakingDecelerationWalking = HeroData.WalkDeceleration;
-		movementComponent->GroundFriction = HeroData.WalkGroundFriction;
-
-		return;
-	}
-}
-
-
 void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 {
 	float currentMeshRoll = GetMesh()->RelativeRotation.Roll;
@@ -405,8 +251,6 @@ void ARushCharacter::ExecuteBoostPerTick(float deltaSeconds)
 
 	if (_timeLeftForBoostToEnd < 0.0f)
 	{
-		DeactivateState(EHeroState::Boost);
-
 		_timeLeftForBoostToEnd = -1.0f;
 	}	
 }
@@ -418,13 +262,13 @@ void ARushCharacter::PerformBoost()
 
 	if (_boostChainCounter != 0)
 	{
-		if (currentBoostTime - _lastBoostTime > HeroData.BoostChainResetDuration)
+		if (currentBoostTime - _lastBoostTime > RushData.BoostChainResetDuration)
 		{
 			_boostChainCounter = 0;
 		}
 	}
 
-	_lastBoostTime = currentBoostTime + HeroData.BoostDuration;
+	_lastBoostTime = currentBoostTime + RushData.BoostDuration;
 
 	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
 
@@ -455,8 +299,7 @@ void ARushCharacter::PerformBoost()
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(_boostChainCounter));
 
 	_boostChainCounter = (_boostChainCounter + 1) % 4;
-	_timeLeftForBoostToEnd = HeroData.BoostDuration;
-	ActivateState(EHeroState::Boost);
+	_timeLeftForBoostToEnd = RushData.BoostDuration;	
 }
 
 
@@ -472,12 +315,11 @@ void ARushCharacter::ExecuteSharpTurnPerTick(float deltaSeconds)
 
 		if (difference.IsNearlyZero())
 		{
-			DeactivateState(EHeroState::SharpTurn);
 			_sharpTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
 		}
 		else
 		{
-			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _sharpTurnTarget, deltaSeconds, HeroData.SharpTurnStrength);
+			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _sharpTurnTarget, deltaSeconds, RushData.SharpTurnStrength);
 			Controller->SetControlRotation(interpControllerRotation);
 		}
 	}
@@ -500,15 +342,13 @@ void ARushCharacter::ExecuteHardStopPerTick(float deltaSeconds)
 
 			if (_timeLeftForHardStopToEnd < 0.0f)
 			{
-				DeactivateState(EHeroState::HardStop);
-
 				_timeLeftForBoostToEnd = -1.0f;
 				_hardTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
 			}
 		}
 		else
 		{
-			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _hardTurnTarget, deltaSeconds, HeroData.HardStopOrientationStrength);
+			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _hardTurnTarget, deltaSeconds, RushData.HardStopOrientationStrength);
 			Controller->SetControlRotation(interpControllerRotation);
 		}
 	}
@@ -526,9 +366,6 @@ void ARushCharacter::ExecuteBouncePerTick(float deltaSeconds)
 
 	if (_timeBeforeRegainingControlFromBounce < 0.0f)
 	{
-		ActivateState(EHeroState::Walk);
-		DeactivateState(EHeroState::Bounce);
-
 		_timeBeforeRegainingControlFromBounce = -1.0f;
 		_bounceTargetOrientation = FRotator(0.0f, 0.0f, 0.0f);
 	}
@@ -536,7 +373,7 @@ void ARushCharacter::ExecuteBouncePerTick(float deltaSeconds)
 	{
 		if (Controller != NULL)
 		{
-			FRotator interpRotation = FMath::RInterpTo(Controller->GetControlRotation(), _bounceTargetOrientation, deltaSeconds, HeroData.BounceOrientationStrength);
+			FRotator interpRotation = FMath::RInterpTo(Controller->GetControlRotation(), _bounceTargetOrientation, deltaSeconds, RushData.BounceOrientationStrength);
 			Controller->SetControlRotation(interpRotation);
 		}
 	}

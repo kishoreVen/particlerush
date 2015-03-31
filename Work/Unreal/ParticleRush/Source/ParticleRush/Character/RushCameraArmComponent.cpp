@@ -7,6 +7,7 @@
 
 /* Custom Headers */
 #include "Character/RushCharacter.h"
+#include "Generic/PRMathUtilities.h"
 
 void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 {
@@ -20,7 +21,8 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 	FRotator DesiredRot = GetComponentRotation();	
 
 	// Apply 'lag' to rotation if desired
-	DesiredRot = FMath::RInterpTo(PreviousDesiredRot, DesiredRot, DeltaTime, CameraRotationLagSpeed);	
+	
+	DesiredRot = ParticleRush::Math::ROverShootingInterpTo(PreviousDesiredRot, DesiredRot, DeltaTime, CameraRotationLagSpeed);
 	PreviousDesiredRot = DesiredRot;
 
 	// Get the spring arm 'origin', the target we want to look at
