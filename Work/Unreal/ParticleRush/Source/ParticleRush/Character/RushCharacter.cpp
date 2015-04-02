@@ -193,10 +193,11 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 	normal.Z = 0.0f;
 	
 	FVector bounceDirection = ParticleRush::Utilities::GetReflectionVector(rushHeading, normal);
+	bounceDirection.Normalize();
 	
 	_bounceTargetOrientation = bounceDirection.Rotation();
 
-	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
+	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetCharacterMovement());
 	float jumpFactor = (movementComponent->Velocity.Size() / movementComponent->MaxWalkSpeed);
 	float bounceFactor = RushData.BounceStrength.DataValue2 * jumpFactor;
 	bounceDirection.Z = jumpFactor * RushData.BounceJumpFactor; //* normalZ;

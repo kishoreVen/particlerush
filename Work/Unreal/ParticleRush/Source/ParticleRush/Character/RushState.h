@@ -15,18 +15,23 @@ namespace ERushState
 	{
 		None,
 
+		/* Locomotion */
 		Air,
-		BlackholeThrow,
-		Blast,
 		Boost,
 		Bounce,
-		Death,
 		HardStop,
-		LaserAttack,
-		NavCompass,
-		RampThrow,
 		SharpTurn,
 		Walk,
+		/* End Locomotion */
+
+		/* Non Locomotion */
+		RampThrow,
+		LaserAttack,
+		Death,
+		NavCompass,
+		BlackholeThrow,
+		Blast,
+		/* End Non Locomotion */
 
 		Everything
 	};
