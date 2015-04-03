@@ -24,16 +24,16 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 	if (rush == NULL)
 		return;
 
-	TEnumAsByte<ERushState::Type> characterState = ERushState::Air;
+	uint32_t characterState = rush->GetRushStateManager().GetCurrentState(ERushStateLayer::Locomotion);
 
 	switch (characterState)
 	{
-	case ERushState::Air:
+	case ERushState::Walk:
 		MaxWalkSpeed				= DefaultMaxSpeed;
 		MaxAcceleration				= DefaultMaxAcceleration;
 		BrakingDecelerationWalking	= DefaultDeceleration;
 		break;
-	case ERushState::Walk:
+	case ERushState::Boost:
 		MaxWalkSpeed				= BoostMaxSpeed;
 		MaxAcceleration				= BoostMaxAcceleration;
 		BrakingDecelerationWalking	= BoostDeceleration;

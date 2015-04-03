@@ -37,6 +37,10 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	RushNavigationLight = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, TEXT("RushNavigationLight"));
 	RushNavigationLight->AttachTo(RootComponent);
 #pragma endregion
+
+#pragma region State Management Setup
+	_rushStateManager.RequestStateChange(ERushStateLayer::Locomotion, ERushState::Walk);
+#pragma endregion
 	
 #pragma region Behavior Parameter Setups
 	#pragma region Turning
@@ -88,6 +92,8 @@ void ARushCharacter::BeginPlay()
 void ARushCharacter::Tick(float DeltaSeconds)
 {
 	ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
+
+	_rushStateManager.UpdateCurrentStates(DeltaSeconds);
 
 	Super::Tick(DeltaSeconds);
 }
@@ -161,7 +167,10 @@ void ARushCharacter::TurnRight(float value)
 
 void ARushCharacter::ActivateBoost()
 {
-	PerformBoost();
+	if (_rushStateManager.RequestStateChange(ERushStateLayer::Locomotion, ERushState::Boost))
+	{
+		PerformBoost();
+	}	
 }
 
 
@@ -214,6 +223,7 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 }
 #pragma endregion
 
+
 #pragma region Rush Behaviors
 void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 {
@@ -248,6 +258,9 @@ void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 
 void ARushCharacter::ExecuteBoostPerTick(float deltaSeconds)
 {
+	if (_rushStateManager.GetCurrentState(ERushStateLayer::Locomotion) != ERushState::Boost)
+		return;
+
 	_timeLeftForBoostToEnd -= deltaSeconds;
 
 	if (_timeLeftForBoostToEnd < 0.0f)
@@ -271,36 +284,36 @@ void ARushCharacter::PerformBoost()
 
 	_lastBoostTime = currentBoostTime + RushData.BoostDuration;
 
-	UCharacterMovementComponent* movementComponent = GetCharacterMovement();
+	//UCharacterMovementComponent* movementComponent = GetCharacterMovement();
 
-	FVector forwardVector = GetActorForwardVector();
+	//FVector forwardVector = GetActorForwardVector();
 
 	/* Action Based on Counter */
-	switch (_boostChainCounter)
-	{
-	case 0:
-		movementComponent->AddImpulse(forwardVector * 500.0f, true);
-		break;
-	case 1:
-		// Regular Boost
-		movementComponent->AddImpulse(forwardVector * 1000.0f, true);
-		break;
-	case 2:
-		// Super Boost - Time Warp
-		movementComponent->AddImpulse(forwardVector * 2000.0f, true);
-		break;
-	case 3:
-		movementComponent->AddImpulse(forwardVector * 4000.0f, true);
-		// Super Boost - Shoot To Air
-		break;
-	default:
-		break;
-	}
+	//switch (_boostChainCounter)
+	//{
+	//case 0:
+	//	movementComponent->AddImpulse(forwardVector * 500.0f, true);
+	//	break;
+	//case 1:
+	//	// Regular Boost
+	//	movementComponent->AddImpulse(forwardVector * 1000.0f, true);
+	//	break;
+	//case 2:
+	//	// Super Boost - Time Warp
+	//	movementComponent->AddImpulse(forwardVector * 2000.0f, true);
+	//	break;
+	//case 3:
+	//	movementComponent->AddImpulse(forwardVector * 4000.0f, true);
+	//	// Super Boost - Shoot To Air
+	//	break;
+	//default:
+	//	break;
+	//}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(_boostChainCounter));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(_boostChainCounter));
 
 	_boostChainCounter = (_boostChainCounter + 1) % 4;
-	_timeLeftForBoostToEnd = RushData.BoostDuration;	
+	//_timeLeftForBoostToEnd = RushData.BoostDuration;	
 }
 
 

@@ -108,8 +108,11 @@ protected:
 
 #pragma region Rush Behaviors
 #pragma region Common
-public:
-	RushStateManager RushStateManagerInstance;
+private:
+	RushStateManager _rushStateManager;
+
+public:	
+	RushStateManager GetRushStateManager();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Data"))
 	struct FRushData RushData;
@@ -194,3 +197,7 @@ private:
 		void ToggleDrawWallCollisionResults();
 #pragma endregion
 };
+
+#pragma region Inline Definitions
+inline RushStateManager ARushCharacter::GetRushStateManager() { return _rushStateManager; }
+#pragma endregion

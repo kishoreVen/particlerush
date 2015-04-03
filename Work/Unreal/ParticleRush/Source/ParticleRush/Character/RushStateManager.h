@@ -20,6 +20,8 @@ public:
 
 	bool RequestStateChange(uint32_t layer, uint32_t state);
 
+	void UpdateCurrentStates(float DeltaSeconds);
+
 private:
 	TArray<FRushStateData> _stateCollection;
 
