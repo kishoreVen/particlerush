@@ -146,6 +146,9 @@ private:
 
 	void PerformBoost();
 protected:	
+
+public:
+	uint32_t GetBoostChainCounter();
 	#pragma endregion
 
 	#pragma region Sharp Turn
@@ -200,4 +203,6 @@ private:
 
 #pragma region Inline Definitions
 inline RushStateManager ARushCharacter::GetRushStateManager() { return _rushStateManager; }
+
+inline uint32_t ARushCharacter::GetBoostChainCounter() { return _boostChainCounter; }
 #pragma endregion

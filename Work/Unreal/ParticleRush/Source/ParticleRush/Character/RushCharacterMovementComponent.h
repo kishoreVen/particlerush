@@ -36,12 +36,12 @@ protected:
 
 #pragma region Movement States Setup - Boost
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-	float BoostMaxSpeed;
+	float BoostSpeedIncrease;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-	float BoostMaxAcceleration;
+	float BoostAccelerationIncrease;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-	float BoostDeceleration;
+	float BoostDecelerationDecrease;
 #pragma endregion
 };

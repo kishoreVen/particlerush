@@ -29,15 +29,20 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 	switch (characterState)
 	{
 	case ERushState::Walk:
-		MaxWalkSpeed				= DefaultMaxSpeed;
-		MaxAcceleration				= DefaultMaxAcceleration;
-		BrakingDecelerationWalking	= DefaultDeceleration;
-		break;
+		{
+			MaxWalkSpeed = DefaultMaxSpeed;
+			MaxAcceleration = DefaultMaxAcceleration;
+			BrakingDecelerationWalking = DefaultDeceleration;
+			break;
+		}
 	case ERushState::Boost:
-		MaxWalkSpeed				= BoostMaxSpeed;
-		MaxAcceleration				= BoostMaxAcceleration;
-		BrakingDecelerationWalking	= BoostDeceleration;
-		break;
+		{
+			MaxWalkSpeed = DefaultMaxSpeed + BoostSpeedIncrease * rush->GetBoostChainCounter();
+			MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * rush->GetBoostChainCounter();
+			BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * rush->GetBoostChainCounter();
+			break;
+		}
+		
 	}
 }
 
