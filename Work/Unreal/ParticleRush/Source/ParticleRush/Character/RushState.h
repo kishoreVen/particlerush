@@ -24,15 +24,6 @@ namespace ERushState
 		Walk,
 		/* End Locomotion */
 
-		/* Non Locomotion */
-		RampThrow,
-		LaserAttack,
-		Death,
-		NavCompass,
-		BlackholeThrow,
-		Blast,
-		/* End Non Locomotion */
-
 		Everything
 	};
 }

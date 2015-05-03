@@ -3,6 +3,7 @@
 #pragma once
 
 /* Custom Headers */
+#include "RushState.h"
 #include "RushStateLayer.h"
 
 /* Generated Headers */
@@ -19,6 +20,7 @@ struct FRushStateData
 	FRushStateData()
 	{
 		LayerIndex = ERushStateLayer::None;
+		StateIndex = ERushState::None;
 		StateName = "None";
 		StateDuration = 0.0f;
 		TransitionStateOnTimeOut = ERushState::None;
@@ -26,15 +28,17 @@ struct FRushStateData
 		_timeLeftToTransitionOut = -1.0f;
 	}
 
-	FRushStateData(uint32_t layerIndex, FString stateName, float stateDuration, uint32_t transitionStateOnTimeOut)
+	FRushStateData(uint32_t layerIndex, uint32_t stateIndex, FString stateName, float stateDuration, uint32_t transitionStateOnTimeOut)
 	{
 		LayerIndex = layerIndex;
+		StateIndex = StateIndex;
 		StateName = stateName;
 		StateDuration = stateDuration;
 		TransitionStateOnTimeOut = transitionStateOnTimeOut;
 	}
 
 	uint32_t	LayerIndex;
+	uint32_t	StateIndex;
 	FString		StateName;
 	float		StateDuration;
 	uint32_t	TransitionStateOnTimeOut;

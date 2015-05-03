@@ -6,6 +6,7 @@
 #include "RushState.h"
 #include "RushStateLayer.h"
 #include "RushStateData.h"
+#include "RushStateLayerData.h"
 
 /**
  * A management system of character states 
@@ -24,10 +25,9 @@ public:
 
 private:
 	TArray<FRushStateData> _stateCollection;
-
-	TMap<uint32_t, uint32_t> _activeStates;
-
-	bool SetCurrentState(uint32_t layer, uint32_t state);
+	TArray<FRushStateLayerData> _layerCollection;
 
 	void InitializeAllStateData();
+
+	void InitialzeAllLayerData();
 };
