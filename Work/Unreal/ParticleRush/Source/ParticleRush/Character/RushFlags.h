@@ -18,8 +18,8 @@ struct FRushFlags
 	float MomentumPercentage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Flags"))
-	uint32 ChainBoostStage;
+	int32 ChainBoostStage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Flags"))
-	uint32 ChainBounceStage;
+	int32 ChainBounceStage;
 };
