@@ -33,15 +33,24 @@ struct FRushData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
 	FDataVector2 WalkCameraLagSpeeds;
 
+	
+	/* How fast the Mesh should rotate in-order to achieve MeshMaxPitchAngle */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Turning"))
+	float MeshTurningSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
-	float BoostFactor;
+	/* The Maximum Roll the Mesh can achieve while turning */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Turning"))
+	float MeshTurningMaxAngle;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
 	float BoostDuration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
 	float BoostChainResetDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
+	int32 MaxBoostStages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
 	FDataVector2 BoostCameraLagSpeeds;

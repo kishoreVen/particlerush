@@ -38,15 +38,9 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	RushNavigationLight->AttachTo(RootComponent);
 #pragma endregion
 
-#pragma region State Management Setup
-	_rushStateManager.RequestStateChange(ERushStateLayer::Locomotion, ERushState::Walk);
-#pragma endregion
-	
 #pragma region Behavior Parameter Setups
-	#pragma region Turning
+	#pragma region Turn
 	_targetMeshTurningRollAngle = 0.0f;
-	MeshTurningRollSpeed		= 35.0f;
-	MeshTurningMaxRollAngle		= 35.0f;
 	#pragma endregion
 
 	#pragma region Boost
@@ -82,7 +76,8 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 #pragma region Base Class Overrides
 void ARushCharacter::BeginPlay()
 {
-	#pragma region OnBegin Setup	
+	#pragma region OnBegin Setup
+	_defaultMeshRotator = GetMesh()->RelativeRotation;
 	#pragma endregion
 
 	Super::BeginPlay();
@@ -93,7 +88,11 @@ void ARushCharacter::Tick(float DeltaSeconds)
 {
 	ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
 
-	_rushStateManager.UpdateCurrentStates(DeltaSeconds);
+	ExecuteBoostPerTick(DeltaSeconds);
+
+	ExecuteBouncePerTick(DeltaSeconds);
+
+	ExecuteMeshRotationPerTick(DeltaSeconds);
 
 	Super::Tick(DeltaSeconds);
 }
@@ -161,13 +160,13 @@ void ARushCharacter::TurnRight(float value)
 	}	
 
 	/* Mesh Rotation for smooth mesh movement */
-	_targetMeshTurningRollAngle = -value * MeshTurningRollSpeed;
+	_targetMeshTurningRollAngle = value * RushData.MeshTurningMaxAngle;
 }
 
 
 void ARushCharacter::ActivateBoost()
 {
-	if (_rushStateManager.RequestStateChange(ERushStateLayer::Locomotion, ERushState::Boost))
+	if (_timeLeftForBoostToEnd < 0.0f)
 	{
 		PerformBoost();
 	}	
@@ -227,38 +226,29 @@ void ARushCharacter::BounceAgainstWall(const FHitResult& HitResult)
 #pragma region Rush Behaviors
 void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 {
-	float currentMeshRoll = GetMesh()->RelativeRotation.Roll;
+	USkeletalMeshComponent* mesh = GetMesh();
 
-	if (_targetMeshTurningRollAngle == 0.0f)
-	{
-		if (currentMeshRoll != 0.0f)
-		{
-			/* Rotate Back to Position */
-			_targetMeshTurningRollAngle = (-currentMeshRoll * MeshTurningRollSpeed * 2.0f) / MeshTurningMaxRollAngle;
-
-			FRotator DeltaRotation(0.0f, 0.0f, 0.0f);
-			DeltaRotation.Roll = _targetMeshTurningRollAngle * deltaSeconds;
-			GetMesh()->AddLocalRotation(DeltaRotation);
-		}		
-		
+	if (mesh == NULL)
 		return;
-	}
 
-	if (currentMeshRoll > MeshTurningMaxRollAngle || currentMeshRoll < -MeshTurningMaxRollAngle)
-	{
-		return;
-	}
+	FRotator targetRotator(_targetMeshTurningRollAngle, 0.0f, 0.0f);
+	FRotator currentMeshRotator = mesh->RelativeRotation;
+	FRotator currentRotator = currentMeshRotator - _defaultMeshRotator;
 
-	FRotator DeltaRotation(0.0f, 0.0f, 0.0f);
-	DeltaRotation.Roll = _targetMeshTurningRollAngle * deltaSeconds;
+	FRotator DeltaRotation = FMath::RInterpTo(currentRotator, targetRotator, deltaSeconds, RushData.MeshTurningSpeed);
+	DeltaRotation.Yaw = _defaultMeshRotator.Yaw;
 
-	GetMesh()->AddLocalRotation(DeltaRotation);
+	/*if (FMath::IsNearlyZero(_targetMeshTurningRollAngle))
+		DeltaRotation = -DeltaRotation;*/
+
+	if (!DeltaRotation.IsNearlyZero())
+		mesh->SetRelativeRotation(DeltaRotation);
 }
 
 
 void ARushCharacter::ExecuteBoostPerTick(float deltaSeconds)
 {
-	if (_rushStateManager.GetCurrentState(ERushStateLayer::Locomotion) != ERushState::Boost)
+	if (RushFlags.ChainBoostStage <= 0)
 		return;
 
 	_timeLeftForBoostToEnd -= deltaSeconds;
@@ -274,46 +264,18 @@ void ARushCharacter::PerformBoost()
 {
 	float currentBoostTime = GetWorld()->GetTimeSeconds();
 
-	if (_boostChainCounter != 0)
+	if (RushFlags.ChainBoostStage > 0)
 	{
 		if (currentBoostTime - _lastBoostTime > RushData.BoostChainResetDuration)
 		{
-			_boostChainCounter = 0;
+			RushFlags.ChainBoostStage = 0;
 		}
 	}
 
 	_lastBoostTime = currentBoostTime + RushData.BoostDuration;
 
-	//UCharacterMovementComponent* movementComponent = GetCharacterMovement();
-
-	//FVector forwardVector = GetActorForwardVector();
-
-	/* Action Based on Counter */
-	//switch (_boostChainCounter)
-	//{
-	//case 0:
-	//	movementComponent->AddImpulse(forwardVector * 500.0f, true);
-	//	break;
-	//case 1:
-	//	// Regular Boost
-	//	movementComponent->AddImpulse(forwardVector * 1000.0f, true);
-	//	break;
-	//case 2:
-	//	// Super Boost - Time Warp
-	//	movementComponent->AddImpulse(forwardVector * 2000.0f, true);
-	//	break;
-	//case 3:
-	//	movementComponent->AddImpulse(forwardVector * 4000.0f, true);
-	//	// Super Boost - Shoot To Air
-	//	break;
-	//default:
-	//	break;
-	//}
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(_boostChainCounter));
-
-	_boostChainCounter = (_boostChainCounter + 1) % 4;
-	//_timeLeftForBoostToEnd = RushData.BoostDuration;	
+	RushFlags.ChainBoostStage = (RushFlags.ChainBoostStage + 1) % RushData.MaxBoostStages;
+	_timeLeftForBoostToEnd = RushData.BoostDuration;
 }
 
 

@@ -9,12 +9,8 @@
 void URushCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	//~~~~~~~~~~~~~~~~~
-
-	//UE_LOG //comp Init!
 }
 
-//Tick Comp
 void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -24,26 +20,20 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 	if (rush == NULL)
 		return;
 
-	uint32_t characterState = rush->GetRushStateManager().GetCurrentState(ERushStateLayer::Locomotion);
+	MaxWalkSpeed = DefaultMaxSpeed;
+	MaxAcceleration = DefaultMaxAcceleration;
+	BrakingDecelerationWalking = DefaultDeceleration;
 
-	switch (characterState)
+	int32 boostStage = rush->RushFlags.ChainBoostStage;	
+
+	if (boostStage > 0 && boostStage <= rush->RushData.MaxBoostStages)
 	{
-	case ERushState::Walk:
-		{
-			MaxWalkSpeed = DefaultMaxSpeed;
-			MaxAcceleration = DefaultMaxAcceleration;
-			BrakingDecelerationWalking = DefaultDeceleration;
-			break;
-		}
-	case ERushState::Boost:
-		{
-			MaxWalkSpeed = DefaultMaxSpeed + BoostSpeedIncrease * rush->GetBoostChainCounter();
-			MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * rush->GetBoostChainCounter();
-			BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * rush->GetBoostChainCounter();
-			break;
-		}
-		
+		MaxWalkSpeed = DefaultMaxSpeed + BoostSpeedIncrease * boostStage;
+		MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * boostStage;
+		BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * boostStage;
 	}
+
+	/* Update Momentum Percentage */
+	float currentVelocity = Velocity.Size();
+	rush->RushFlags.MomentumPercentage = FMath::Clamp(currentVelocity / DefaultMaxSpeed, 0.0f, 1.0f);
 }
-
-

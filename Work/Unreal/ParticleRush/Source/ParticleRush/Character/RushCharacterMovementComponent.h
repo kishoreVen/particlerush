@@ -24,13 +24,13 @@ protected:
 
 #pragma region Movement States Setup - Walk
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-		float DefaultMaxSpeed;
+	float DefaultMaxSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-		float DefaultMaxAcceleration;
+	float DefaultMaxAcceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
-		float DefaultDeceleration;
+	float DefaultDeceleration;
 #pragma endregion
 
 

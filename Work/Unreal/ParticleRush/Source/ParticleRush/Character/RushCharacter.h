@@ -7,9 +7,7 @@
 
 /* Custom Headers */
 #include "RushData.h"
-#include "RushState.h"
-#include "RushStateLayer.h"
-#include "RushStateManager.h"
+#include "RushFlags.h"
 
 /* Defines */
 #include "Generic/ParticleRushDefines.h"
@@ -66,27 +64,6 @@ protected:
 
 #pragma region Rush Input
 protected:
-	/* Moves the character forward based on the Actor's world forward vector
-	* Value > 0.0f - Moves forward
-	* Value < 0.0f - Moves Backward
-	*/
-	UFUNCTION()
-	void MoveForward(float value);
-
-	/*
-	* Turns the character right based on the Turn speed
-	* value > 0.0f - Turns Right
-	* value < 0.0f - Turns Left
-	*/
-	UFUNCTION()
-	void TurnRight(float value);
-
-	/*
-	* Turn on the boost state to propel rush at higher speeds
-	*/
-	UFUNCTION()
-	void ActivateBoost();
-
 	/*
 	* Turn 90 degrees to execute sharp turn
 	*/
@@ -98,58 +75,17 @@ protected:
 	*/
 	UFUNCTION()
 	void ActivateHardStop();
-
-
-	/*
-	* Function to perform bounce against the wall
-	*/
-	void BounceAgainstWall(const FHitResult& HitResult);
 #pragma endregion
 
 #pragma region Rush Behaviors
 #pragma region Common
-private:
-	RushStateManager _rushStateManager;
-
 public:	
-	RushStateManager GetRushStateManager();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
 	struct FRushData RushData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
+	struct FRushFlags RushFlags;
 #pragma endregion
-
-	#pragma region Turning
-private:
-	float _targetMeshTurningRollAngle;
-
-	void ExecuteMeshRotationPerTick(float deltaSeconds);
-
-protected:	
-	/* How fast the Mesh should rotate in-order to achieve MeshMaxPitchAngle */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Behavior - Turning"))
-	float MeshTurningRollSpeed;
-
-	/* The Maximum Roll the Mesh can achieve while turning */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Behavior - Turning"))
-	float MeshTurningMaxRollAngle;
-	#pragma endregion
-
-	#pragma region Boost
-private:
-	float _timeLeftForBoostToEnd;
-
-	float _lastBoostTime;
-
-	int32 _boostChainCounter;
-
-	void ExecuteBoostPerTick(float deltaSeconds);
-
-	void PerformBoost();
-protected:	
-
-public:
-	uint32_t GetBoostChainCounter();
-	#pragma endregion
 
 	#pragma region Sharp Turn
 private:
@@ -167,20 +103,73 @@ private:
 protected:
 	void ExecuteHardStopPerTick(float delatSeconds);
 	#pragma endregion
+#pragma endregion
 
-	#pragma region Bounce
+#pragma region MOVEMENT
+private:
+	float _targetMeshTurningRollAngle;
+
+	FRotator _defaultMeshRotator;
+
+	void ExecuteMeshRotationPerTick(float deltaSeconds);
+
+protected:
+	/* Moves the character forward based on the Actor's world forward vector
+	* Value > 0.0f - Moves forward
+	* Value < 0.0f - Moves Backward
+	*/
+	UFUNCTION()
+	void MoveForward(float value);
+
+	/*
+	* Turns the character right based on the Turn speed
+	* value > 0.0f - Turns Right
+	* value < 0.0f - Turns Left
+	*/
+	UFUNCTION()
+	void TurnRight(float value);
+
+public:
+#pragma endregion
+
+#pragma region BOOST
+private:
+	float _timeLeftForBoostToEnd;
+
+	float _lastBoostTime;
+
+	int32 _boostChainCounter;
+
+	void ExecuteBoostPerTick(float deltaSeconds);
+
+	void PerformBoost();
+protected:
+	/*
+	* Turn on the boost state to propel rush at higher speeds
+	*/
+	UFUNCTION()
+	void ActivateBoost();
+
+public:
+#pragma endregion
+
+#pragma region BOUNCE
 private:
 	float		_timeBeforeRegainingControlFromBounce;
 
 	FRotator	_bounceTargetOrientation;
 protected:
+	/*
+	* Function to perform bounce against the wall
+	*/
+	void BounceAgainstWall(const FHitResult& HitResult);
 
 	void ExecuteBouncePerTick(float deltaSeconds);
-	/* End Bounce*/
-	#pragma endregion
+
+public:
 #pragma endregion
 
-#pragma region Rush Action Sphere Timer Management
+#pragma region TIMER
 private:
 	float _targetRushTimeScale;
 
@@ -189,9 +178,13 @@ private:
 	void ResetRushTimeScale();
 
 	void ExecuteRushTimeScaleUpdatePerTick(float DeltaSeconds);
+
+protected:
+
+public:
 #pragma endregion
 
-#pragma region Debug Section
+#pragma region DEBUG
 	private:
 		bool _shouldDrawWallCollisionResults;
 
@@ -200,9 +193,3 @@ private:
 		void ToggleDrawWallCollisionResults();
 #pragma endregion
 };
-
-#pragma region Inline Definitions
-inline RushStateManager ARushCharacter::GetRushStateManager() { return _rushStateManager; }
-
-inline uint32_t ARushCharacter::GetBoostChainCounter() { return _boostChainCounter; }
-#pragma endregion
