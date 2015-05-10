@@ -56,5 +56,12 @@ void ARushCharacter::ExecuteBoostPerTick(float deltaSeconds)
 	if (_timeLeftForBoostToEnd < 0.0f)
 	{
 		_timeLeftForBoostToEnd = -1.0f;
+
+		float currentBoostTime = GetWorld()->GetTimeSeconds();
+
+		if (currentBoostTime - _lastBoostTime > RushData.BoostChainResetDuration)
+		{
+			RushFlags.ChainBoostStage = 0;
+		}
 	}
 }
