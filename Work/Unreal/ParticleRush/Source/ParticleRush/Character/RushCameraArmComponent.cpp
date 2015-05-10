@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ParticleRush.h"
-#include "RushCameraArmComponent.h"
-
 /* Engine Headers*/
+#include "ParticleRush.h"
 
 /* Custom Headers */
+#include "RushCameraArmComponent.h"
+
 #include "Character/RushCharacter.h"
-#include "Generic/PRMathUtilities.h"
+#include "Generic/Utilities.h"
 
 void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 {
@@ -22,7 +22,7 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 
 	// Apply 'lag' to rotation if desired
 	
-	DesiredRot = ParticleRush::Math::ROverShootingInterpTo(PreviousDesiredRot, DesiredRot, DeltaTime, CameraRotationLagSpeed);
+	DesiredRot = ParticleRush::Utilities::ROverShootingInterpTo(PreviousDesiredRot, DesiredRot, DeltaTime, CameraRotationLagSpeed);
 	PreviousDesiredRot = DesiredRot;
 
 	// Get the spring arm 'origin', the target we want to look at

@@ -111,8 +111,11 @@ private:
 
 	FRotator _defaultMeshRotator;
 
-	void ExecuteMeshRotationPerTick(float deltaSeconds);
+	void InitializeBehaviorMovement();
 
+	void OnBeginPlayBehaviorMovement();
+
+	void ExecuteMeshRotationPerTick(float deltaSeconds);
 protected:
 	/* Moves the character forward based on the Actor's world forward vector
 	* Value > 0.0f - Moves forward
@@ -140,6 +143,8 @@ private:
 
 	int32 _boostChainCounter;
 
+	void InitializeBehaviorBoost();
+
 	void ExecuteBoostPerTick(float deltaSeconds);
 
 	void PerformBoost();
@@ -158,11 +163,15 @@ private:
 	float		_timeBeforeRegainingControlFromBounce;
 
 	FRotator	_bounceTargetOrientation;
+
+	void InitializeBehaviorBounce();
 protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void BounceAgainstWall(const FHitResult& HitResult);
+	void BounceAgainstWall(class AActor* OtherActor, const FHitResult& HitResult);
+
+	void PerformBounce(FVector HitNormal);
 
 	void ExecuteBouncePerTick(float deltaSeconds);
 
