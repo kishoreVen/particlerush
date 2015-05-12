@@ -6,36 +6,18 @@
 /* Custom Headers */
 #include "Character/RushCharacter.h"
 
-void URushCameraComponent::LookAtPoint(FVector aWorldPoint)
+void URushCameraComponent::RotateCameraToStoredTarget(float DeltaTime)
 {
-	FVector cameraLocation = this->GetComponentLocation();
-	
-	FVector lookAtDirection = aWorldPoint - cameraLocation;
-	FRotator currentRotation = this->GetComponentRotation();
-	FRotator lookAtRotation = lookAtDirection.Rotation();
-	FRotator interpRotation = FMath::InterpEaseOut<FRotator>(currentRotation, lookAtRotation, LookAtEaseAlpha, LookAtEaseExp);
-	
-	this->SetWorldRotation(interpRotation);	
+	FRotator currentRotation = RelativeRotation;
+	FRotator interpRotation = FMath::RInterpTo(currentRotation, _targetRotation, DeltaTime, _blendTime);
+
+	RelativeRotation = interpRotation;
 }
 
 
-void URushCameraComponent::LookAtRush()
+void URushCameraComponent::RequestCameraStageSwitch(FRotator targetRotation, float blendTime)
 {
-	ARushCharacter* rush = static_cast<ARushCharacter*>(GetOwner());
+	_targetRotation = targetRotation;
 
-	if (rush == NULL)
-		return;
-
-	
-	FVector rushLocation = rush->GetActorLocation();
-
-	LookAtPoint(rushLocation);
-}
-
-
-void URushCameraComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	LookAtRush();
+	_blendTime = blendTime;
 }

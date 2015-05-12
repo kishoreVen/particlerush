@@ -7,7 +7,9 @@
 #include "RushCameraArmComponent.h"
 
 #include "Character/RushCharacter.h"
+#include "Character/RushCameraComponent.h"
 #include "Generic/Utilities.h"
+
 
 void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 {
@@ -83,7 +85,56 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 }
 
 
+void URushCameraArmComponent::SetCamera(class URushCameraComponent* rushCamera)
+{
+	RushCamera = rushCamera;
+}
+
+void URushCameraArmComponent::UpdateCameraToReachSwitchTarget(float DeltaTime)
+{
+	if (!EnableCameraSwitching)
+		return;
+
+	float interpTargetArmLength = FMath::FInterpTo(TargetArmLength, _targetTargetArmLength, DeltaTime, CameraSwitchBlendTime);
+	FRotator currentTargetArmRotation = RelativeRotation;
+	FRotator interpTargetArmRotation = FMath::RInterpTo(currentTargetArmRotation, _targetTargetArmRotation, DeltaTime, CameraSwitchBlendTime);
+
+	TargetArmLength = interpTargetArmLength;
+	RelativeRotation = interpTargetArmRotation;
+
+	RushCamera->RotateCameraToStoredTarget(DeltaTime);
+}
+
 void URushCameraArmComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	DoCameraLag(DeltaTime);
+
+	UpdateCameraToReachSwitchTarget(DeltaTime);
+}
+
+
+void URushCameraArmComponent::RequestCameraStageSwitch()
+{
+	if (RushCamera == NULL)
+		return;
+
+	int32 stage = _currentCameraSwitchStage;
+	stage = (stage + 1) % (CameraSwitchTransforms.Num());
+	
+	RequestCameraStageSwitch(stage);
+}
+
+
+void URushCameraArmComponent::RequestCameraStageSwitch(int32 stage)
+{
+	if (RushCamera == NULL)
+		return;
+
+	_currentCameraSwitchStage = stage;
+
+	FCameraDataVector requestValue = CameraSwitchTransforms[_currentCameraSwitchStage];
+	_targetTargetArmLength = requestValue.TargetArmLength;
+	_targetTargetArmRotation = requestValue.TargetArmRotation;
+
+	RushCamera->RequestCameraStageSwitch(requestValue.CameraRotation, CameraSwitchBlendTime);
 }

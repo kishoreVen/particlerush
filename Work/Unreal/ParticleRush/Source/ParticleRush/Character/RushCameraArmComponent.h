@@ -2,7 +2,13 @@
 
 #pragma once
 
+/* Eninge Headers */
 #include "GameFramework/SpringArmComponent.h"
+
+/* Custom Headers */
+#include "Generic/DataStructs.h"
+
+/* Generated Headers */
 #include "RushCameraArmComponent.generated.h"
 
 /**
@@ -13,18 +19,41 @@ class PARTICLERUSH_API URushCameraArmComponent : public USpringArmComponent
 {
 	GENERATED_BODY()
 
-#pragma region Local Cache
+#pragma region Private Members
 private:
 	float _rushLastFrameSpeedCache;
-#pragma endregion
+
+	float _targetTargetArmLength;
+
+	FRotator _targetTargetArmRotation;
+
+	uint32 _currentCameraSwitchStage;
+
+	class URushCameraComponent* RushCamera;
 	
+	/* On every tick, performs rotational and catch up lag */
+	void DoCameraLag(float DeltaTime);
+
+	/* On every tick, move the camera arm according to the specified camera setting */
+	void UpdateCameraToReachSwitchTarget(float DeltaTime);
+#pragma endregion
+
 #pragma region Blueprint Param Declerations
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
-	float DefaultDistanceFromRush;	
+	float DefaultDistanceFromRush;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Target Lag Params"))
 	FVector2D SpeedImpactOnArmCatchup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	TArray<FCameraDataVector> CameraSwitchTransforms;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	float CameraSwitchBlendTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	bool EnableCameraSwitching;
 #pragma endregion
 
 #pragma region Base Overrides
@@ -34,6 +63,10 @@ protected:
 
 #pragma region Helper Methods
 public:
-	void DoCameraLag(float DeltaTime);
+	void RequestCameraStageSwitch();
+
+	void RequestCameraStageSwitch(int32 stage);
+
+	void SetCamera(class URushCameraComponent* rushCamera);
 #pragma endregion
 };

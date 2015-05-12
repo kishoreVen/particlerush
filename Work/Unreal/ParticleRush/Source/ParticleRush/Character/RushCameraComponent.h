@@ -2,7 +2,10 @@
 
 #pragma once
 
+/* Engine Headers */
 #include "Camera/CameraComponent.h"
+
+/* Generated Headers */
 #include "RushCameraComponent.generated.h"
 
 /**
@@ -13,25 +16,17 @@ class PARTICLERUSH_API URushCameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
 
-#pragma region Blueprint Param Declerations
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
-	float LookAtEaseAlpha;
+#pragma region Behaviors
+private:
+	FRotator _targetRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
-	float LookAtEaseExp;
-#pragma endregion
+	float	 _blendTime;
 
-#pragma region Base Overrides
 protected:
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
-#pragma endregion
-	
-#pragma region Helper Methods
-protected:
-	void LookAtRush();
 
 public:
-	void LookAtPoint(FVector worldPoint);	
+	void RotateCameraToStoredTarget(float DeltaTime);
+
+	void RequestCameraStageSwitch(FRotator targetRotation, float BlendTime);
 #pragma endregion
 };

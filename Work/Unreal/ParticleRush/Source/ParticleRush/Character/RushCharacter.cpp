@@ -18,7 +18,7 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 
 	// Create a spring arm component
 	RushCameraBoom = ObjectInitializer.CreateDefaultSubobject<URushCameraArmComponent>(this, TEXT("RushCameraBoom"));
-	RushCameraBoom->AttachTo(capsuleComponent);
+	RushCameraBoom->AttachTo(capsuleComponent);	
 	
 	// Create camera component 
 	RushCamera = ObjectInitializer.CreateDefaultSubobject<URushCameraComponent>(this, TEXT("RushCamera"));
@@ -70,6 +70,15 @@ void ARushCharacter::BeginPlay()
 }
 
 
+void ARushCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	RushCameraBoom->SetCamera(RushCamera);
+	RushCameraBoom->RequestCameraStageSwitch(0);
+}
+
+
 void ARushCharacter::Tick(float DeltaSeconds)
 {
 	//ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
@@ -78,7 +87,7 @@ void ARushCharacter::Tick(float DeltaSeconds)
 
 	ExecuteBouncePerTick(DeltaSeconds);
 
-	ExecuteMeshRotationPerTick(DeltaSeconds);
+	ExecuteMeshRotationPerTick(DeltaSeconds);	
 
 	Super::Tick(DeltaSeconds);
 }
@@ -93,7 +102,7 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	InputComponent->BindAxis("SharpTurn", this, &ARushCharacter::ActivateSharpTurn);
 	InputComponent->BindAction("HardStop", IE_Pressed, this, &ARushCharacter::ActivateHardStop);
 	InputComponent->BindAction("Boost", IE_Pressed, this, &ARushCharacter::ActivateBoost);
-
+	InputComponent->BindAction("SwitchCamera", IE_Pressed, this, &ARushCharacter::SwitchCamera);
 }
 #pragma endregion
 
@@ -134,6 +143,12 @@ void ARushCharacter::ActivateHardStop()
 {
 	_timeLeftForHardStopToEnd = RushData.HardStopDriftDuration;
 	_hardTurnTarget = GetController()->GetControlRotation() + FRotator(0.0f, 180.0f, 0.0f);	
+}
+
+
+void ARushCharacter::SwitchCamera()
+{
+	RushCameraBoom->RequestCameraStageSwitch();
 }
 #pragma endregion
 

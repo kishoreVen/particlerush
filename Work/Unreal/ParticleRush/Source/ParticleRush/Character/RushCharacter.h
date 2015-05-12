@@ -49,6 +49,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+
+	virtual void PostInitializeComponents() override;
 #pragma endregion
 
 #pragma region Physics Methods and Callbacks
@@ -75,6 +77,12 @@ protected:
 	*/
 	UFUNCTION()
 	void ActivateHardStop();
+
+	/*
+	* Hard Stop with 180 degree turn
+	*/
+	UFUNCTION()
+	void SwitchCamera();
 #pragma endregion
 
 #pragma region Rush Behaviors

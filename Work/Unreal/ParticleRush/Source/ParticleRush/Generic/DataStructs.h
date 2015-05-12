@@ -126,3 +126,34 @@ struct FDataVector4
 		DataValue4 = dataValue4;
 	}
 };
+
+
+/**
+* 1 float and 1 rotator datatype mostly used for Camera
+*/
+USTRUCT(BlueprintType)
+struct FCameraDataVector
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere)
+	float TargetArmLength;
+	UPROPERTY(EditAnywhere)
+	FRotator TargetArmRotation;
+	UPROPERTY(EditAnywhere)
+	FRotator CameraRotation;
+	
+	FCameraDataVector()
+	{
+		TargetArmLength = 0.0f;
+		TargetArmRotation = FRotator(0.0f, 0.0f, 0.0f);
+		CameraRotation = FRotator(0.0f, 0.0f, 0.0f);
+	}
+
+	FCameraDataVector(float targetArmLength, FRotator targetArmRotation, FRotator cameraRotation)
+	{
+		TargetArmLength = targetArmLength;
+		TargetArmRotation = targetArmRotation;
+		CameraRotation = cameraRotation;
+	}
+};
