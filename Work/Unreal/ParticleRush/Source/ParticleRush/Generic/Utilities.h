@@ -9,18 +9,23 @@ namespace ParticleRush
 		/*
 		* Given two vectors, GetReflectionVector computes the reflection of inVec about the normal
 		*/
-		extern FVector GetReflectionVector(FVector inVec, FVector normal);
+		extern FVector GetReflectionVector(const FVector& inVec, const FVector& normal);
+
+		/*
+		* Given two vectors, GetRefractionVector computes the refraction of inVec about the normal, with refractive index. Give refractive index as nL / nR (0 ... 1)
+		*/
+		extern FVector GetRefractionVector(const FVector& inVec, const FVector& normal, float refractiveIndex);
 		
 
 		/*
-		* Given two vectors, GetRotationBetweenVectors computes the euler angles required to rotate from Vector A to Vector B
+		* Given two normalized vectors, GetRotationBetweenVectors computes the euler angles required to rotate from Vector A to Vector B
 		*/
-		extern FRotator GetRotationBetweenVectors(FVector vecA, FVector vecB);
+		extern FRotator GetRotationBetweenVectors(const FVector& vecA, const FVector& vecB);
 
 
 		/*
 		* The ROverShootingInterpTo will help creating an oscillating effect about the target rotation.
 		*/
-		FRotator ROverShootingInterpTo(const FRotator& Current, const FRotator& Target, float DeltaTime, float InterpSpeed);
+		extern FRotator ROverShootingInterpTo(const FRotator& Current, const FRotator& Target, float DeltaTime, float InterpSpeed);
 	}
 }

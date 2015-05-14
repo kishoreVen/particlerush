@@ -2,30 +2,24 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include "Level/Obstacle/Obstacle.h"
 #include "BounceObstacle.generated.h"
 
 UCLASS()
-class PARTICLERUSH_API ABounceObstacle : public AActor
+class PARTICLERUSH_API ABounceObstacle : public AObstacle
 {
 	GENERATED_BODY()
 
-#pragma region Component Declerations
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
-	class UStaticMeshComponent* staticMeshComp;
-#pragma endregion
-	
-public:	
-	// Sets default values for this actor's properties
-	ABounceObstacle(const class FObjectInitializer& ObjectInitializer);
+	UPROPERTY(EditAnywhere, Meta = (Category = "Bounce Params"))
+	float BounceJumpFactor;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
-	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
-
-	
-	
+public:
+	UFUNCTION(BlueprintCallable, Meta = (Category = "Bounce Params"))
+	float GetBounceJumpFactor();
 };
+
+FORCEINLINE float ABounceObstacle::GetBounceJumpFactor()
+{
+	return BounceJumpFactor;
+}

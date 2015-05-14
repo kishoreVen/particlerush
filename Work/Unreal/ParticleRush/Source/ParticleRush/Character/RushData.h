@@ -72,6 +72,13 @@ struct FRushData
 	FDataVector2 BounceStrength;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
+	float RefractDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
+	float RefractOrientationStrength;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "SharpTurn"))
 	float SharpTurnStrength;
 
