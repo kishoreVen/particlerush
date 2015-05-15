@@ -9,18 +9,36 @@ namespace ParticleRush
 {
 	namespace Utilities
 	{
-		FVector GetReflectionVector(FVector inVec, FVector normal)
+		FVector GetReflectionVector(const FVector& inVec, const FVector& normal)
 		{
 			return -2 * (FVector::DotProduct(inVec, normal)) * normal + inVec;
 		}
 
+
+		FVector GetRefractionVector(const FVector& inVec, const FVector& normal, float refractiveIndex)
+		{
+			if (refractiveIndex > 1 || refractiveIndex <= 0)
+				return FVector::ZeroVector;
+
+			float dotProduct = FVector::DotProduct(inVec, normal);
+			float radical = FMath::Sqrt(1 - refractiveIndex * refractiveIndex * (1 - dotProduct * dotProduct));
+
+			if (radical < 0)
+				return FVector::ZeroVector;
+
+			FVector normalContribution = (refractiveIndex * dotProduct - radical) * normal;
+			FVector inVecContribution = refractiveIndex * inVec;
+
+			FVector refractionVector = normalContribution - inVecContribution;
+			refractionVector.Normalize();
+
+			return refractionVector;
+		}
+
 		
-		FRotator GetRotationBetweenVectors(FVector vecA, FVector vecB)
+		FRotator GetRotationBetweenVectors(const FVector& vecA, const FVector& vecB)
 		{
 			FRotator angle;
-
-			vecA.Normalize();
-			vecB.Normalize();
 
 			FVector cross = FVector::CrossProduct(vecA, vecB);
 			cross.Normalize();

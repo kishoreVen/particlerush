@@ -46,7 +46,7 @@ protected:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaSeconds) override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
@@ -177,7 +177,7 @@ protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void BounceAgainstWall(class AActor* OtherActor, const FHitResult& HitResult);
+	void BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
 	void PerformBounce(FVector HitNormal);
 
@@ -185,6 +185,30 @@ protected:
 
 public:
 #pragma endregion
+
+
+#pragma region REFRACTION
+private:
+	float						_timeBeforeRegainingControlFromRefraction;
+
+	FRotator					_refractTargetOrientation;
+
+	class ARefractObstacle*		_localRefractionCache;
+
+	void InitializeBehaviorRefraction();
+protected:
+	/*
+	* Function to perform bounce against the wall
+	*/
+	void RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
+
+	void PerformRefraction(FVector HitNormal, float RefractiveIndex);
+
+	void ExecuteRefractionPerTick(float deltaSeconds);
+
+public:
+#pragma endregion
+
 
 #pragma region TIMER
 private:
@@ -199,6 +223,9 @@ private:
 protected:
 
 public:
+#pragma endregion
+
+#pragma region INPUT CONTROL
 #pragma endregion
 
 #pragma region DEBUG

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "ParticleRush.h"
+
 #include "DataStructs.generated.h"
 
 /**

@@ -43,6 +43,8 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 
 	InitializeBehaviorBoost();
 
+	InitializeBehaviorRefraction();
+
 	#pragma region Sharp Turn
 	_sharpTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
 	#pragma endregion
@@ -79,17 +81,19 @@ void ARushCharacter::PostInitializeComponents()
 }
 
 
-void ARushCharacter::Tick(float DeltaSeconds)
+void ARushCharacter::Tick(float DeltaTime)
 {
 	//ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
 
-	ExecuteBoostPerTick(DeltaSeconds);
+	ExecuteBoostPerTick(DeltaTime);
 
-	ExecuteBouncePerTick(DeltaSeconds);
+	ExecuteBouncePerTick(DeltaTime);
 
-	ExecuteMeshRotationPerTick(DeltaSeconds);	
+	ExecuteRefractionPerTick(DeltaTime);
 
-	Super::Tick(DeltaSeconds);
+	ExecuteMeshRotationPerTick(DeltaTime);	
+
+	Super::Tick(DeltaTime);
 }
 
 
@@ -110,14 +114,13 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 #pragma region Physics Methods and Callbakcs
 void ARushCharacter::OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
-	BounceAgainstWall(OtherActor, HitResult);
+	BounceAgainstObstacle(OtherActor, HitResult);
+
+	RefractAgainstObstacle(OtherActor, HitResult);
 }
 
 void ARushCharacter::OnRushActionSphereBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	#pragma region Is Collision with Wall?
-
-	#pragma endregion
+{	
 }
 
 void ARushCharacter::OnRushActionSphereEndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
