@@ -24,6 +24,7 @@ class PARTICLERUSH_API ARushCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+
 #pragma region Component Declarations
 public:
 	ARushCharacter(const class FObjectInitializer& ObjectInitializer);
@@ -42,7 +43,8 @@ protected:
 	class UPointLightComponent* RushNavigationLight;
 #pragma endregion
 
-#pragma region Base Class Overrides
+
+#pragma region OVERRIDES
 protected:
 	virtual void BeginPlay() override;
 
@@ -53,7 +55,8 @@ protected:
 	virtual void PostInitializeComponents() override;
 #pragma endregion
 
-#pragma region Physics Methods and Callbacks
+
+#pragma region PHYSICS CALLBACKS
 	UFUNCTION()
 	void OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
 
@@ -64,7 +67,8 @@ protected:
 	void OnRushActionSphereEndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
 
-#pragma region Rush Input
+
+#pragma region INPUT
 protected:
 	/*
 	* Turn 90 degrees to execute sharp turn
@@ -77,15 +81,10 @@ protected:
 	*/
 	UFUNCTION()
 	void ActivateHardStop();
-
-	/*
-	* Hard Stop with 180 degree turn
-	*/
-	UFUNCTION()
-	void SwitchCamera();
 #pragma endregion
 
-#pragma region Rush Behaviors
+
+#pragma region BEHAVIORS
 #pragma region Common
 public:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
@@ -95,7 +94,7 @@ public:
 	struct FRushFlags RushFlags;
 #pragma endregion
 
-	#pragma region Sharp Turn
+#pragma region Sharp Turn
 private:
 	FRotator _sharpTurnTarget;
 
@@ -103,7 +102,7 @@ private:
 protected:
 	#pragma endregion
 
-	#pragma region HardStop
+#pragma region HardStop
 private:
 	float _timeLeftForHardStopToEnd;
 
@@ -112,6 +111,7 @@ protected:
 	void ExecuteHardStopPerTick(float delatSeconds);
 	#pragma endregion
 #pragma endregion
+
 
 #pragma region MOVEMENT
 private:
@@ -143,6 +143,29 @@ protected:
 public:
 #pragma endregion
 
+
+#pragma region JUMP
+private:
+	void InitializeBehaviorJump();
+
+protected:
+	/* Moves the character forward based on the Actor's world forward vector
+	* Value > 0.0f - Moves forward
+	* Value < 0.0f - Moves Backward
+	*/
+	UFUNCTION()
+	void StartJump();
+
+	/*
+	* Turns the character right based on the Turn speed
+	* value > 0.0f - Turns Right
+	* value < 0.0f - Turns Left
+	*/
+	UFUNCTION()
+	void StopJump();
+#pragma endregion
+
+
 #pragma region BOOST
 private:
 	float _timeLeftForBoostToEnd;
@@ -165,6 +188,7 @@ protected:
 
 public:
 #pragma endregion
+
 
 #pragma region BOUNCE
 private:
@@ -210,6 +234,18 @@ public:
 #pragma endregion
 
 
+#pragma region CAMERA
+	UFUNCTION()
+	void SwitchCamera();
+
+	UFUNCTION()
+	void TurnCameraYaw(float value);
+
+	UFUNCTION()
+	void TurnCameraRoll(float value);
+#pragma endregion
+
+
 #pragma region TIMER
 private:
 	float _targetRushTimeScale;
@@ -225,8 +261,10 @@ protected:
 public:
 #pragma endregion
 
+
 #pragma region INPUT CONTROL
 #pragma endregion
+
 
 #pragma region DEBUG
 	private:
@@ -237,3 +275,7 @@ public:
 		void ToggleDrawWallCollisionResults();
 #pragma endregion
 };
+
+
+#pragma region INLINE
+#pragma endregion

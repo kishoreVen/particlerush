@@ -23,25 +23,43 @@ protected:
 
 
 #pragma region Movement States Setup - Walk
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Wallk"))
 	float DefaultMaxSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))
 	float DefaultMaxAcceleration;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))
 	float DefaultDeceleration;
 #pragma endregion
 
 
 #pragma region Movement States Setup - Boost
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Boost"))
 	float BoostSpeedIncrease;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Boost"))
 	float BoostAccelerationIncrease;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Parameters"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Boost"))
 	float BoostDecelerationDecrease;
+#pragma endregion
+
+
+#pragma region Movement States - Jump Mechanism
+private:
+	bool	_isJumping;
+	float	_jumpKeyHoldTime;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Jump"))
+	float JumpMaxKeyHoldTime;
+
+public:
+	UFUNCTION(Meta = (Category = "Jump Mechanism"))
+	void StartJump();
+
+	UFUNCTION(Meta = (Category = "Jump Mechanism"))
+	void StopJump();
 #pragma endregion
 };

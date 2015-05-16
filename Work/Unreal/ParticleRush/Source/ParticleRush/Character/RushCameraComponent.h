@@ -20,13 +20,32 @@ class PARTICLERUSH_API URushCameraComponent : public UCameraComponent
 private:
 	FRotator _targetRotation;
 
+	FRotator _defaultRotation;
+
+	FRotator _targetRightStickRotation;
+
 	float	 _blendTime;
 
+	bool	 _isSwitchingCamera;
+
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Control"))
+	float CameraRightStickRotationBlendTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Control"))
+	FRotator CameraRightStickRotationMaxAngle;	
 
 public:
+	void InitializeCamera();
+
 	void RotateCameraToStoredTarget(float DeltaTime);
 
+	void RotateCameraToRightStickTarget(float DeltaTime);
+
 	void RequestCameraStageSwitch(FRotator targetRotation, float BlendTime);
+
+	void SetYawForRightStickRotation(float value);
+
+	void SetRollForRightStickRotation(float value);
 #pragma endregion
 };

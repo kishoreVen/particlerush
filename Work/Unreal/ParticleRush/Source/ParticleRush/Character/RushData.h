@@ -33,6 +33,13 @@ struct FRushData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
 	FDataVector2 WalkCameraLagSpeeds;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
+	float JumpMaxHoldTimeForHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
+	float JumpMaxHeight;
+
 	
 	/* How fast the Mesh should rotate in-order to achieve MeshMaxPitchAngle */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Turning"))

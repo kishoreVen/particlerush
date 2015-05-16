@@ -7,6 +7,7 @@
 
 /* Custom Headers */
 #include "Generic/DataStructs.h"
+#include "Character/RushCameraComponent.h"
 
 /* Generated Headers */
 #include "RushCameraArmComponent.generated.h"
@@ -19,7 +20,7 @@ class PARTICLERUSH_API URushCameraArmComponent : public USpringArmComponent
 {
 	GENERATED_BODY()
 
-#pragma region Private Members
+#pragma region PRIVATE MEMBERS
 private:
 	float _rushLastFrameSpeedCache;
 
@@ -29,16 +30,16 @@ private:
 
 	uint32 _currentCameraSwitchStage;
 
-	class URushCameraComponent* RushCamera;
+	URushCameraComponent* RushCamera;
 	
 	/* On every tick, performs rotational and catch up lag */
 	void DoCameraLag(float DeltaTime);
 
 	/* On every tick, move the camera arm according to the specified camera setting */
-	void UpdateCameraToReachSwitchTarget(float DeltaTime);
+	void UpdateCameraToReachSwitchTarget(float DeltaTime);	
 #pragma endregion
 
-#pragma region Blueprint Param Declerations
+#pragma region PARAMS FOR BP
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Distance Params"))
 	float DefaultDistanceFromRush;
@@ -46,27 +47,56 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Target Lag Params"))
 	FVector2D SpeedImpactOnArmCatchup;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Switch - Blend Params"))
 	TArray<FCameraDataVector> CameraSwitchTransforms;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Switch - Blend Params"))
 	float CameraSwitchBlendTime;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Blend Params"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Camera Switch - Blend Params"))
 	bool EnableCameraSwitching;
 #pragma endregion
 
-#pragma region Base Overrides
+#pragma region OVERRIDE
 protected:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 #pragma endregion
 
-#pragma region Helper Methods
+#pragma region PUBLIC METHODS
 public:
 	void RequestCameraStageSwitch();
 
-	void RequestCameraStageSwitch(int32 stage);
+	void RequestCameraStageSwitch(int32 stage);	
 
-	void SetCamera(class URushCameraComponent* rushCamera);
+	void TurnCameraYaw(float value);
+
+	void TurnCameraRoll(float value);
+
+	/* Initialize Component */
+	void InitializeCameraArm(URushCameraComponent* rushCamera);
+
+	UFUNCTION(Meta = (Category = "Camera Switch"))
+	int32 GetCurrentCameraStage();
 #pragma endregion
 };
+
+
+#pragma region INLINE
+FORCEINLINE int32 URushCameraArmComponent::GetCurrentCameraStage()
+{
+	return _currentCameraSwitchStage;
+}
+
+FORCEINLINE void URushCameraArmComponent::TurnCameraYaw(float value)
+{
+	if (RushCamera != NULL)
+		RushCamera->SetYawForRightStickRotation(value);
+}
+
+
+FORCEINLINE void URushCameraArmComponent::TurnCameraRoll(float value)
+{
+	if (RushCamera != NULL)
+		RushCamera->SetRollForRightStickRotation(value);
+}
+#pragma endregion

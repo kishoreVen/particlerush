@@ -76,8 +76,8 @@ void ARushCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	RushCameraBoom->SetCamera(RushCamera);
-	RushCameraBoom->RequestCameraStageSwitch(0);
+	RushCameraBoom->InitializeCameraArm(RushCamera);
+	
 }
 
 
@@ -107,6 +107,10 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	InputComponent->BindAction("HardStop", IE_Pressed, this, &ARushCharacter::ActivateHardStop);
 	InputComponent->BindAction("Boost", IE_Pressed, this, &ARushCharacter::ActivateBoost);
 	InputComponent->BindAction("SwitchCamera", IE_Pressed, this, &ARushCharacter::SwitchCamera);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ARushCharacter::StartJump);
+	InputComponent->BindAction("Jump", IE_Released, this, &ARushCharacter::StopJump);
+	InputComponent->BindAxis("CameraYaw", this, &ARushCharacter::TurnCameraYaw);
+	InputComponent->BindAxis("CameraRoll", this, &ARushCharacter::TurnCameraRoll);
 }
 #pragma endregion
 
@@ -147,11 +151,23 @@ void ARushCharacter::ActivateHardStop()
 	_timeLeftForHardStopToEnd = RushData.HardStopDriftDuration;
 	_hardTurnTarget = GetController()->GetControlRotation() + FRotator(0.0f, 180.0f, 0.0f);	
 }
+#pragma endregion
 
 
+#pragma region CAMERA
 void ARushCharacter::SwitchCamera()
 {
 	RushCameraBoom->RequestCameraStageSwitch();
+}
+
+void ARushCharacter::TurnCameraYaw(float value)
+{
+	RushCameraBoom->TurnCameraYaw(value);
+}
+
+void ARushCharacter::TurnCameraRoll(float value)
+{
+	RushCameraBoom->TurnCameraRoll(value);
 }
 #pragma endregion
 

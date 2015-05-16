@@ -5,10 +5,19 @@
 
 /* Custom Headers */
 #include "RushCameraArmComponent.h"
-
 #include "Character/RushCharacter.h"
-#include "Character/RushCameraComponent.h"
 #include "Generic/Utilities.h"
+
+
+
+void URushCameraArmComponent::InitializeCameraArm(URushCameraComponent* rushCamera)
+{
+	RushCamera = rushCamera;
+
+	RequestCameraStageSwitch(0);
+
+	RushCamera->InitializeCamera();
+}
 
 
 void URushCameraArmComponent::DoCameraLag(float DeltaTime)
@@ -85,11 +94,6 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 }
 
 
-void URushCameraArmComponent::SetCamera(class URushCameraComponent* rushCamera)
-{
-	RushCamera = rushCamera;
-}
-
 void URushCameraArmComponent::UpdateCameraToReachSwitchTarget(float DeltaTime)
 {
 	if (!EnableCameraSwitching)
@@ -110,6 +114,8 @@ void URushCameraArmComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 	DoCameraLag(DeltaTime);
 
 	UpdateCameraToReachSwitchTarget(DeltaTime);
+
+	RushCamera->RotateCameraToRightStickTarget(DeltaTime);
 }
 
 
