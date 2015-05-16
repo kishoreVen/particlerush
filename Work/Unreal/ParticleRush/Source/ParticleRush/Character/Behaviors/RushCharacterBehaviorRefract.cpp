@@ -26,12 +26,17 @@ void ARushCharacter::RefractAgainstObstacle(class AActor* OtherActor, const FHit
 	_localRefractionCache = collidedWall;
 
 	PerformRefraction(HitResult.Normal, collidedWall->GetRefractiveIndex());
+
+	if (_shouldDrawWallCollisionResults)
+	{
+		DrawDebugDirectionalArrow(GetWorld(), HitResult.Location, HitResult.Location + HitResult.Normal * 50.0f, 5.0f, FColor::Yellow, false, 1.0f);
+	}
 }
 
 
 void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 {
-	FVector rushHeading = GetActorForwardVector();	
+	FVector rushHeading = GetActorForwardVector();
 
 	FVector normal = HitNormal;	
 
@@ -44,6 +49,11 @@ void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 		_refractTargetOrientation = refractDirection.Rotation();
 
 		_localRefractionCache->RequestCollisionEnabledToggle(false);
+	}
+
+	if (_shouldDrawWallCollisionResults)
+	{
+		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + refractDirection * 50.0f, 5.0f, FColor::Red, false, 1.0f);
 	}
 }
 
