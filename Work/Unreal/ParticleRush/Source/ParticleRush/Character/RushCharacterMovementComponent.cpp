@@ -4,13 +4,23 @@
 #include "RushCharacterMovementComponent.h"
 
 /* Custom Headers */
-#include "RushCharacter.h"
+#include "Character/RushCharacter.h"
 
 void URushCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
 	_jumpKeyHoldTime = 0.0f;
+
+	_currentBrakingGroundFriction = GroundFrictionBrakingStrength.MinValue;
+	_currentBrakingDecelerationIncrease = 0.0f;
+}
+
+
+void URushCharacterMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.MemberProperty->GetName() == "GroundFrictionBrakingStrength")
+		GroundFrictionBrakingStrength.UpdateProperties();
 }
 
 
@@ -35,6 +45,11 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 		MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * boostStage;
 		BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * boostStage;
 	}
+
+#pragma region STOP UPDATE
+	GroundFriction = _currentBrakingGroundFriction;
+	BrakingDecelerationWalking += _currentBrakingDecelerationIncrease;
+#pragma endregion
 
 #pragma region JUMP UPDATE
 	if (_isJumping && _jumpKeyHoldTime < JumpMaxKeyHoldTime)
@@ -65,4 +80,11 @@ void URushCharacterMovementComponent::StopJump()
 {
 	_isJumping = false;
 	_jumpKeyHoldTime = 0.0f;
+}
+
+
+void URushCharacterMovementComponent::ApplyBraking(float value)
+{
+	_currentBrakingGroundFriction = GroundFrictionBrakingStrength.GetInterpolatedValue(value);
+	_currentBrakingDecelerationIncrease = BrakingDecelerationIncreaseStrength.GetInterpolatedValue(value);
 }

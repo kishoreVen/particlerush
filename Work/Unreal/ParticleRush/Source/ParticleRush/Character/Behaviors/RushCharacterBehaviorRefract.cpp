@@ -17,22 +17,26 @@ void ARushCharacter::InitializeBehaviorRefraction()
 }
 
 
-void ARushCharacter::RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
+bool ARushCharacter::RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
 {
 	/* Check if Bounce Can happen Here */
 	ARefractObstacle* collidedWall = dynamic_cast<ARefractObstacle*>(OtherActor);
 
 	if (collidedWall == NULL)
-		return;	
+		return false;
 
 	_localRefractionCache = collidedWall;
 
 	PerformRefraction(HitResult.Normal, collidedWall->GetRefractiveIndex());
 
+#if !UE_BUILD_SHIPPING
 	if (_shouldDrawWallCollisionResults)
 	{
 		DrawDebugDirectionalArrow(GetWorld(), HitResult.Location, HitResult.Location + HitResult.Normal * 50.0f, 5.0f, FColor::Yellow, false, 1.0f);
 	}
+#endif //!UE_BUILD_SHIPPING
+
+	return true;
 }
 
 

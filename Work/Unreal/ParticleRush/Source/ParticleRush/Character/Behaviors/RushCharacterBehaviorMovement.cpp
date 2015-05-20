@@ -2,6 +2,7 @@
 
 #include "ParticleRush.h"
 #include "Character/RushCharacter.h"
+#include "Character/RushCharacterMovementComponent.h"
 
 
 void ARushCharacter::InitializeBehaviorMovement()
@@ -14,7 +15,7 @@ void ARushCharacter::OnBeginPlayBehaviorMovement()
 	_defaultMeshRotator = GetMesh()->RelativeRotation;
 }
 
-#pragma region Rush Input
+
 void ARushCharacter::MoveForward(float value)
 {
 	if ((Controller != NULL) && (value != 0.0f))
@@ -36,6 +37,14 @@ void ARushCharacter::TurnRight(float value)
 	_targetMeshTurningRollAngle = value * RushData.MeshTurningMaxAngle;
 }
 
+
+void ARushCharacter::ApplyBraking(float value)
+{
+	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
+
+	if (movementComponent != NULL)
+		movementComponent->ApplyBraking(value);
+}
 
 void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 {

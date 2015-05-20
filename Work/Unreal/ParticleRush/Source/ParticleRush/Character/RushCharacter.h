@@ -53,6 +53,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
 	virtual void PostInitializeComponents() override;
+
+	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #pragma endregion
 
 
@@ -75,17 +77,11 @@ protected:
 	*/
 	UFUNCTION()
 	void ActivateSharpTurn(float value);
-
-	/* 
-	* Hard Stop with 180 degree turn 
-	*/
-	UFUNCTION()
-	void ActivateHardStop();
 #pragma endregion
 
 
 #pragma region BEHAVIORS
-#pragma region Common
+#pragma region COMMON
 public:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
 	struct FRushData RushData;
@@ -94,22 +90,23 @@ public:
 	struct FRushFlags RushFlags;
 #pragma endregion
 
-#pragma region Sharp Turn
+#pragma region SHARP TURN
 private:
 	FRotator _sharpTurnTarget;
 
 	void ExecuteSharpTurnPerTick(float deltaSeconds);
 protected:
-	#pragma endregion
+#pragma endregion
+#pragma endregion
 
-#pragma region HardStop
-private:
-	float _timeLeftForHardStopToEnd;
-
-	FRotator _hardTurnTarget;
+	
+#pragma region BRAKING
 protected:
-	void ExecuteHardStopPerTick(float delatSeconds);
-	#pragma endregion
+	/*
+	* Intuitive stopping that increase ground friction and braking deceleration
+	*/
+	UFUNCTION()
+	void ApplyBraking(float value);
 #pragma endregion
 
 
@@ -123,7 +120,7 @@ private:
 
 	void OnBeginPlayBehaviorMovement();
 
-	void ExecuteMeshRotationPerTick(float deltaSeconds);
+	void ExecuteMeshRotationPerTick(float DeltaTime);
 protected:
 	/* Moves the character forward based on the Actor's world forward vector
 	* Value > 0.0f - Moves forward
@@ -149,17 +146,12 @@ private:
 	void InitializeBehaviorJump();
 
 protected:
-	/* Moves the character forward based on the Actor's world forward vector
-	* Value > 0.0f - Moves forward
-	* Value < 0.0f - Moves Backward
+	/* Start a Jump
 	*/
 	UFUNCTION()
 	void StartJump();
 
-	/*
-	* Turns the character right based on the Turn speed
-	* value > 0.0f - Turns Right
-	* value < 0.0f - Turns Left
+	/* Stop a Jump
 	*/
 	UFUNCTION()
 	void StopJump();
@@ -201,7 +193,7 @@ protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
+	bool BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
 	void PerformBounce(FVector HitNormal, float OverrideZImpulseFactor);
 
@@ -224,7 +216,7 @@ protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
+	bool RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
 	void PerformRefraction(FVector HitNormal, float RefractiveIndex);
 

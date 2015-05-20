@@ -41,10 +41,17 @@ struct FStrengthData
 {
 	GENERATED_USTRUCT_BODY()
 
+	/* Minimum Strength Value */
 	UPROPERTY(EditAnywhere)
 	float MinValue;
+
+	/* Maximum Strength Value */
 	UPROPERTY(EditAnywhere)
 	float MaxValue;
+	
+	/* Strength Range */
+	UPROPERTY(BlueprintReadOnly)
+	float Range;
 
 	FStrengthData()
 	{
@@ -68,8 +75,11 @@ struct FStrengthData
 			return MinValue + Range * normalizedValue;
 	}
 
-	UPROPERTY(BlueprintReadOnly)
-	float Range;
+	/* Update Properties and call only PostEditPropertyChange */
+	void UpdateProperties()
+	{
+		Range = MaxValue - MinValue;
+	}
 };
 
 

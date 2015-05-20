@@ -49,11 +49,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	#pragma region Sharp Turn
 	_sharpTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
 	#pragma endregion
-
-	#pragma region Hard Stop
-	_timeLeftForHardStopToEnd = -1.0f;
-	_hardTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
-	#pragma endregion
 #pragma endregion
 
 #pragma region Rush Action Sphere Timer Management
@@ -81,6 +76,20 @@ void ARushCharacter::PostInitializeComponents()
 }
 
 
+void ARushCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+	UProperty* MemberProperty = PropertyChangedEvent.PropertyChain.GetActiveMemberNode()->GetValue();
+	FName PropertyName = (MemberProperty != NULL) ? MemberProperty->GetFName() : NAME_None;
+
+	if ((PropertyName == TEXT("RushData")))
+	{
+		RushData.UpdateProperty(PropertyChangedEvent);
+	}
+
+	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+}
+
+
 void ARushCharacter::Tick(float DeltaTime)
 {
 	//ExecuteRushTimeScaleUpdatePerTick(DeltaSeconds);
@@ -103,12 +112,18 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 
 	InputComponent->BindAxis("MoveForward", this, &ARushCharacter::MoveForward);
 	InputComponent->BindAxis("TurnRight", this, &ARushCharacter::TurnRight);
+	
 	InputComponent->BindAxis("SharpTurn", this, &ARushCharacter::ActivateSharpTurn);
-	InputComponent->BindAction("HardStop", IE_Pressed, this, &ARushCharacter::ActivateHardStop);
+
+	InputComponent->BindAxis("Brake", this, &ARushCharacter::ApplyBraking);
+
 	InputComponent->BindAction("Boost", IE_Pressed, this, &ARushCharacter::ActivateBoost);
+	
 	InputComponent->BindAction("SwitchCamera", IE_Pressed, this, &ARushCharacter::SwitchCamera);
+
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ARushCharacter::StartJump);
 	InputComponent->BindAction("Jump", IE_Released, this, &ARushCharacter::StopJump);
+
 	InputComponent->BindAxis("CameraYaw", this, &ARushCharacter::TurnCameraYaw);
 	InputComponent->BindAxis("CameraRoll", this, &ARushCharacter::TurnCameraRoll);
 }
@@ -143,13 +158,6 @@ void ARushCharacter::ActivateSharpTurn(float value)
 	{
 		_sharpTurnTarget = Controller->GetControlRotation() + FRotator(0.0f, value * 90.0f, 0.0f);
 	}
-}
-
-
-void ARushCharacter::ActivateHardStop()
-{
-	_timeLeftForHardStopToEnd = RushData.HardStopDriftDuration;
-	_hardTurnTarget = GetController()->GetControlRotation() + FRotator(0.0f, 180.0f, 0.0f);	
 }
 #pragma endregion
 
@@ -190,35 +198,6 @@ void ARushCharacter::ExecuteSharpTurnPerTick(float deltaSeconds)
 		else
 		{
 			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _sharpTurnTarget, deltaSeconds, RushData.SharpTurnStrength);
-			Controller->SetControlRotation(interpControllerRotation);
-		}
-	}
-}
-
-
-void ARushCharacter::ExecuteHardStopPerTick(float deltaSeconds)
-{
-	if (_hardTurnTarget == FRotator(0.0f, 0.0f, 0.0f))
-		return;
-
-	if (Controller != NULL)
-	{
-		FRotator currentControllerRotation = Controller->GetControlRotation();
-		FRotator difference = _hardTurnTarget - currentControllerRotation;
-
-		if (difference.IsNearlyZero())
-		{
-			_timeLeftForHardStopToEnd -= deltaSeconds;
-
-			if (_timeLeftForHardStopToEnd < 0.0f)
-			{
-				_timeLeftForBoostToEnd = -1.0f;
-				_hardTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
-			}
-		}
-		else
-		{
-			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _hardTurnTarget, deltaSeconds, RushData.HardStopOrientationStrength);
 			Controller->SetControlRotation(interpControllerRotation);
 		}
 	}

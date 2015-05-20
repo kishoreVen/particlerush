@@ -8,7 +8,6 @@
 
 void ARushCharacter::InitializeBehaviorJump()
 {
-	JumpMaxHoldTime = RushData.JumpMaxHoldTimeForHeight;
 }
 
 

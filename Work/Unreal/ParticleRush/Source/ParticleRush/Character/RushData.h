@@ -15,13 +15,6 @@ struct FRushData
 {
 	GENERATED_USTRUCT_BODY()
 
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
-	float JumpMaxHoldTimeForHeight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
-	float JumpMaxHeight;
-
 	
 	/* How fast the Mesh should rotate in-order to achieve MeshMaxPitchAngle */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Turning"))
@@ -86,6 +79,18 @@ struct FRushData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "HardStop"))
 	FDataVector2 HardStopCameraLagSpeeds;
+
+
+	void UpdateProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+	{
+		UProperty* field = PropertyChangedEvent.PropertyChain.GetTail()->GetPrevNode()->GetValue();
+		FName fieldName = (field != NULL) ? field->GetFName() : NAME_None;
+
+		if (fieldName == "BounceStrength")
+			BounceStrength.UpdateProperties();
+		else if (fieldName == "BounceJumpStrength")
+			BounceJumpStrength.UpdateProperties();
+	}
 };
 
 /* Legend:

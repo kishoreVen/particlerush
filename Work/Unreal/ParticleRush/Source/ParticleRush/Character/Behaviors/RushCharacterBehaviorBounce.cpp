@@ -17,15 +17,17 @@ void ARushCharacter::InitializeBehaviorBounce()
 }
 
 
-void ARushCharacter::BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
+bool ARushCharacter::BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
 {
 	/* Check if Bounce Can happen Here */
 	ABounceObstacle* collidedWall = dynamic_cast<ABounceObstacle*>(OtherActor);
 
 	if (collidedWall == NULL)
-		return;	
+		return false;
 
 	PerformBounce(HitResult.Normal, collidedWall->GetBounceZOverrideFactor());
+
+	return true;
 }
 
 
