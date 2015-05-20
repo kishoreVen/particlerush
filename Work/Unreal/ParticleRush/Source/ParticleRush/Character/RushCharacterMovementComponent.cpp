@@ -63,7 +63,10 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 
 #pragma region UPDATE FLAGS
 	float currentVelocity = Velocity.Size();
-	rush->RushFlags.MomentumPercentage = FMath::Clamp(currentVelocity / DefaultMaxSpeed, 0.0f, 1.0f);
+	float currentMomentumPercentage = FMath::Clamp(currentVelocity / DefaultMaxSpeed, 0.0f, 1.0f);
+
+	rush->RushFlags.MomentumDiffPercentage = currentMomentumPercentage - rush->RushFlags.MomentumPercentage;
+	rush->RushFlags.MomentumPercentage = currentMomentumPercentage;
 #pragma endregion
 }
 

@@ -10,10 +10,6 @@ void ARushCharacter::InitializeBehaviorBounce()
 {
 	_timeBeforeRegainingControlFromBounce = -1.0f;
 	_bounceTargetOrientation = FRotator(0.0f, 0.0f, 0.0f);
-
-#if !UE_BUILD_SHIPPING
-	_shouldDrawWallCollisionResults = false;
-#endif //!UE_BUILD_SHIPPING
 }
 
 
@@ -53,13 +49,12 @@ void ARushCharacter::PerformBounce(FVector HitNormal, float OverrideZImpulseFact
 
 	movementComponent->AddImpulse(bounceImpulse, true);
 
-#if !UE_BUILD_SHIPPING
+
 	if (_shouldDrawWallCollisionResults)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, bounceImpulse.ToString());
 		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + bounceDirection * 50.0f, 5.0f, FColor::Red, false, 1.0f);
 	}
-#endif //!UE_BUILD_SHIPPING
 }
 
 

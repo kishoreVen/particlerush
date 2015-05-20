@@ -259,14 +259,21 @@ public:
 
 
 #pragma region DEBUG
-#if !UE_BUILD_SHIPPING
 	private:
 		bool _shouldDrawWallCollisionResults;
+		bool _shouldDrawCharacterStats;
+
+		void DrawCharacterStats();
+
+	protected:
+		virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) override;
 
 	public:
-		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console ~ ToggleDrawWallCollisionResults"))
+		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Collision"))
 		void ToggleDrawWallCollisionResults();
-#endif //!UE_BUILD_SHIPPING
+
+		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Gameplay"))
+		void ToggleDrawCharacterStats();
 #pragma endregion
 };
 

@@ -1,6 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+/* Engine Headers */
 #include "ParticleRush.h"
+#include "DisplayDebugHelpers.h"
+
+/* Custom Headers */
 #include "RushCharacter.h"
 #include "RushCharacterMovementComponent.h"
 #include "RushCameraComponent.h"
@@ -51,6 +55,13 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	#pragma endregion
 #pragma endregion
 
+
+#pragma region DEBUG SETUP
+	_shouldDrawCharacterStats = false;
+	_shouldDrawWallCollisionResults = false;
+#pragma endregion
+
+
 #pragma region Rush Action Sphere Timer Management
 	ResetRushTimeScale();
 #pragma endregion
@@ -72,7 +83,6 @@ void ARushCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	RushCameraBoom->InitializeCameraArm(RushCamera);
-	
 }
 
 
@@ -100,7 +110,12 @@ void ARushCharacter::Tick(float DeltaTime)
 
 	ExecuteRefractionPerTick(DeltaTime);
 
-	ExecuteMeshRotationPerTick(DeltaTime);	
+	ExecuteMeshRotationPerTick(DeltaTime);
+
+	#pragma region DEBUG UPDATE
+	if (_shouldDrawCharacterStats)
+		DrawCharacterStats();
+	#pragma endregion
 
 	Super::Tick(DeltaTime);
 }
@@ -139,7 +154,7 @@ void ARushCharacter::OnCapsuleCollision(class AActor* OtherActor, class UPrimiti
 }
 
 void ARushCharacter::OnRushActionSphereBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{	
+{
 }
 
 void ARushCharacter::OnRushActionSphereEndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -238,10 +253,37 @@ void ARushCharacter::ExecuteRushTimeScaleUpdatePerTick(float DeltaSeconds)
 
 
 #pragma region DEBUG METHODS
-#if !UE_BUILD_SHIPPING
+void ARushCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos)
+{
+	static FName NAME_Rush = FName(TEXT("RUSH"));
+
+	UFont* RenderFont = GEngine->GetSmallFont();
+
+	if (DebugDisplay.IsDisplayOn(NAME_Rush))
+	{
+		FString TargetDesc = FString::Printf(TEXT("  Rush Flags: [%f | %f | %d | %d]"),
+			RushFlags.MomentumPercentage, RushFlags.MomentumDiffPercentage, RushFlags.ChainBoostStage, RushFlags.ChainBounceStage);
+
+		Canvas->DrawText(RenderFont, TargetDesc, 4.0f, YPos);
+		YPos += YL;
+	}
+
+	Super::DisplayDebug(Canvas, DebugDisplay, YL, YPos);
+}
+
+void ARushCharacter::DrawCharacterStats()
+{
+	if (!GEngine)
+		return;
+}
+
 void ARushCharacter::ToggleDrawWallCollisionResults()
 {
 	_shouldDrawWallCollisionResults = !_shouldDrawWallCollisionResults;
 }
-#endif //!UE_BUILD_SHIPPING
+
+void ARushCharacter::ToggleDrawCharacterStats()
+{
+	_shouldDrawCharacterStats = !_shouldDrawCharacterStats;
+}
 #pragma endregion
