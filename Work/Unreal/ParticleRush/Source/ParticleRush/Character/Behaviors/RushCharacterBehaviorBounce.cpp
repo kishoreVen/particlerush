@@ -11,7 +11,9 @@ void ARushCharacter::InitializeBehaviorBounce()
 	_timeBeforeRegainingControlFromBounce = -1.0f;
 	_bounceTargetOrientation = FRotator(0.0f, 0.0f, 0.0f);
 
+#if !UE_BUILD_SHIPPING
 	_shouldDrawWallCollisionResults = false;
+#endif //!UE_BUILD_SHIPPING
 }
 
 
@@ -23,11 +25,11 @@ void ARushCharacter::BounceAgainstObstacle(class AActor* OtherActor, const FHitR
 	if (collidedWall == NULL)
 		return;	
 
-	PerformBounce(HitResult.Normal);
+	PerformBounce(HitResult.Normal, collidedWall->GetBounceZOverrideFactor());
 }
 
 
-void ARushCharacter::PerformBounce(FVector HitNormal)
+void ARushCharacter::PerformBounce(FVector HitNormal, float OverrideZImpulseFactor)
 {
 	_timeBeforeRegainingControlFromBounce = RushData.BounceDuration;
 
@@ -35,7 +37,6 @@ void ARushCharacter::PerformBounce(FVector HitNormal)
 	rushHeading.Z = 0.0f;
 
 	FVector normal = HitNormal;
-	float normalZ = normal.Z;
 	normal.Z = 0.0f;
 
 	FVector bounceDirection = ParticleRush::Utilities::GetReflectionVector(rushHeading, normal);
@@ -44,19 +45,19 @@ void ARushCharacter::PerformBounce(FVector HitNormal)
 	_bounceTargetOrientation = bounceDirection.Rotation();
 
 	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetCharacterMovement());
-	float jumpFactor = (movementComponent->Velocity.Size() / movementComponent->MaxWalkSpeed);
-	float bounceFactor = RushData.BounceStrength.DataValue2 * jumpFactor;
-	bounceDirection.Z = jumpFactor * RushData.BounceJumpFactor; //* normalZ;
+	FVector bounceImpulse = bounceDirection * RushData.BounceStrength.GetInterpolatedValue(RushFlags.MomentumPercentage);
 
-	bounceFactor = FMath::Max<float>(bounceFactor, RushData.BounceStrength.DataValue1);
+	bounceImpulse.Z = RushData.BounceJumpStrength.GetInterpolatedValue(RushFlags.MomentumPercentage) * OverrideZImpulseFactor;
 
-	movementComponent->AddImpulse(bounceDirection * bounceFactor, true);
+	movementComponent->AddImpulse(bounceImpulse, true);
 
+#if !UE_BUILD_SHIPPING
 	if (_shouldDrawWallCollisionResults)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, (bounceDirection * bounceFactor).ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, bounceImpulse.ToString());
 		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + bounceDirection * 50.0f, 5.0f, FColor::Red, false, 1.0f);
 	}
+#endif //!UE_BUILD_SHIPPING
 }
 
 
@@ -82,10 +83,4 @@ void ARushCharacter::ExecuteBouncePerTick(float deltaSeconds)
 			Controller->SetControlRotation(interpRotation);
 		}
 	}
-}
-
-
-void ARushCharacter::ToggleDrawWallCollisionResults()
-{
-	_shouldDrawWallCollisionResults = !_shouldDrawWallCollisionResults;
 }

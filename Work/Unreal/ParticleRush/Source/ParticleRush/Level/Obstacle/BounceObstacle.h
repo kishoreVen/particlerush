@@ -11,15 +11,15 @@ class PARTICLERUSH_API ABounceObstacle : public AObstacle
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, Meta = (Category = "Bounce Params"))
-	float BounceJumpFactor;
+	UPROPERTY(EditAnywhere, Meta = (Category = "Bounce Params", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+	float BounceZOverrideFactor;
 
 public:
 	UFUNCTION(BlueprintCallable, Meta = (Category = "Bounce Params"))
-	float GetBounceJumpFactor();
+	float GetBounceZOverrideFactor();
 };
 
-FORCEINLINE float ABounceObstacle::GetBounceJumpFactor()
+FORCEINLINE float ABounceObstacle::GetBounceZOverrideFactor()
 {
-	return BounceJumpFactor;
+	return BounceZOverrideFactor;
 }

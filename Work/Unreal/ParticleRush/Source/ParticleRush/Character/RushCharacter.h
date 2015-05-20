@@ -203,7 +203,7 @@ protected:
 	*/
 	void BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
-	void PerformBounce(FVector HitNormal);
+	void PerformBounce(FVector HitNormal, float OverrideZImpulseFactor);
 
 	void ExecuteBouncePerTick(float deltaSeconds);
 
@@ -267,12 +267,14 @@ public:
 
 
 #pragma region DEBUG
+#if !UE_BUILD_SHIPPING
 	private:
 		bool _shouldDrawWallCollisionResults;
 
 	public:
 		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console ~ ToggleDrawWallCollisionResults"))
 		void ToggleDrawWallCollisionResults();
+#endif //!UE_BUILD_SHIPPING
 #pragma endregion
 };
 

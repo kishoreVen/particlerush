@@ -11,7 +11,9 @@ void ARushCharacter::InitializeBehaviorRefraction()
 	_timeBeforeRegainingControlFromRefraction = -1.0f;
 	_refractTargetOrientation = FRotator(0.0f, 0.0f, 0.0f);
 
+#if !UE_BUILD_SHIPPING
 	_shouldDrawWallCollisionResults = false;
+#endif //!UE_BUILD_SHIPPING
 }
 
 
@@ -51,10 +53,12 @@ void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 		_localRefractionCache->RequestCollisionEnabledToggle(false);
 	}
 
+#if !UE_BUILD_SHIPPING
 	if (_shouldDrawWallCollisionResults)
 	{
 		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + refractDirection * 50.0f, 5.0f, FColor::Red, false, 1.0f);
 	}
+#endif //!UE_BUILD_SHIPPING
 }
 
 

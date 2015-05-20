@@ -15,24 +15,6 @@ struct FRushData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkAcceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkDeceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkGroundFriction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	FRotator WalkRotationRate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	FDataVector2 WalkCameraLagSpeeds;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
 	float JumpMaxHoldTimeForHeight;
@@ -59,10 +41,7 @@ struct FRushData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
 	int32 MaxBoostStages;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
-	FDataVector2 BoostCameraLagSpeeds;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
 	float BounceDuration;
 
@@ -70,13 +49,13 @@ struct FRushData
 	float BounceFactor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
-	float BounceJumpFactor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
 	float BounceOrientationStrength;
 
+	UPROPERTY(EditAnywhere, Meta = (Category = "Bounce"))
+	FStrengthData BounceStrength;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
-	FDataVector2 BounceStrength;
+	FStrengthData BounceJumpStrength;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))

@@ -36,6 +36,7 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	RushNavigationLight->AttachTo(RootComponent);
 #pragma endregion
 
+
 #pragma region Behavior Parameter Setups
 	InitializeBehaviorMovement();
 
@@ -59,7 +60,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	ResetRushTimeScale();
 #pragma endregion
 }
-
 
 #pragma region Base Class Overrides
 void ARushCharacter::BeginPlay()
@@ -255,4 +255,14 @@ void ARushCharacter::ExecuteRushTimeScaleUpdatePerTick(float DeltaSeconds)
 		UGameplayStatics::SetGlobalTimeDilation(world, timeScale);
 	}
 }
+#pragma endregion
+
+
+#pragma region DEBUG METHODS
+#if !UE_BUILD_SHIPPING
+void ARushCharacter::ToggleDrawWallCollisionResults()
+{
+	_shouldDrawWallCollisionResults = !_shouldDrawWallCollisionResults;
+}
+#endif //!UE_BUILD_SHIPPING
 #pragma endregion
