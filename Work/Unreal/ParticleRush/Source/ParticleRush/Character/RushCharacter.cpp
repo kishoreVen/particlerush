@@ -49,10 +49,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	InitializeBehaviorBoost();
 
 	InitializeBehaviorRefraction();
-
-	#pragma region Sharp Turn
-	_sharpTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
-	#pragma endregion
 #pragma endregion
 
 
@@ -67,7 +63,8 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 #pragma endregion
 }
 
-#pragma region Base Class Overrides
+
+#pragma region OVERRIDES
 void ARushCharacter::BeginPlay()
 {
 #pragma region OnBegin Behavior Setup
@@ -112,6 +109,8 @@ void ARushCharacter::Tick(float DeltaTime)
 
 	ExecuteMeshRotationPerTick(DeltaTime);
 
+	ExecuteSharpTurnPerTick(DeltaTime);
+
 	#pragma region DEBUG UPDATE
 	if (_shouldDrawCharacterStats)
 		DrawCharacterStats();
@@ -145,7 +144,7 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 #pragma endregion
 
 
-#pragma region Physics Methods and Callbakcs
+#pragma region PHYSICS
 void ARushCharacter::OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
 	BounceAgainstObstacle(OtherActor, HitResult);
@@ -166,17 +165,6 @@ void ARushCharacter::OnRushActionSphereEndOverlap(class AActor* OtherActor, clas
 #pragma endregion
 
 
-#pragma region Rush Input
-void ARushCharacter::ActivateSharpTurn(float value)
-{
-	if (Controller != NULL && value != 0.0f && _sharpTurnTarget.IsNearlyZero())
-	{
-		_sharpTurnTarget = Controller->GetControlRotation() + FRotator(0.0f, value * 90.0f, 0.0f);
-	}
-}
-#pragma endregion
-
-
 #pragma region CAMERA
 void ARushCharacter::SwitchCamera()
 {
@@ -191,31 +179,6 @@ void ARushCharacter::TurnCameraYaw(float value)
 void ARushCharacter::TurnCameraRoll(float value)
 {
 	RushCameraBoom->TurnCameraRoll(value);
-}
-#pragma endregion
-
-
-#pragma region Rush Behaviors
-void ARushCharacter::ExecuteSharpTurnPerTick(float deltaSeconds)
-{
-	if (_sharpTurnTarget == FRotator(0.0f, 0.0f, 0.0f))
-		return;
-
-	if (Controller != NULL)
-	{
-		FRotator currentControllerRotation = Controller->GetControlRotation();
-		FRotator difference = _sharpTurnTarget - currentControllerRotation;
-
-		if (difference.IsNearlyZero())
-		{
-			_sharpTurnTarget = FRotator(0.0f, 0.0f, 0.0f);
-		}
-		else
-		{
-			FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _sharpTurnTarget, deltaSeconds, RushData.SharpTurnStrength);
-			Controller->SetControlRotation(interpControllerRotation);
-		}
-	}
 }
 #pragma endregion
 

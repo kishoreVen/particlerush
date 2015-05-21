@@ -62,7 +62,7 @@ struct FRushData
 	float SharpTurnStrength;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "SharpTurn"))
-	FDataVector2 SharpTurnCameraLagSpeeds;
+	FStrengthData SharpTurnYawReach;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "HardStop"))
@@ -90,6 +90,8 @@ struct FRushData
 			BounceStrength.UpdateProperties();
 		else if (fieldName == "BounceJumpStrength")
 			BounceJumpStrength.UpdateProperties();
+		else if (fieldName == "SharpTurnYawReach")
+			SharpTurnYawReach.UpdateProperties();
 	}
 };
 

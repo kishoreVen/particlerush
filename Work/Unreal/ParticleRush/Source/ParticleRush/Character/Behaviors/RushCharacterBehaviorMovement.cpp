@@ -46,7 +46,19 @@ void ARushCharacter::ApplyBraking(float value)
 		movementComponent->ApplyBraking(value);
 }
 
-void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
+
+void ARushCharacter::ActivateSharpTurn(float value)
+{
+	if (Controller != NULL && value != 0.0f && _sharpTurnTarget.IsNearlyZero())
+	{
+		FRotator sharpRotator = FRotator::ZeroRotator;
+		sharpRotator.Yaw = value * RushData.SharpTurnYawReach.GetInterpolatedValue(1 - RushFlags.MomentumPercentage);
+		_sharpTurnTarget = Controller->GetControlRotation() + sharpRotator;
+	}
+}
+
+
+void ARushCharacter::ExecuteMeshRotationPerTick(float DeltaTime)
 {
 	USkeletalMeshComponent* mesh = GetMesh();
 
@@ -57,9 +69,29 @@ void ARushCharacter::ExecuteMeshRotationPerTick(float deltaSeconds)
 	FRotator currentMeshRotator = mesh->RelativeRotation;
 	FRotator currentRotator = currentMeshRotator - _defaultMeshRotator;
 
-	FRotator DeltaRotation = FMath::RInterpTo(currentRotator, targetRotator, deltaSeconds, RushData.MeshTurningSpeed);
+	FRotator DeltaRotation = FMath::RInterpTo(currentRotator, targetRotator, DeltaTime, RushData.MeshTurningSpeed);
 	DeltaRotation.Yaw = _defaultMeshRotator.Yaw;
 
 	if (!DeltaRotation.IsNearlyZero())
 		mesh->SetRelativeRotation(DeltaRotation);
+}
+
+
+void ARushCharacter::ExecuteSharpTurnPerTick(float DeltaTime)
+{
+	if (_sharpTurnTarget.IsNearlyZero() || Controller == NULL)
+		return;
+
+	FRotator currentControllerRotation = Controller->GetControlRotation();
+	FRotator difference = _sharpTurnTarget - currentControllerRotation;
+
+	if (difference.IsNearlyZero(0.01f))
+	{
+		_sharpTurnTarget = FRotator::ZeroRotator;
+	}
+	else
+	{
+		FRotator interpControllerRotation = FMath::RInterpTo(currentControllerRotation, _sharpTurnTarget, DeltaTime, RushData.SharpTurnStrength);
+		Controller->SetControlRotation(interpControllerRotation);
+	}
 }

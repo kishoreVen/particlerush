@@ -25,7 +25,7 @@ class PARTICLERUSH_API ARushCharacter : public ACharacter
 	GENERATED_BODY()
 
 
-#pragma region Component Declarations
+#pragma region COMPONENTS
 public:
 	ARushCharacter(const class FObjectInitializer& ObjectInitializer);
 
@@ -44,6 +44,16 @@ protected:
 #pragma endregion
 
 
+#pragma region EXPOSED
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
+	struct FRushData RushData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
+	struct FRushFlags RushFlags;
+#pragma endregion
+
+
 #pragma region OVERRIDES
 protected:
 	virtual void BeginPlay() override;
@@ -58,7 +68,7 @@ protected:
 #pragma endregion
 
 
-#pragma region PHYSICS CALLBACKS
+#pragma region PHYSICS
 	UFUNCTION()
 	void OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
 
@@ -70,36 +80,6 @@ protected:
 #pragma endregion
 
 
-#pragma region INPUT
-protected:
-	/*
-	* Turn 90 degrees to execute sharp turn
-	*/
-	UFUNCTION()
-	void ActivateSharpTurn(float value);
-#pragma endregion
-
-
-#pragma region BEHAVIORS
-#pragma region COMMON
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
-	struct FRushData RushData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
-	struct FRushFlags RushFlags;
-#pragma endregion
-
-#pragma region SHARP TURN
-private:
-	FRotator _sharpTurnTarget;
-
-	void ExecuteSharpTurnPerTick(float deltaSeconds);
-protected:
-#pragma endregion
-#pragma endregion
-
-	
 #pragma region BRAKING
 protected:
 	/*
@@ -116,11 +96,15 @@ private:
 
 	FRotator _defaultMeshRotator;
 
+	FRotator _sharpTurnTarget;
+
 	void InitializeBehaviorMovement();
 
 	void OnBeginPlayBehaviorMovement();
 
 	void ExecuteMeshRotationPerTick(float DeltaTime);
+
+	void ExecuteSharpTurnPerTick(float DeltaTime);
 protected:
 	/* Moves the character forward based on the Actor's world forward vector
 	* Value > 0.0f - Moves forward
@@ -136,6 +120,12 @@ protected:
 	*/
 	UFUNCTION()
 	void TurnRight(float value);
+
+	/*
+	* Turn 90 degrees to execute sharp turn
+	*/
+	UFUNCTION()
+	void ActivateSharpTurn(float value);
 
 public:
 #pragma endregion
@@ -163,8 +153,6 @@ private:
 	float _timeLeftForBoostToEnd;
 
 	float _lastBoostTime;
-
-	int32 _boostChainCounter;
 
 	void InitializeBehaviorBoost();
 
@@ -203,7 +191,7 @@ public:
 #pragma endregion
 
 
-#pragma region REFRACTION
+#pragma region REFRACT
 private:
 	float						_timeBeforeRegainingControlFromRefraction;
 
@@ -254,7 +242,13 @@ public:
 #pragma endregion
 
 
-#pragma region INPUT CONTROL
+#pragma region EVENTS
+public:
+	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
+	virtual void OnBoostStageUp(int32 stage);
+
+	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
+	virtual void OnBoostEnd();
 #pragma endregion
 
 

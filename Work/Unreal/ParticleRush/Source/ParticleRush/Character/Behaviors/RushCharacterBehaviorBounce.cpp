@@ -58,14 +58,14 @@ void ARushCharacter::PerformBounce(FVector HitNormal, float OverrideZImpulseFact
 }
 
 
-void ARushCharacter::ExecuteBouncePerTick(float deltaSeconds)
+void ARushCharacter::ExecuteBouncePerTick(float DeltaTime)
 {
 	if (_timeBeforeRegainingControlFromBounce == -1.0f)
 	{
 		return;
 	}
 
-	_timeBeforeRegainingControlFromBounce -= deltaSeconds;
+	_timeBeforeRegainingControlFromBounce -= DeltaTime;
 
 	if (_timeBeforeRegainingControlFromBounce < 0.0f)
 	{
@@ -76,7 +76,7 @@ void ARushCharacter::ExecuteBouncePerTick(float deltaSeconds)
 	{
 		if (Controller != NULL)
 		{
-			FRotator interpRotation = FMath::RInterpTo(Controller->GetControlRotation(), _bounceTargetOrientation, deltaSeconds, RushData.BounceOrientationStrength);
+			FRotator interpRotation = FMath::RInterpTo(Controller->GetControlRotation(), _bounceTargetOrientation, DeltaTime, RushData.BounceOrientationStrength);
 			Controller->SetControlRotation(interpRotation);
 		}
 	}

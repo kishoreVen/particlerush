@@ -21,6 +21,10 @@ void URushCharacterMovementComponent::PostEditChangeProperty(FPropertyChangedEve
 {
 	if (PropertyChangedEvent.MemberProperty->GetName() == "GroundFrictionBrakingStrength")
 		GroundFrictionBrakingStrength.UpdateProperties();
+	else if (PropertyChangedEvent.MemberProperty->GetName() == "BrakingDecelerationIncreaseStrength")
+		BrakingDecelerationIncreaseStrength.UpdateProperties();
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 
