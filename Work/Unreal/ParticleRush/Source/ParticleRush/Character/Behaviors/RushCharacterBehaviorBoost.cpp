@@ -31,13 +31,13 @@ void ARushCharacter::PerformBoost()
 
 	if (RushFlags.ChainBoostStage > 0)
 	{
-		if (currentBoostTime - _lastBoostTime > RushData.BoostChainResetDuration)
+		if (currentBoostTime - _lastBoostActvationTime > RushData.BoostChainResetDuration)
 		{
 			RushFlags.ChainBoostStage = 0;
 		}
 	}
 
-	_lastBoostTime = currentBoostTime + RushData.BoostDuration;
+	_lastBoostActvationTime = currentBoostTime + RushData.BoostDuration;
 
 	RushFlags.ChainBoostStage = (RushFlags.ChainBoostStage + 1) % RushData.MaxBoostStages;
 	_timeLeftForBoostToEnd = RushData.BoostDuration;
@@ -61,7 +61,7 @@ void ARushCharacter::ExecuteBoostPerTick(float DeltaTime)
 
 		float currentBoostTime = GetWorld()->GetTimeSeconds();
 
-		if (currentBoostTime - _lastBoostTime > RushData.BoostChainResetDuration)
+		if (currentBoostTime - _lastBoostActvationTime > RushData.BoostChainResetDuration)
 		{
 			RushFlags.ChainBoostStage = 0;
 		}

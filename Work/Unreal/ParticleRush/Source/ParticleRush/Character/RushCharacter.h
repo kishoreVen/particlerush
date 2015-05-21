@@ -152,7 +152,7 @@ protected:
 private:
 	float _timeLeftForBoostToEnd;
 
-	float _lastBoostTime;
+	float _lastBoostActvationTime;
 
 	void InitializeBehaviorBoost();
 
