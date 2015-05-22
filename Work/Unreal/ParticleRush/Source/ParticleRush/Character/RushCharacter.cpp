@@ -124,6 +124,11 @@ void ARushCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 {
 	check(InputComponent);
 
+	/* Enable All Degrees of Freedom. 
+	*  TODO: If we have more complicated features that turn on for specific conditions, enable only those.
+	*/
+	SetInputDOFState(EInputDOF::EVERYTHING, true);
+
 	InputComponent->BindAxis("MoveForward", this, &ARushCharacter::MoveForward);
 	InputComponent->BindAxis("TurnRight", this, &ARushCharacter::TurnRight);
 	
@@ -179,6 +184,37 @@ void ARushCharacter::TurnCameraYaw(float value)
 void ARushCharacter::TurnCameraRoll(float value)
 {
 	RushCameraBoom->TurnCameraRoll(value);
+}
+#pragma endregion
+
+
+#pragma region INPUT
+void ARushCharacter::SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, bool enable)
+{
+	int32 requestedMask = (int32)InputDOF;
+	switch (InputDOF)
+	{	
+	case EInputDOF::EVERYTHING:
+		requestedMask = requestedMask - 1;		// We care about every enum before everything ( 2 ^ n - 1)
+		if (enable)
+			_inputDOFMask = requestedMask;		// Requested everything to be turned on
+		else
+			_inputDOFMask = 0;					// Requested everything to be turned off
+		break;
+	default:
+		if (enable)
+			_inputDOFMask |= requestedMask;		// Eg. 1001 | 0010 = 1011 ... 2nd bit was activated i.e EInputDOF::TURN was activated
+		else
+			_inputDOFMask &= (~requestedMask);	// Eg. 1011 & (~0010) = 1011 & (1101) = 1001 ... 2nd bit was activated i.e EInputDOF::TURN was deactivated
+		break;
+	}
+}
+
+bool ARushCharacter::IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF)
+{
+	int32 maskedInput = _inputDOFMask & (int32)InputDOF; // Eg. 1001 & 0010 = 0000 ... 2nd bit is off mean EInputDOF::TURN was deactivated
+
+	return !(maskedInput == 0); // If the result is not 0, the one bit is active, meaning that state is active
 }
 #pragma endregion
 

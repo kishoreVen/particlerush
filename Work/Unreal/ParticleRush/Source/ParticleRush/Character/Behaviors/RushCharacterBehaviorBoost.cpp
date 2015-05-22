@@ -14,11 +14,9 @@ void ARushCharacter::InitializeBehaviorBoost()
 
 void ARushCharacter::ActivateBoost()
 {
-	if (_timeLeftForBoostToEnd > 0.0f)
-		return;
-
-	/* Check conditions to see if boost can be performed */
-	if (RushFlags.MomentumPercentage < 0.4f)
+	if (!IsInputDOFActive(EInputDOF::BOOST) 
+		|| _timeLeftForBoostToEnd > 0.0f 
+		|| RushFlags.MomentumPercentage < RushData.BoostMomentumThreshold)
 		return;
 
 	PerformBoost();

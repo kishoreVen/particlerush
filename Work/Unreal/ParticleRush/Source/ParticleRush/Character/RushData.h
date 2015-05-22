@@ -32,6 +32,9 @@ struct FRushData
 	float BoostChainResetDuration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
+	float BoostMomentumThreshold;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
 	int32 MaxBoostStages;
 
 	

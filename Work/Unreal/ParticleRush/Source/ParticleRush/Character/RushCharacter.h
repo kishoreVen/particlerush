@@ -11,6 +11,7 @@
 
 /* Defines */
 #include "Generic/ParticleRushDefines.h"
+#include "Character/InputDOF.h"
 
 /* Generated Headers */
 #include "RushCharacter.generated.h"
@@ -249,6 +250,22 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
 	virtual void OnBoostEnd();
+#pragma endregion
+
+
+#pragma region INPUT
+private:
+	/* The 32-bit mask in which each bit represents an Input DOF */
+	int32 _inputDOFMask;
+
+public:
+	/* Turns on / off a particular input state, hence disabling or enabling input processing for that particlur DOF */
+	UFUNCTION(Meta = (Category = "Input Masking"))
+	void SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, bool enable);
+
+	/* Returns if the given InputDOF is enabled or disabled */
+	UFUNCTION(Meta = (Category = "Input Masking"))
+	bool IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF);
 #pragma endregion
 
 
