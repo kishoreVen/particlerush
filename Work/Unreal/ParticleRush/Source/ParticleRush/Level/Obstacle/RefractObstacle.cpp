@@ -6,8 +6,11 @@
 
 void ARefractObstacle::RequestCollisionEnabledToggle(bool EnableCollision)
 {
+	static FName NAME_DisableProfile		= COLLISION_OVERLAP_ALL_DYNAMIC;
+	static FName NAME_EnableProfile			= COLLISION_BLOCK_ALL;
+
 	if (!EnableCollision)
-		staticMeshComp->SetCollisionProfileName(COLLISION_OVERLAP_ALL_DYNAMIC);
+		staticMeshComp->SetCollisionProfileName(NAME_DisableProfile);
 	else
-		staticMeshComp->SetCollisionProfileName(COLLISION_BLOCK_ALL);
+		staticMeshComp->SetCollisionProfileName(NAME_EnableProfile);
 }

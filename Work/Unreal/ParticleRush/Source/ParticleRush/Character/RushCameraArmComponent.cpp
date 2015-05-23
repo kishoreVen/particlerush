@@ -138,6 +138,9 @@ void URushCameraArmComponent::RequestCameraStageSwitch(int32 stage)
 
 	_currentCameraSwitchStage = stage;
 
+	if (CameraSwitchTransforms.Num() == 0)
+		return;
+
 	FCameraDataVector requestValue = CameraSwitchTransforms[_currentCameraSwitchStage];
 	_targetTargetArmLength = requestValue.TargetArmLength;
 	_targetTargetArmRotation = requestValue.TargetArmRotation;

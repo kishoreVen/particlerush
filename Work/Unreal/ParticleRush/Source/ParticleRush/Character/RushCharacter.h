@@ -11,6 +11,7 @@
 
 /* Defines */
 #include "Generic/ParticleRushDefines.h"
+#include "Character/InputDOF.h"
 
 /* Generated Headers */
 #include "RushCharacter.generated.h"
@@ -25,7 +26,7 @@ class PARTICLERUSH_API ARushCharacter : public ACharacter
 	GENERATED_BODY()
 
 
-#pragma region Component Declarations
+#pragma region COMPONENTS
 public:
 	ARushCharacter(const class FObjectInitializer& ObjectInitializer);
 
@@ -44,6 +45,16 @@ protected:
 #pragma endregion
 
 
+#pragma region EXPOSED
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
+	struct FRushData RushData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
+	struct FRushFlags RushFlags;
+#pragma endregion
+
+
 #pragma region OVERRIDES
 protected:
 	virtual void BeginPlay() override;
@@ -53,10 +64,12 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
 	virtual void PostInitializeComponents() override;
+
+	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #pragma endregion
 
 
-#pragma region PHYSICS CALLBACKS
+#pragma region PHYSICS
 	UFUNCTION()
 	void OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
 
@@ -68,48 +81,13 @@ protected:
 #pragma endregion
 
 
-#pragma region INPUT
+#pragma region BRAKING
 protected:
 	/*
-	* Turn 90 degrees to execute sharp turn
+	* Intuitive stopping that increase ground friction and braking deceleration
 	*/
 	UFUNCTION()
-	void ActivateSharpTurn(float value);
-
-	/* 
-	* Hard Stop with 180 degree turn 
-	*/
-	UFUNCTION()
-	void ActivateHardStop();
-#pragma endregion
-
-
-#pragma region BEHAVIORS
-#pragma region Common
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
-	struct FRushData RushData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
-	struct FRushFlags RushFlags;
-#pragma endregion
-
-#pragma region Sharp Turn
-private:
-	FRotator _sharpTurnTarget;
-
-	void ExecuteSharpTurnPerTick(float deltaSeconds);
-protected:
-	#pragma endregion
-
-#pragma region HardStop
-private:
-	float _timeLeftForHardStopToEnd;
-
-	FRotator _hardTurnTarget;
-protected:
-	void ExecuteHardStopPerTick(float delatSeconds);
-	#pragma endregion
+	void ApplyBraking(float value);
 #pragma endregion
 
 
@@ -119,11 +97,15 @@ private:
 
 	FRotator _defaultMeshRotator;
 
+	FRotator _sharpTurnTarget;
+
 	void InitializeBehaviorMovement();
 
 	void OnBeginPlayBehaviorMovement();
 
-	void ExecuteMeshRotationPerTick(float deltaSeconds);
+	void ExecuteMeshRotationPerTick(float DeltaTime);
+
+	void ExecuteSharpTurnPerTick(float DeltaTime);
 protected:
 	/* Moves the character forward based on the Actor's world forward vector
 	* Value > 0.0f - Moves forward
@@ -140,6 +122,12 @@ protected:
 	UFUNCTION()
 	void TurnRight(float value);
 
+	/*
+	* Turn 90 degrees to execute sharp turn
+	*/
+	UFUNCTION()
+	void ActivateSharpTurn(float value);
+
 public:
 #pragma endregion
 
@@ -149,17 +137,12 @@ private:
 	void InitializeBehaviorJump();
 
 protected:
-	/* Moves the character forward based on the Actor's world forward vector
-	* Value > 0.0f - Moves forward
-	* Value < 0.0f - Moves Backward
+	/* Start a Jump
 	*/
 	UFUNCTION()
 	void StartJump();
 
-	/*
-	* Turns the character right based on the Turn speed
-	* value > 0.0f - Turns Right
-	* value < 0.0f - Turns Left
+	/* Stop a Jump
 	*/
 	UFUNCTION()
 	void StopJump();
@@ -170,9 +153,7 @@ protected:
 private:
 	float _timeLeftForBoostToEnd;
 
-	float _lastBoostTime;
-
-	int32 _boostChainCounter;
+	float _lastBoostActvationTime;
 
 	void InitializeBehaviorBoost();
 
@@ -201,9 +182,9 @@ protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
+	bool BounceAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
-	void PerformBounce(FVector HitNormal);
+	void PerformBounce(FVector HitNormal, float OverrideZImpulseFactor);
 
 	void ExecuteBouncePerTick(float deltaSeconds);
 
@@ -211,7 +192,7 @@ public:
 #pragma endregion
 
 
-#pragma region REFRACTION
+#pragma region REFRACT
 private:
 	float						_timeBeforeRegainingControlFromRefraction;
 
@@ -224,7 +205,7 @@ protected:
 	/*
 	* Function to perform bounce against the wall
 	*/
-	void RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
+	bool RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult);
 
 	void PerformRefraction(FVector HitNormal, float RefractiveIndex);
 
@@ -262,17 +243,48 @@ public:
 #pragma endregion
 
 
-#pragma region INPUT CONTROL
+#pragma region EVENTS
+public:
+	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
+	virtual void OnBoostStageUp(int32 stage);
+
+	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
+	virtual void OnBoostEnd();
+#pragma endregion
+
+
+#pragma region INPUT
+private:
+	/* The 32-bit mask in which each bit represents an Input DOF */
+	int32 _inputDOFMask;
+
+public:
+	/* Turns on / off a particular input state, hence disabling or enabling input processing for that particlur DOF */
+	UFUNCTION(Meta = (Category = "Input Masking"))
+	void SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, bool enable);
+
+	/* Returns if the given InputDOF is enabled or disabled */
+	UFUNCTION(Meta = (Category = "Input Masking"))
+	bool IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF);
 #pragma endregion
 
 
 #pragma region DEBUG
 	private:
 		bool _shouldDrawWallCollisionResults;
+		bool _shouldDrawCharacterStats;
+
+		void DrawCharacterStats();
+
+	protected:
+		virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) override;
 
 	public:
-		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console ~ ToggleDrawWallCollisionResults"))
+		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Collision"))
 		void ToggleDrawWallCollisionResults();
+
+		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Gameplay"))
+		void ToggleDrawCharacterStats();
 #pragma endregion
 };
 

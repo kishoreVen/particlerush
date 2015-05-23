@@ -10,27 +10,28 @@ void ARushCharacter::InitializeBehaviorRefraction()
 {
 	_timeBeforeRegainingControlFromRefraction = -1.0f;
 	_refractTargetOrientation = FRotator(0.0f, 0.0f, 0.0f);
-
-	_shouldDrawWallCollisionResults = false;
 }
 
 
-void ARushCharacter::RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
+bool ARushCharacter::RefractAgainstObstacle(class AActor* OtherActor, const FHitResult& HitResult)
 {
 	/* Check if Bounce Can happen Here */
 	ARefractObstacle* collidedWall = dynamic_cast<ARefractObstacle*>(OtherActor);
 
 	if (collidedWall == NULL)
-		return;	
+		return false;
 
 	_localRefractionCache = collidedWall;
 
 	PerformRefraction(HitResult.Normal, collidedWall->GetRefractiveIndex());
 
+
 	if (_shouldDrawWallCollisionResults)
 	{
 		DrawDebugDirectionalArrow(GetWorld(), HitResult.Location, HitResult.Location + HitResult.Normal * 50.0f, 5.0f, FColor::Yellow, false, 1.0f);
 	}
+
+	return true;
 }
 
 
@@ -51,6 +52,7 @@ void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 		_localRefractionCache->RequestCollisionEnabledToggle(false);
 	}
 
+
 	if (_shouldDrawWallCollisionResults)
 	{
 		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + refractDirection * 50.0f, 5.0f, FColor::Red, false, 1.0f);
@@ -58,7 +60,7 @@ void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 }
 
 
-void ARushCharacter::ExecuteRefractionPerTick(float deltaSeconds)
+void ARushCharacter::ExecuteRefractionPerTick(float DeltaTime)
 {
 	if (_timeBeforeRegainingControlFromRefraction == -1.0f)
 	{
@@ -74,7 +76,7 @@ void ARushCharacter::ExecuteRefractionPerTick(float deltaSeconds)
 		}
 	}
 
-	_timeBeforeRegainingControlFromRefraction -= deltaSeconds;
+	_timeBeforeRegainingControlFromRefraction -= DeltaTime;
 
 	FRotator currentOrientation = Controller->GetControlRotation();
 
@@ -89,7 +91,7 @@ void ARushCharacter::ExecuteRefractionPerTick(float deltaSeconds)
 	{
 		if (Controller != NULL)
 		{
-			FRotator interpRotation = FMath::RInterpTo(currentOrientation, _refractTargetOrientation, deltaSeconds, RushData.RefractOrientationStrength);
+			FRotator interpRotation = FMath::RInterpTo(currentOrientation, _refractTargetOrientation, DeltaTime, RushData.RefractOrientationStrength);
 			Controller->SetControlRotation(interpRotation);
 		}
 	}

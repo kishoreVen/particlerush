@@ -15,31 +15,6 @@ struct FRushData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkAcceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkDeceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	float WalkGroundFriction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	FRotator WalkRotationRate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Walk"))
-	FDataVector2 WalkCameraLagSpeeds;
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
-	float JumpMaxHoldTimeForHeight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Jumping"))
-	float JumpMaxHeight;
-
 	
 	/* How fast the Mesh should rotate in-order to achieve MeshMaxPitchAngle */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Turning"))
@@ -57,12 +32,12 @@ struct FRushData
 	float BoostChainResetDuration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
-	int32 MaxBoostStages;
+	float BoostMomentumThreshold;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Boost"))
-	FDataVector2 BoostCameraLagSpeeds;
+	int32 MaxBoostStages;
 
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
 	float BounceDuration;
 
@@ -70,13 +45,13 @@ struct FRushData
 	float BounceFactor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
-	float BounceJumpFactor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
 	float BounceOrientationStrength;
 
+	UPROPERTY(EditAnywhere, Meta = (Category = "Bounce"))
+	FStrengthData BounceStrength;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
-	FDataVector2 BounceStrength;
+	FStrengthData BounceJumpStrength;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Bounce"))
@@ -90,7 +65,7 @@ struct FRushData
 	float SharpTurnStrength;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "SharpTurn"))
-	FDataVector2 SharpTurnCameraLagSpeeds;
+	FStrengthData SharpTurnYawReach;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "HardStop"))
@@ -107,6 +82,20 @@ struct FRushData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "HardStop"))
 	FDataVector2 HardStopCameraLagSpeeds;
+
+
+	void UpdateProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+	{
+		UProperty* field = PropertyChangedEvent.PropertyChain.GetTail()->GetPrevNode()->GetValue();
+		FName fieldName = (field != NULL) ? field->GetFName() : NAME_None;
+
+		if (fieldName == "BounceStrength")
+			BounceStrength.UpdateProperties();
+		else if (fieldName == "BounceJumpStrength")
+			BounceJumpStrength.UpdateProperties();
+		else if (fieldName == "SharpTurnYawReach")
+			SharpTurnYawReach.UpdateProperties();
+	}
 };
 
 /* Legend:

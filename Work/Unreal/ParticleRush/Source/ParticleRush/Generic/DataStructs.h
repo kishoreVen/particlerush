@@ -34,6 +34,56 @@ struct FDataVector2
 
 
 /**
+* A 2 float datatype
+*/
+USTRUCT(BlueprintType)
+struct FStrengthData
+{
+	GENERATED_USTRUCT_BODY()
+
+	/* Minimum Strength Value */
+	UPROPERTY(EditAnywhere)
+	float MinValue;
+
+	/* Maximum Strength Value */
+	UPROPERTY(EditAnywhere)
+	float MaxValue;
+	
+	/* Strength Range */
+	UPROPERTY(BlueprintReadOnly)
+	float Range;
+
+	FStrengthData()
+	{
+		MinValue = 0.0f;
+		MaxValue = 0.0f;
+	}
+
+	FStrengthData(float minValue, float maxValue)
+	{
+		MinValue = minValue;
+		MaxValue = maxValue;
+
+		Range = MaxValue - MinValue;
+	}
+
+	/* Returns a value in between Min and Max Value, based on the normalized percentage input */
+	float GetInterpolatedValue(float normalizedValue)
+	{
+			FMath::Clamp(normalizedValue, 0.0f, 1.0f);
+
+			return MinValue + Range * normalizedValue;
+	}
+
+	/* Update Properties and call only PostEditPropertyChange */
+	void UpdateProperties()
+	{
+		Range = MaxValue - MinValue;
+	}
+};
+
+
+/**
  * A 3 float datatype
  */
 USTRUCT(BlueprintType)

@@ -4,13 +4,27 @@
 #include "RushCharacterMovementComponent.h"
 
 /* Custom Headers */
-#include "RushCharacter.h"
+#include "Character/RushCharacter.h"
 
 void URushCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
 	_jumpKeyHoldTime = 0.0f;
+
+	_currentBrakingGroundFriction = GroundFrictionBrakingStrength.MinValue;
+	_currentBrakingDecelerationIncrease = 0.0f;
+}
+
+
+void URushCharacterMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.MemberProperty->GetName() == "GroundFrictionBrakingStrength")
+		GroundFrictionBrakingStrength.UpdateProperties();
+	else if (PropertyChangedEvent.MemberProperty->GetName() == "BrakingDecelerationIncreaseStrength")
+		BrakingDecelerationIncreaseStrength.UpdateProperties();
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 
@@ -36,6 +50,11 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 		BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * boostStage;
 	}
 
+#pragma region STOP UPDATE
+	GroundFriction = _currentBrakingGroundFriction;
+	BrakingDecelerationWalking += _currentBrakingDecelerationIncrease;
+#pragma endregion
+
 #pragma region JUMP UPDATE
 	if (_isJumping && _jumpKeyHoldTime < JumpMaxKeyHoldTime)
 	{
@@ -48,7 +67,10 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 
 #pragma region UPDATE FLAGS
 	float currentVelocity = Velocity.Size();
-	rush->RushFlags.MomentumPercentage = FMath::Clamp(currentVelocity / DefaultMaxSpeed, 0.0f, 1.0f);
+	float currentMomentumPercentage = FMath::Clamp(currentVelocity / DefaultMaxSpeed, 0.0f, 1.0f);
+
+	rush->RushFlags.MomentumDiffPercentage = currentMomentumPercentage - rush->RushFlags.MomentumPercentage;
+	rush->RushFlags.MomentumPercentage = currentMomentumPercentage;
 #pragma endregion
 }
 
@@ -65,4 +87,11 @@ void URushCharacterMovementComponent::StopJump()
 {
 	_isJumping = false;
 	_jumpKeyHoldTime = 0.0f;
+}
+
+
+void URushCharacterMovementComponent::ApplyBraking(float value)
+{
+	_currentBrakingGroundFriction = GroundFrictionBrakingStrength.GetInterpolatedValue(value);
+	_currentBrakingDecelerationIncrease = BrakingDecelerationIncreaseStrength.GetInterpolatedValue(value);
 }

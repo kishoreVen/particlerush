@@ -8,19 +8,18 @@
 
 void ARushCharacter::InitializeBehaviorJump()
 {
-	JumpMaxHoldTime = RushData.JumpMaxHoldTimeForHeight;
 }
 
 
 void ARushCharacter::StartJump()
 {
-	if (CanJump())
-	{
-		URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
-		
-		if (movementComponent != NULL)
-			movementComponent->StartJump();
-	}
+	if (!IsInputDOFActive(EInputDOF::JUMP) || !CanJump())
+		return;
+
+	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
+
+	if (movementComponent != NULL)
+		movementComponent->StartJump();
 }
 
 
