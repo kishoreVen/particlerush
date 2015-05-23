@@ -43,7 +43,7 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 
 	int32 boostStage = rush->RushFlags.ChainBoostStage;
 
-	if (boostStage > 0 && boostStage < rush->RushData.MaxBoostStages)
+	if (boostStage > 0 && boostStage <= rush->RushData.MaxBoostStages)
 	{
 		MaxWalkSpeed = DefaultMaxSpeed + BoostSpeedIncrease * boostStage;
 		MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * boostStage;

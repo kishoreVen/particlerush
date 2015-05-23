@@ -25,19 +25,12 @@ void ARushCharacter::ActivateBoost()
 
 void ARushCharacter::PerformBoost()
 {
+	/* Set the time of activation for boost and offset by the duration for the boost */
 	float currentBoostTime = GetWorld()->GetTimeSeconds();
-
-	if (RushFlags.ChainBoostStage > 0)
-	{
-		if (currentBoostTime - _lastBoostActvationTime > RushData.BoostChainResetDuration)
-		{
-			RushFlags.ChainBoostStage = 0;
-		}
-	}
-
 	_lastBoostActvationTime = currentBoostTime + RushData.BoostDuration;
 
-	RushFlags.ChainBoostStage = (RushFlags.ChainBoostStage + 1) % RushData.MaxBoostStages;
+	
+	RushFlags.ChainBoostStage = FMath::Clamp(RushFlags.ChainBoostStage + 1, 1, RushData.MaxBoostStages);
 	_timeLeftForBoostToEnd = RushData.BoostDuration;
 
 	OnBoostStageUp(RushFlags.ChainBoostStage);
@@ -53,15 +46,18 @@ void ARushCharacter::ExecuteBoostPerTick(float DeltaTime)
 
 	if (_timeLeftForBoostToEnd < 0.0f)
 	{
-		_timeLeftForBoostToEnd = -1.0f;
-
-		OnBoostEnd();
-
-		float currentBoostTime = GetWorld()->GetTimeSeconds();
-
-		if (currentBoostTime - _lastBoostActvationTime > RushData.BoostChainResetDuration)
+		/* Reset Boost stages if boost not activated for more than a certain time */
+		float currentTime = GetWorld()->GetTimeSeconds();
+		if (currentTime - _lastBoostActvationTime > RushData.BoostChainResetDuration)
 		{
 			RushFlags.ChainBoostStage = 0;
+		}
+		
+		/* If Boost End hasn't already been declared, declare it */
+		if (-1.0f != _timeLeftForBoostToEnd)
+		{
+			_timeLeftForBoostToEnd = -1.0f;
+			OnBoostEnd();
 		}
 	}
 }
