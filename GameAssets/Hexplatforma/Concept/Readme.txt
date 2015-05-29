@@ -1,1 +1,0 @@
-Hexplatforma -- Concept Folder
