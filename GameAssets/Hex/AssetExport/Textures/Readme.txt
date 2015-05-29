@@ -1,1 +1,0 @@
-Hex -- Textures Folder For Artist
