@@ -22,7 +22,7 @@ void ARushCharacter::MoveForward(float value)
 		return;
 	
 	FVector actorForward = GetActorForwardVector();
-	AddMovementInput(actorForward, value);	
+	AddMovementInput(actorForward, value);
 }
 
 

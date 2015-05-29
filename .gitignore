@@ -162,7 +162,7 @@ $RECYCLE.BIN/
 
 # Particle Rush Specific Ignore Files
 Local/
-Tools/Binaries/FSG
+Tools/Binaries/AFG
 *.sln
 Work/Maya/
 *.pdb
