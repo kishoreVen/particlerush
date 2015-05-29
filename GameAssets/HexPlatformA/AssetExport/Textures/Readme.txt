@@ -1,0 +1,1 @@
+HexPlatformA -- Textures Folder For Artist

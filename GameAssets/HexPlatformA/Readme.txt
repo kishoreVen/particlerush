@@ -1,0 +1,1 @@
+HexPlatformA -- Main Asset Folder
