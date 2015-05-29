@@ -63,7 +63,7 @@ namespace AssetFolderGenerator
             string assetCategory        = AssetCategory.Text;
             string assetFriendlyName    = AssetName.Text;
 
-            if ("" != username && "" != password && "" != assetCategory && "" != assetFriendlyName)
+            if ("" == username || "" == password || "" == assetCategory || "" == assetFriendlyName)
                 return;
 
             Tuple<string, string> assetTuple = CamelCaseWord(assetFriendlyName);
@@ -74,6 +74,8 @@ namespace AssetFolderGenerator
             mGitManager.PushChangesToRepository(username, password);
 
             UpdateAssetUI(LIST_ALL);
+
+            AssetNames.Text = "";
         }
 
         private void AssetFolderGeneratorForm_Load(object sender, EventArgs e)
@@ -98,6 +100,10 @@ namespace AssetFolderGenerator
 
             string selectedCategory = AssetCategories.Items[AssetCategories.SelectedIndex].ToString();
             mPreviousSelectedCategory = AssetCategories.SelectedIndex;
+
+            if(selectedCategory != LIST_ALL)
+                AssetCategory.Text = selectedCategory;
+
             UpdateAssetUI(selectedCategory);
         }
 
@@ -155,6 +161,9 @@ namespace AssetFolderGenerator
             }
 
             AssetCategories.SetSelected(index, true);
+
+            AssetCategories.Focus();
+            AssetNames.Focus();
         }
 
         private void Sync(string username, string password)
