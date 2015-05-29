@@ -1,1 +1,0 @@
-Hex -- Main Asset Folder
