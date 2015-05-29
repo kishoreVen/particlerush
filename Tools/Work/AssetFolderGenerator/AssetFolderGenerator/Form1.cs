@@ -75,7 +75,7 @@ namespace AssetFolderGenerator
 
             UpdateAssetUI(LIST_ALL);
 
-            AssetNames.Text = "";
+            AssetName.Text = "";
         }
 
         private void AssetFolderGeneratorForm_Load(object sender, EventArgs e)
