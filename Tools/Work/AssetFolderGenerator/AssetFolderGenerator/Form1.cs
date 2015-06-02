@@ -20,8 +20,10 @@ namespace AssetFolderGenerator
         private ConfigurationManager    mConfigurationManager;
         private AssetManager            mAssetManager;
         private GitManager              mGitManager;
+        private AssetTypeManager        mAssetTypeManager;
         private int                     mPreviousSelectedCategory;
         private int                     mPreviousSelectedAsset;
+        private int                     mPreviousSelectedAssetType;
         #endregion
 
         #region CONSTRUCTOR
@@ -32,9 +34,11 @@ namespace AssetFolderGenerator
             mConfigurationManager       = new ConfigurationManager();
             mGitManager                 = new GitManager();
             mAssetManager               = new AssetManager(mConfigurationManager, mGitManager);
+            mAssetTypeManager           = new AssetTypeManager(mConfigurationManager, mGitManager);
 
             mPreviousSelectedCategory   = -1;
             mPreviousSelectedAsset      = -1;
+            mPreviousSelectedAssetType  = 0;
         }
         #endregion
 
@@ -91,6 +95,7 @@ namespace AssetFolderGenerator
 
             // Set to 0, to Select All
             UpdateAssetUI(LIST_ALL);
+            UpdateAssetTypeUI();
         }
 
         private void AssetCategories_SelectedIndexChanged(object sender, EventArgs e)
@@ -115,6 +120,14 @@ namespace AssetFolderGenerator
             mPreviousSelectedAsset = AssetNames.SelectedIndex;
         }
 
+        private void AssetTypes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mPreviousSelectedAssetType == AssetTypes.SelectedIndex)
+                return;
+
+            mPreviousSelectedAssetType = AssetTypes.SelectedIndex;
+        }
+
         private void AssetNames_KeyDown(object sender, KeyEventArgs e)
         {
             if (mPreviousSelectedAsset < 0 || mPreviousSelectedAsset >= AssetNames.Items.Count)
@@ -128,6 +141,24 @@ namespace AssetFolderGenerator
                 mAssetManager.ShowArtAssetInExplorer(selectedAsset);
             else if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.R)
                 DeleteSelectedAsset(selectedAsset);
+        }
+
+        private void AssetTypes_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.N)
+            {
+                mAssetTypeManager.AddAssetType();
+                mPreviousSelectedAssetType = 0;
+                UpdateAssetTypeUI();
+            }
+            else if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.R)
+            {
+                if (mPreviousSelectedAssetType < 0 || mPreviousSelectedAssetType >= AssetTypes.Items.Count)
+                    return;
+
+                string selectedAssetType = AssetTypes.Items[mPreviousSelectedAssetType].ToString();
+                mAssetTypeManager.RemoveAssetType(selectedAssetType);
+            }
         }
         #endregion
 
@@ -166,6 +197,26 @@ namespace AssetFolderGenerator
             AssetNames.Focus();
         }
 
+        private void UpdateAssetTypeUI()
+        {
+            AssetTypes.Items.Clear();
+
+            List<AssetTypeData> assetTypeList = mAssetTypeManager.AssetTypeList;
+
+            foreach (AssetTypeData assetType in assetTypeList)
+            {
+                AssetTypes.Items.Add(assetType.assetTypeFriendlyName);
+            }
+
+            if(assetTypeList.Count != 0)
+            {
+                mPreviousSelectedAssetType = System.Math.Max(0, System.Math.Min(mPreviousSelectedAssetType, assetTypeList.Count - 1));
+                AssetTypes.SetSelected(mPreviousSelectedAssetType, true);
+
+                AssetTypes.Focus();
+            }
+        }
+
         private void Sync(string username, string password)
         {
             if ("" != username && "" != password)
@@ -174,6 +225,8 @@ namespace AssetFolderGenerator
                 mGitManager.SyncRepository(username, password);
 
                 UpdateAssetUI(LIST_ALL);
+
+                UpdateAssetTypeUI();
             }
         }
 

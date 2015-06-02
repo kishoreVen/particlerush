@@ -28,12 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AssetFolderGeneratorForm));
             this.AssetListLabel = new System.Windows.Forms.Label();
-            this.AssetListSpliter = new System.Windows.Forms.SplitContainer();
             this.AssetCategories = new System.Windows.Forms.ListBox();
             this.AssetNames = new System.Windows.Forms.ListBox();
-            this.MiscellaneousContainer = new System.Windows.Forms.SplitContainer();
+            this.AssetLabel = new System.Windows.Forms.Label();
+            this.CategoryLabel = new System.Windows.Forms.Label();
+            this.AssetName = new System.Windows.Forms.TextBox();
+            this.GenerateBtn = new System.Windows.Forms.Button();
+            this.AssetCategory = new System.Windows.Forms.TextBox();
+            this.AssetGenerationLabel = new System.Windows.Forms.Label();
             this.PasswordLabel = new System.Windows.Forms.Label();
             this.UsernameLabel = new System.Windows.Forms.Label();
             this.SyncBtn = new System.Windows.Forms.Button();
@@ -41,21 +46,26 @@
             this.GitPassword = new System.Windows.Forms.TextBox();
             this.GitUsername = new System.Windows.Forms.TextBox();
             this.GitCredentialsLabel = new System.Windows.Forms.Label();
-            this.AssetLabel = new System.Windows.Forms.Label();
-            this.CategoryLabel = new System.Windows.Forms.Label();
-            this.AssetName = new System.Windows.Forms.TextBox();
-            this.GenerateBtn = new System.Windows.Forms.Button();
-            this.AssetCategory = new System.Windows.Forms.TextBox();
-            this.AssetGenerationLabel = new System.Windows.Forms.Label();
             this.ControlsLabel = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.AssetListSpliter)).BeginInit();
-            this.AssetListSpliter.Panel1.SuspendLayout();
-            this.AssetListSpliter.Panel2.SuspendLayout();
-            this.AssetListSpliter.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MiscellaneousContainer)).BeginInit();
-            this.MiscellaneousContainer.Panel1.SuspendLayout();
-            this.MiscellaneousContainer.Panel2.SuspendLayout();
-            this.MiscellaneousContainer.SuspendLayout();
+            this.SelectionPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.AssetTypes = new System.Windows.Forms.ListBox();
+            this.MiscOperationsPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.GitCredentialsPanel = new System.Windows.Forms.Panel();
+            this.AssetGenerationPanel = new System.Windows.Forms.Panel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.AssetGeneratedName = new System.Windows.Forms.Button();
+            this.maskedTextBox1 = new System.Windows.Forms.MaskedTextBox();
+            this.AssetNumber = new System.Windows.Forms.NumericUpDown();
+            this.NumberLabel = new System.Windows.Forms.Label();
+            this.NameSuffix = new System.Windows.Forms.Label();
+            this.NameGenerationLabel = new System.Windows.Forms.Label();
+            this.NameGenerationToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.SelectionPanel.SuspendLayout();
+            this.MiscOperationsPanel.SuspendLayout();
+            this.GitCredentialsPanel.SuspendLayout();
+            this.AssetGenerationPanel.SuspendLayout();
+            this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.AssetNumber)).BeginInit();
             this.SuspendLayout();
             // 
             // AssetListLabel
@@ -68,32 +78,16 @@
             this.AssetListLabel.TabIndex = 1;
             this.AssetListLabel.Text = "Asset List: ";
             // 
-            // AssetListSpliter
-            // 
-            this.AssetListSpliter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.AssetListSpliter.Location = new System.Drawing.Point(15, 40);
-            this.AssetListSpliter.Name = "AssetListSpliter";
-            // 
-            // AssetListSpliter.Panel1
-            // 
-            this.AssetListSpliter.Panel1.Controls.Add(this.AssetCategories);
-            // 
-            // AssetListSpliter.Panel2
-            // 
-            this.AssetListSpliter.Panel2.Controls.Add(this.AssetNames);
-            this.AssetListSpliter.Size = new System.Drawing.Size(590, 300);
-            this.AssetListSpliter.SplitterDistance = 295;
-            this.AssetListSpliter.TabIndex = 2;
-            // 
             // AssetCategories
             // 
             this.AssetCategories.BackColor = System.Drawing.SystemColors.ActiveBorder;
             this.AssetCategories.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.AssetCategories.FormattingEnabled = true;
             this.AssetCategories.ItemHeight = 15;
-            this.AssetCategories.Location = new System.Drawing.Point(3, 4);
+            this.AssetCategories.Location = new System.Drawing.Point(10, 10);
+            this.AssetCategories.Margin = new System.Windows.Forms.Padding(5);
             this.AssetCategories.Name = "AssetCategories";
-            this.AssetCategories.Size = new System.Drawing.Size(287, 300);
+            this.AssetCategories.Size = new System.Drawing.Size(283, 285);
             this.AssetCategories.TabIndex = 0;
             this.AssetCategories.SelectedIndexChanged += new System.EventHandler(this.AssetCategories_SelectedIndexChanged);
             // 
@@ -103,98 +97,13 @@
             this.AssetNames.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.AssetNames.FormattingEnabled = true;
             this.AssetNames.ItemHeight = 15;
-            this.AssetNames.Location = new System.Drawing.Point(3, 5);
+            this.AssetNames.Location = new System.Drawing.Point(303, 10);
+            this.AssetNames.Margin = new System.Windows.Forms.Padding(5);
             this.AssetNames.Name = "AssetNames";
             this.AssetNames.Size = new System.Drawing.Size(283, 285);
             this.AssetNames.TabIndex = 0;
             this.AssetNames.SelectedIndexChanged += new System.EventHandler(this.AssetNames_SelectedIndexChanged);
             this.AssetNames.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AssetNames_KeyDown);
-            // 
-            // MiscellaneousContainer
-            // 
-            this.MiscellaneousContainer.Location = new System.Drawing.Point(15, 351);
-            this.MiscellaneousContainer.Name = "MiscellaneousContainer";
-            // 
-            // MiscellaneousContainer.Panel1
-            // 
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.PasswordLabel);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.UsernameLabel);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.SyncBtn);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.GitUrlLabel);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.GitPassword);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.GitUsername);
-            this.MiscellaneousContainer.Panel1.Controls.Add(this.GitCredentialsLabel);
-            // 
-            // MiscellaneousContainer.Panel2
-            // 
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.AssetLabel);
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.CategoryLabel);
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.AssetName);
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.GenerateBtn);
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.AssetCategory);
-            this.MiscellaneousContainer.Panel2.Controls.Add(this.AssetGenerationLabel);
-            this.MiscellaneousContainer.Size = new System.Drawing.Size(590, 100);
-            this.MiscellaneousContainer.SplitterDistance = 295;
-            this.MiscellaneousContainer.TabIndex = 8;
-            // 
-            // PasswordLabel
-            // 
-            this.PasswordLabel.AutoSize = true;
-            this.PasswordLabel.Location = new System.Drawing.Point(4, 71);
-            this.PasswordLabel.Name = "PasswordLabel";
-            this.PasswordLabel.Size = new System.Drawing.Size(34, 15);
-            this.PasswordLabel.TabIndex = 6;
-            this.PasswordLabel.Text = "Pass:";
-            // 
-            // UsernameLabel
-            // 
-            this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(4, 44);
-            this.UsernameLabel.Name = "UsernameLabel";
-            this.UsernameLabel.Size = new System.Drawing.Size(21, 15);
-            this.UsernameLabel.TabIndex = 5;
-            this.UsernameLabel.Text = "Id:";
-            // 
-            // SyncBtn
-            // 
-            this.SyncBtn.Location = new System.Drawing.Point(216, 38);
-            this.SyncBtn.Name = "SyncBtn";
-            this.SyncBtn.Size = new System.Drawing.Size(75, 53);
-            this.SyncBtn.TabIndex = 4;
-            this.SyncBtn.Text = "Sync";
-            this.SyncBtn.UseVisualStyleBackColor = true;
-            this.SyncBtn.Click += new System.EventHandler(this.SyncBtn_Click);
-            // 
-            // GitUrlLabel
-            // 
-            this.GitUrlLabel.Location = new System.Drawing.Point(100, 7);
-            this.GitUrlLabel.Name = "GitUrlLabel";
-            this.GitUrlLabel.Size = new System.Drawing.Size(185, 15);
-            this.GitUrlLabel.TabIndex = 3;
-            // 
-            // GitPassword
-            // 
-            this.GitPassword.Location = new System.Drawing.Point(47, 68);
-            this.GitPassword.Name = "GitPassword";
-            this.GitPassword.Size = new System.Drawing.Size(163, 23);
-            this.GitPassword.TabIndex = 2;
-            this.GitPassword.UseSystemPasswordChar = true;
-            // 
-            // GitUsername
-            // 
-            this.GitUsername.Location = new System.Drawing.Point(47, 39);
-            this.GitUsername.Name = "GitUsername";
-            this.GitUsername.Size = new System.Drawing.Size(163, 23);
-            this.GitUsername.TabIndex = 1;
-            // 
-            // GitCredentialsLabel
-            // 
-            this.GitCredentialsLabel.AutoSize = true;
-            this.GitCredentialsLabel.Location = new System.Drawing.Point(8, 7);
-            this.GitCredentialsLabel.Name = "GitCredentialsLabel";
-            this.GitCredentialsLabel.Size = new System.Drawing.Size(92, 15);
-            this.GitCredentialsLabel.TabIndex = 0;
-            this.GitCredentialsLabel.Text = "Git Credentials:";
             // 
             // AssetLabel
             // 
@@ -223,7 +132,7 @@
             // 
             // GenerateBtn
             // 
-            this.GenerateBtn.Location = new System.Drawing.Point(207, 39);
+            this.GenerateBtn.Location = new System.Drawing.Point(201, 38);
             this.GenerateBtn.Name = "GenerateBtn";
             this.GenerateBtn.Size = new System.Drawing.Size(80, 57);
             this.GenerateBtn.TabIndex = 2;
@@ -247,6 +156,65 @@
             this.AssetGenerationLabel.TabIndex = 0;
             this.AssetGenerationLabel.Text = "Asset Generation:";
             // 
+            // PasswordLabel
+            // 
+            this.PasswordLabel.AutoSize = true;
+            this.PasswordLabel.Location = new System.Drawing.Point(4, 71);
+            this.PasswordLabel.Name = "PasswordLabel";
+            this.PasswordLabel.Size = new System.Drawing.Size(34, 15);
+            this.PasswordLabel.TabIndex = 6;
+            this.PasswordLabel.Text = "Pass:";
+            // 
+            // UsernameLabel
+            // 
+            this.UsernameLabel.AutoSize = true;
+            this.UsernameLabel.Location = new System.Drawing.Point(4, 44);
+            this.UsernameLabel.Name = "UsernameLabel";
+            this.UsernameLabel.Size = new System.Drawing.Size(21, 15);
+            this.UsernameLabel.TabIndex = 5;
+            this.UsernameLabel.Text = "Id:";
+            // 
+            // SyncBtn
+            // 
+            this.SyncBtn.Location = new System.Drawing.Point(213, 38);
+            this.SyncBtn.Name = "SyncBtn";
+            this.SyncBtn.Size = new System.Drawing.Size(63, 53);
+            this.SyncBtn.TabIndex = 4;
+            this.SyncBtn.Text = "Sync";
+            this.SyncBtn.UseVisualStyleBackColor = true;
+            this.SyncBtn.Click += new System.EventHandler(this.SyncBtn_Click);
+            // 
+            // GitUrlLabel
+            // 
+            this.GitUrlLabel.Location = new System.Drawing.Point(100, 7);
+            this.GitUrlLabel.Name = "GitUrlLabel";
+            this.GitUrlLabel.Size = new System.Drawing.Size(176, 15);
+            this.GitUrlLabel.TabIndex = 3;
+            // 
+            // GitPassword
+            // 
+            this.GitPassword.Location = new System.Drawing.Point(47, 68);
+            this.GitPassword.Name = "GitPassword";
+            this.GitPassword.Size = new System.Drawing.Size(163, 23);
+            this.GitPassword.TabIndex = 2;
+            this.GitPassword.UseSystemPasswordChar = true;
+            // 
+            // GitUsername
+            // 
+            this.GitUsername.Location = new System.Drawing.Point(47, 39);
+            this.GitUsername.Name = "GitUsername";
+            this.GitUsername.Size = new System.Drawing.Size(163, 23);
+            this.GitUsername.TabIndex = 1;
+            // 
+            // GitCredentialsLabel
+            // 
+            this.GitCredentialsLabel.AutoSize = true;
+            this.GitCredentialsLabel.Location = new System.Drawing.Point(8, 7);
+            this.GitCredentialsLabel.Name = "GitCredentialsLabel";
+            this.GitCredentialsLabel.Size = new System.Drawing.Size(92, 15);
+            this.GitCredentialsLabel.TabIndex = 0;
+            this.GitCredentialsLabel.Text = "Git Credentials:";
+            // 
             // ControlsLabel
             // 
             this.ControlsLabel.AutoSize = true;
@@ -256,31 +224,187 @@
             this.ControlsLabel.TabIndex = 9;
             this.ControlsLabel.Text = "(Q - Show Art Folder, W - Show Unreal Folder, Del / R - Delete Asset)";
             // 
+            // SelectionPanel
+            // 
+            this.SelectionPanel.AutoScroll = true;
+            this.SelectionPanel.AutoScrollMinSize = new System.Drawing.Size(640, 250);
+            this.SelectionPanel.AutoSize = true;
+            this.SelectionPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.SelectionPanel.Controls.Add(this.AssetCategories);
+            this.SelectionPanel.Controls.Add(this.AssetNames);
+            this.SelectionPanel.Controls.Add(this.AssetTypes);
+            this.SelectionPanel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.SelectionPanel.Location = new System.Drawing.Point(15, 40);
+            this.SelectionPanel.Margin = new System.Windows.Forms.Padding(5);
+            this.SelectionPanel.Name = "SelectionPanel";
+            this.SelectionPanel.Padding = new System.Windows.Forms.Padding(5);
+            this.SelectionPanel.Size = new System.Drawing.Size(887, 305);
+            this.SelectionPanel.TabIndex = 10;
+            // 
+            // AssetTypes
+            // 
+            this.AssetTypes.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.AssetTypes.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.AssetTypes.FormattingEnabled = true;
+            this.AssetTypes.ItemHeight = 15;
+            this.AssetTypes.Location = new System.Drawing.Point(594, 8);
+            this.AssetTypes.Name = "AssetTypes";
+            this.AssetTypes.Size = new System.Drawing.Size(283, 285);
+            this.AssetTypes.TabIndex = 1;
+            this.AssetTypes.SelectedIndexChanged += new System.EventHandler(this.AssetTypes_SelectedIndexChanged);
+            this.AssetTypes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AssetTypes_KeyDown);
+            // 
+            // MiscOperationsPanel
+            // 
+            this.MiscOperationsPanel.AutoScroll = true;
+            this.MiscOperationsPanel.AutoScrollMinSize = new System.Drawing.Size(640, 85);
+            this.MiscOperationsPanel.AutoSize = true;
+            this.MiscOperationsPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.MiscOperationsPanel.Controls.Add(this.GitCredentialsPanel);
+            this.MiscOperationsPanel.Controls.Add(this.AssetGenerationPanel);
+            this.MiscOperationsPanel.Controls.Add(this.panel1);
+            this.MiscOperationsPanel.Location = new System.Drawing.Point(15, 350);
+            this.MiscOperationsPanel.Margin = new System.Windows.Forms.Padding(5);
+            this.MiscOperationsPanel.Name = "MiscOperationsPanel";
+            this.MiscOperationsPanel.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.MiscOperationsPanel.Size = new System.Drawing.Size(887, 107);
+            this.MiscOperationsPanel.TabIndex = 11;
+            // 
+            // GitCredentialsPanel
+            // 
+            this.GitCredentialsPanel.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.GitCredentialsPanel.Controls.Add(this.PasswordLabel);
+            this.GitCredentialsPanel.Controls.Add(this.UsernameLabel);
+            this.GitCredentialsPanel.Controls.Add(this.SyncBtn);
+            this.GitCredentialsPanel.Controls.Add(this.GitUrlLabel);
+            this.GitCredentialsPanel.Controls.Add(this.GitPassword);
+            this.GitCredentialsPanel.Controls.Add(this.GitUsername);
+            this.GitCredentialsPanel.Controls.Add(this.GitCredentialsLabel);
+            this.GitCredentialsPanel.Location = new System.Drawing.Point(8, 3);
+            this.GitCredentialsPanel.Name = "GitCredentialsPanel";
+            this.GitCredentialsPanel.Size = new System.Drawing.Size(285, 100);
+            this.GitCredentialsPanel.TabIndex = 0;
+            // 
+            // AssetGenerationPanel
+            // 
+            this.AssetGenerationPanel.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.AssetGenerationPanel.Controls.Add(this.AssetLabel);
+            this.AssetGenerationPanel.Controls.Add(this.CategoryLabel);
+            this.AssetGenerationPanel.Controls.Add(this.AssetName);
+            this.AssetGenerationPanel.Controls.Add(this.GenerateBtn);
+            this.AssetGenerationPanel.Controls.Add(this.AssetCategory);
+            this.AssetGenerationPanel.Controls.Add(this.AssetGenerationLabel);
+            this.AssetGenerationPanel.Location = new System.Drawing.Point(299, 3);
+            this.AssetGenerationPanel.Name = "AssetGenerationPanel";
+            this.AssetGenerationPanel.Size = new System.Drawing.Size(285, 100);
+            this.AssetGenerationPanel.TabIndex = 1;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.panel1.Controls.Add(this.AssetGeneratedName);
+            this.panel1.Controls.Add(this.maskedTextBox1);
+            this.panel1.Controls.Add(this.AssetNumber);
+            this.panel1.Controls.Add(this.NumberLabel);
+            this.panel1.Controls.Add(this.NameSuffix);
+            this.panel1.Controls.Add(this.NameGenerationLabel);
+            this.panel1.Location = new System.Drawing.Point(590, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(285, 100);
+            this.panel1.TabIndex = 2;
+            // 
+            // AssetGeneratedName
+            // 
+            this.AssetGeneratedName.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.AssetGeneratedName.Enabled = false;
+            this.AssetGeneratedName.Location = new System.Drawing.Point(10, 67);
+            this.AssetGeneratedName.Name = "AssetGeneratedName";
+            this.AssetGeneratedName.Size = new System.Drawing.Size(266, 23);
+            this.AssetGeneratedName.TabIndex = 6;
+            this.AssetGeneratedName.UseVisualStyleBackColor = false;
+            // 
+            // maskedTextBox1
+            // 
+            this.maskedTextBox1.AsciiOnly = true;
+            this.maskedTextBox1.Location = new System.Drawing.Point(50, 36);
+            this.maskedTextBox1.Name = "maskedTextBox1";
+            this.maskedTextBox1.Size = new System.Drawing.Size(100, 23);
+            this.maskedTextBox1.TabIndex = 5;
+            // 
+            // AssetNumber
+            // 
+            this.AssetNumber.Location = new System.Drawing.Point(219, 38);
+            this.AssetNumber.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.AssetNumber.Name = "AssetNumber";
+            this.AssetNumber.Size = new System.Drawing.Size(57, 23);
+            this.AssetNumber.TabIndex = 3;
+            this.AssetNumber.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // NumberLabel
+            // 
+            this.NumberLabel.AutoSize = true;
+            this.NumberLabel.Location = new System.Drawing.Point(158, 42);
+            this.NumberLabel.Name = "NumberLabel";
+            this.NumberLabel.Size = new System.Drawing.Size(57, 15);
+            this.NumberLabel.TabIndex = 2;
+            this.NumberLabel.Text = "Number:";
+            // 
+            // NameSuffix
+            // 
+            this.NameSuffix.AutoSize = true;
+            this.NameSuffix.Location = new System.Drawing.Point(7, 42);
+            this.NameSuffix.Name = "NameSuffix";
+            this.NameSuffix.Size = new System.Drawing.Size(41, 15);
+            this.NameSuffix.TabIndex = 1;
+            this.NameSuffix.Text = "Suffix:";
+            // 
+            // NameGenerationLabel
+            // 
+            this.NameGenerationLabel.AutoSize = true;
+            this.NameGenerationLabel.Location = new System.Drawing.Point(7, 7);
+            this.NameGenerationLabel.Name = "NameGenerationLabel";
+            this.NameGenerationLabel.Size = new System.Drawing.Size(109, 15);
+            this.NameGenerationLabel.TabIndex = 0;
+            this.NameGenerationLabel.Text = "Name Generation:";
+            // 
+            // NameGenerationToolTip
+            // 
+            this.NameGenerationToolTip.IsBalloon = true;
+            this.NameGenerationToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.NameGenerationToolTip.ToolTipTitle = "Name Generation";
+            // 
             // AssetFolderGeneratorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.ClientSize = new System.Drawing.Size(624, 459);
+            this.ClientSize = new System.Drawing.Size(910, 459);
+            this.Controls.Add(this.MiscOperationsPanel);
+            this.Controls.Add(this.SelectionPanel);
             this.Controls.Add(this.ControlsLabel);
-            this.Controls.Add(this.MiscellaneousContainer);
-            this.Controls.Add(this.AssetListSpliter);
             this.Controls.Add(this.AssetListLabel);
             this.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AssetFolderGeneratorForm";
             this.Text = "Asset Folder Generator";
             this.Load += new System.EventHandler(this.AssetFolderGeneratorForm_Load);
-            this.AssetListSpliter.Panel1.ResumeLayout(false);
-            this.AssetListSpliter.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.AssetListSpliter)).EndInit();
-            this.AssetListSpliter.ResumeLayout(false);
-            this.MiscellaneousContainer.Panel1.ResumeLayout(false);
-            this.MiscellaneousContainer.Panel1.PerformLayout();
-            this.MiscellaneousContainer.Panel2.ResumeLayout(false);
-            this.MiscellaneousContainer.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MiscellaneousContainer)).EndInit();
-            this.MiscellaneousContainer.ResumeLayout(false);
+            this.SelectionPanel.ResumeLayout(false);
+            this.MiscOperationsPanel.ResumeLayout(false);
+            this.GitCredentialsPanel.ResumeLayout(false);
+            this.GitCredentialsPanel.PerformLayout();
+            this.AssetGenerationPanel.ResumeLayout(false);
+            this.AssetGenerationPanel.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.AssetNumber)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -288,11 +412,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Label AssetListLabel;
-        private System.Windows.Forms.SplitContainer AssetListSpliter;
+        private System.Windows.Forms.Label AssetListLabel;        
         private System.Windows.Forms.ListBox AssetCategories;
         private System.Windows.Forms.ListBox AssetNames;
-        private System.Windows.Forms.SplitContainer MiscellaneousContainer;
         private System.Windows.Forms.TextBox GitPassword;
         private System.Windows.Forms.TextBox GitUsername;
         private System.Windows.Forms.Label GitCredentialsLabel;
@@ -307,6 +429,19 @@
         private System.Windows.Forms.Label AssetLabel;
         private System.Windows.Forms.Label CategoryLabel;
         private System.Windows.Forms.Label ControlsLabel;
+        private System.Windows.Forms.FlowLayoutPanel SelectionPanel;
+        private System.Windows.Forms.ListBox AssetTypes;
+        private System.Windows.Forms.FlowLayoutPanel MiscOperationsPanel;
+        private System.Windows.Forms.Panel GitCredentialsPanel;
+        private System.Windows.Forms.Panel AssetGenerationPanel;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label NameGenerationLabel;
+        private System.Windows.Forms.Label NumberLabel;
+        private System.Windows.Forms.Label NameSuffix;
+        private System.Windows.Forms.NumericUpDown AssetNumber;
+        private System.Windows.Forms.MaskedTextBox maskedTextBox1;
+        private System.Windows.Forms.ToolTip NameGenerationToolTip;
+        private System.Windows.Forms.Button AssetGeneratedName;
     }
 }
 
