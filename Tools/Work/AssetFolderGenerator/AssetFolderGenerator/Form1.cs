@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Word;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,16 +16,17 @@ namespace AssetFolderGenerator
     {
         #region CONST
         private const string LIST_ALL = "All";
+        private static object _oEndOfDoc = "\\endofdoc";
         #endregion
 
         #region FIELDS
-        private ConfigurationManager    mConfigurationManager;
-        private AssetManager            mAssetManager;
-        private GitManager              mGitManager;
-        private AssetTypeManager        mAssetTypeManager;
-        private int                     mPreviousSelectedCategory;
-        private int                     mPreviousSelectedAsset;
-        private int                     mPreviousSelectedAssetType;
+        private ConfigurationManager                                    mConfigurationManager;
+        private AssetManager                                            mAssetManager;
+        private GitManager                                              mGitManager;
+        private AssetTypeManager                                        mAssetTypeManager;
+        private int                                                     mPreviousSelectedCategory;
+        private int                                                     mPreviousSelectedAsset;
+        private int                                                     mPreviousSelectedAssetType;
         #endregion
 
         #region CONSTRUCTOR
@@ -98,6 +101,10 @@ namespace AssetFolderGenerator
             UpdateAssetTypeUI();
         }
 
+        private void AssetFolderGeneratorForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+        }
+
         private void AssetCategories_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mPreviousSelectedCategory == AssetCategories.SelectedIndex)
@@ -110,6 +117,7 @@ namespace AssetFolderGenerator
                 AssetCategory.Text = selectedCategory;
 
             UpdateAssetUI(selectedCategory);
+            BuildAssetName();
         }
 
         private void AssetNames_SelectedIndexChanged(object sender, EventArgs e)
@@ -118,14 +126,28 @@ namespace AssetFolderGenerator
                 return;
 
             mPreviousSelectedAsset = AssetNames.SelectedIndex;
+
+            BuildAssetName();
         }
 
         private void AssetTypes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (mPreviousSelectedAssetType == AssetTypes.SelectedIndex)
+            if (mPreviousSelectedAssetType == AssetTypes.SelectedIndex || AssetTypes.SelectedIndex == -1)
                 return;
 
             mPreviousSelectedAssetType = AssetTypes.SelectedIndex;
+
+            BuildAssetName();
+        }
+
+        private void AssetSuffix_TextChanged(object sender, EventArgs e)
+        {
+            BuildAssetName();
+        }
+
+        private void AssetNumber_ValueChanged(object sender, EventArgs e)
+        {
+            BuildAssetName();
         }
 
         private void AssetNames_KeyDown(object sender, KeyEventArgs e)
@@ -159,6 +181,24 @@ namespace AssetFolderGenerator
                 string selectedAssetType = AssetTypes.Items[mPreviousSelectedAssetType].ToString();
                 mAssetTypeManager.RemoveAssetType(selectedAssetType);
             }
+        }
+
+        private void AssetSuffix_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                string text = AssetSuffix.Text;
+
+                if("" != text)
+                {
+                    AssetSuffix.Text = CheckSpelling(text);
+                }
+            }
+        }
+
+        private void AssetGeneratedName_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.Clipboard.SetText(AssetGeneratedName.Text);
         }
         #endregion
 
@@ -279,6 +319,79 @@ namespace AssetFolderGenerator
             //Clamp previous selected category to be 0 or max - 1
             int selectedCategoryIndex = System.Math.Max(0, System.Math.Min(mPreviousSelectedCategory, AssetCategories.Items.Count - 1));
             UpdateAssetUI(AssetCategories.Items[selectedCategoryIndex].ToString());
+        }
+
+        private void BuildAssetName()
+        {
+            string assetname = "";
+            bool isComplete = true;
+
+            if(AssetTypes.SelectedIndex != -1)
+            {
+                string selectedAssetType = AssetTypes.Items[AssetTypes.SelectedIndex].ToString();
+                AssetTypeData selectedAsset = mAssetTypeManager.GetAsset(selectedAssetType);
+
+                if(selectedAsset != null)
+                    assetname += selectedAsset.assetTypePrefix;
+                else
+                    isComplete = false;
+            }
+            else
+            {
+                if (AssetTypes.Items.Count != 0 && mPreviousSelectedAssetType < AssetTypes.Items.Count)
+                {
+                    string selectedAssetType = AssetTypes.Items[mPreviousSelectedAssetType].ToString();
+                    AssetTypeData selectedAsset = mAssetTypeManager.GetAsset(selectedAssetType);
+
+                    if (selectedAsset != null)
+                        assetname += selectedAsset.assetTypePrefix;
+                    else
+                        isComplete = false;
+                }
+                else
+                    isComplete = false;
+            }
+
+            if (AssetNames.SelectedIndex != -1)
+                assetname += "_" + AssetNames.Items[AssetNames.SelectedIndex].ToString();
+            else
+                isComplete = false;
+
+            if (AssetSuffix.Text != "")
+                assetname += "_" + AssetSuffix.Text;
+
+            if ((int)AssetNumber.Value != 0)
+                assetname += "_" + AssetNumber.Value.ToString();
+
+            AssetGeneratedName.Text = assetname;
+            AssetGeneratedName.Enabled = isComplete;
+        }
+
+        public string CheckSpelling(string inText)
+        {
+            int errors = 0;
+            Microsoft.Office.Interop.Word.Application mWordApp = new Microsoft.Office.Interop.Word.Application { Visible = false }; ;
+            Document mWordDoc = mWordApp.Documents.Add();
+            mWordApp.ActiveWindow.SetFocus();
+
+            mWordDoc.Words.First.InsertBefore(inText);
+            Microsoft.Office.Interop.Word.ProofreadingErrors spellErrorsColl = mWordDoc.SpellingErrors;
+            errors = spellErrorsColl.Count;
+
+            object optional = Missing.Value;
+
+            mWordDoc.CheckSpelling(
+                ref optional, ref optional, ref optional, ref optional, ref optional, ref optional,
+                ref optional, ref optional, ref optional, ref optional, ref optional, ref optional);
+
+            object first = 0;
+            object last = mWordDoc.Characters.Count - 1;
+            string outText = mWordDoc.Range(ref first, ref last).Text;
+
+            mWordDoc.Close(WdSaveOptions.wdDoNotSaveChanges, WdOriginalFormat.wdOriginalDocumentFormat, optional);
+            mWordApp.Quit();
+
+            return outText;
         }
         #endregion
     }

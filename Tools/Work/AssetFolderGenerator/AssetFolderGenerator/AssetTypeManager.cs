@@ -24,7 +24,7 @@ namespace AssetFolderGenerator
             set;
         }
 
-        [JsonProperty(PropertyName = "assetTag")]
+        [JsonProperty(PropertyName = "assetPrefix")]
         public string assetTypePrefix
         {
             get;
@@ -34,6 +34,11 @@ namespace AssetFolderGenerator
         public int CompareTo(AssetTypeData other)
         {
             return this.assetTypeName.CompareTo(other.assetTypeName);
+        }
+
+        public static int CompareByFriendlyNames(AssetTypeData a, AssetTypeData b)
+        {
+            return a.assetTypeFriendlyName.CompareTo(b.assetTypeFriendlyName);
         }
     }
 
@@ -152,7 +157,7 @@ namespace AssetFolderGenerator
                     newAssetData.assetTypePrefix = assetTypePrefix;
 
                     mAssetTypeList.Add(newAssetData);
-                    mAssetTypeList.Sort();
+                    mAssetTypeList.Sort(AssetTypeData.CompareByFriendlyNames);
 
                     string assetJson = JsonConvert.SerializeObject(mAssetTypeList);
                     File.WriteAllText(assetMetaFileLocation, assetJson);

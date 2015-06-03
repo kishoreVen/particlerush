@@ -54,7 +54,7 @@
             this.AssetGenerationPanel = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.AssetGeneratedName = new System.Windows.Forms.Button();
-            this.maskedTextBox1 = new System.Windows.Forms.MaskedTextBox();
+            this.AssetSuffix = new System.Windows.Forms.MaskedTextBox();
             this.AssetNumber = new System.Windows.Forms.NumericUpDown();
             this.NumberLabel = new System.Windows.Forms.Label();
             this.NameSuffix = new System.Windows.Forms.Label();
@@ -303,7 +303,7 @@
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ActiveBorder;
             this.panel1.Controls.Add(this.AssetGeneratedName);
-            this.panel1.Controls.Add(this.maskedTextBox1);
+            this.panel1.Controls.Add(this.AssetSuffix);
             this.panel1.Controls.Add(this.AssetNumber);
             this.panel1.Controls.Add(this.NumberLabel);
             this.panel1.Controls.Add(this.NameSuffix);
@@ -322,14 +322,17 @@
             this.AssetGeneratedName.Size = new System.Drawing.Size(266, 23);
             this.AssetGeneratedName.TabIndex = 6;
             this.AssetGeneratedName.UseVisualStyleBackColor = false;
+            this.AssetGeneratedName.Click += new System.EventHandler(this.AssetGeneratedName_Click);
             // 
-            // maskedTextBox1
+            // AssetSuffix
             // 
-            this.maskedTextBox1.AsciiOnly = true;
-            this.maskedTextBox1.Location = new System.Drawing.Point(50, 36);
-            this.maskedTextBox1.Name = "maskedTextBox1";
-            this.maskedTextBox1.Size = new System.Drawing.Size(100, 23);
-            this.maskedTextBox1.TabIndex = 5;
+            this.AssetSuffix.AsciiOnly = true;
+            this.AssetSuffix.Location = new System.Drawing.Point(50, 36);
+            this.AssetSuffix.Name = "AssetSuffix";
+            this.AssetSuffix.Size = new System.Drawing.Size(100, 23);
+            this.AssetSuffix.TabIndex = 5;
+            this.AssetSuffix.TextChanged += new System.EventHandler(this.AssetSuffix_TextChanged);
+            this.AssetSuffix.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AssetSuffix_KeyDown);
             // 
             // AssetNumber
             // 
@@ -342,11 +345,7 @@
             this.AssetNumber.Name = "AssetNumber";
             this.AssetNumber.Size = new System.Drawing.Size(57, 23);
             this.AssetNumber.TabIndex = 3;
-            this.AssetNumber.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.AssetNumber.ValueChanged += new System.EventHandler(this.AssetNumber_ValueChanged);
             // 
             // NumberLabel
             // 
@@ -395,6 +394,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AssetFolderGeneratorForm";
             this.Text = "Asset Folder Generator";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.AssetFolderGeneratorForm_FormClosed);
             this.Load += new System.EventHandler(this.AssetFolderGeneratorForm_Load);
             this.SelectionPanel.ResumeLayout(false);
             this.MiscOperationsPanel.ResumeLayout(false);
@@ -439,7 +439,7 @@
         private System.Windows.Forms.Label NumberLabel;
         private System.Windows.Forms.Label NameSuffix;
         private System.Windows.Forms.NumericUpDown AssetNumber;
-        private System.Windows.Forms.MaskedTextBox maskedTextBox1;
+        private System.Windows.Forms.MaskedTextBox AssetSuffix;
         private System.Windows.Forms.ToolTip NameGenerationToolTip;
         private System.Windows.Forms.Button AssetGeneratedName;
     }
