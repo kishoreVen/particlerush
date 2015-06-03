@@ -220,9 +220,10 @@
             this.ControlsLabel.AutoSize = true;
             this.ControlsLabel.Location = new System.Drawing.Point(89, 15);
             this.ControlsLabel.Name = "ControlsLabel";
-            this.ControlsLabel.Size = new System.Drawing.Size(379, 15);
+            this.ControlsLabel.Size = new System.Drawing.Size(519, 15);
             this.ControlsLabel.TabIndex = 9;
-            this.ControlsLabel.Text = "(Q - Show Art Folder, W - Show Unreal Folder, Del / R - Delete Asset)";
+            this.ControlsLabel.Text = "(Q - Show Art Folder, W - Show Unreal Folder, Del / R - Delete Asset, Enter - Suf" +
+    "fix Spell Check)";
             // 
             // SelectionPanel
             // 
