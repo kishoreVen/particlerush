@@ -42,12 +42,12 @@ void ARushCharacter::PerformBounce(FVector HitNormal, float OverrideZImpulseFact
 
 	_bounceTargetOrientation = bounceDirection.Rotation();
 
-	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetCharacterMovement());
+	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
 	FVector bounceImpulse = bounceDirection * RushData.BounceStrength.GetInterpolatedValue(RushFlags.MomentumPercentage);
 
 	bounceImpulse.Z = RushData.BounceJumpStrength.GetInterpolatedValue(RushFlags.MomentumPercentage) * OverrideZImpulseFactor;
 
-	movementComponent->AddImpulse(bounceImpulse, true);
+	//movementComponent->AddImpulse(bounceImpulse, true);
 
 
 	if (_shouldDrawWallCollisionResults)

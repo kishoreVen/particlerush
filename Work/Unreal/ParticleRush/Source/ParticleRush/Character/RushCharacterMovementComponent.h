@@ -3,10 +3,10 @@
 #pragma once
 
 /* Engine Headers */
-#include "GameFramework/CharacterMovementComponent.h"
 
 /* Custom Headers */
 #include "Generic/DataStructs.h"
+#include "CustomComponents/HoverMovementComponent.h"
 
 /* Generated Headers */
 #include "RushCharacterMovementComponent.generated.h"
@@ -17,7 +17,7 @@
  * Movement Component for Rush Character
  */
 UCLASS()
-class PARTICLERUSH_API URushCharacterMovementComponent : public UCharacterMovementComponent
+class PARTICLERUSH_API URushCharacterMovementComponent : public UHoverMovementComponent
 {
 	GENERATED_BODY()
 	
@@ -34,7 +34,7 @@ protected:
 
 
 #pragma region Movement States Setup - Walk
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Wallk"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))
 	float DefaultMaxSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))

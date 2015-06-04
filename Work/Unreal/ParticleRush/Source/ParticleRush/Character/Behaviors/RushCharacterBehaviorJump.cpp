@@ -13,20 +13,16 @@ void ARushCharacter::InitializeBehaviorJump()
 
 void ARushCharacter::StartJump()
 {
-	if (!IsInputDOFActive(EInputDOF::JUMP) || !CanJump())
+	if (!IsInputDOFActive(EInputDOF::JUMP))
 		return;
 
-	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
-
-	if (movementComponent != NULL)
-		movementComponent->StartJump();
+	if (RushMovementComponent != NULL && RushMovementComponent->IsMovingOnGround())
+		RushMovementComponent->StartJump();
 }
 
 
 void ARushCharacter::StopJump()
 {
-	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
-
-	if (movementComponent != NULL && movementComponent->IsFalling())
-		movementComponent->StopJump();
+	if (RushMovementComponent != NULL && RushMovementComponent->IsFalling())
+		RushMovementComponent->StopJump();
 }

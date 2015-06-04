@@ -37,29 +37,28 @@ void URushCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevel
 	if (rush == NULL)
 		return;
 
-	MaxWalkSpeed = DefaultMaxSpeed;
-	MaxAcceleration = DefaultMaxAcceleration;
-	BrakingDecelerationWalking = DefaultDeceleration;
+	MaxSpeed		= DefaultMaxSpeed;
+	Acceleration	= DefaultMaxAcceleration;
+	Deceleration	= DefaultDeceleration;
 
 	int32 boostStage = rush->RushFlags.ChainBoostStage;
-
 	if (boostStage > 0 && boostStage <= rush->RushData.MaxBoostStages)
 	{
-		MaxWalkSpeed = DefaultMaxSpeed + BoostSpeedIncrease * boostStage;
-		MaxAcceleration = DefaultMaxAcceleration + BoostAccelerationIncrease * boostStage;
-		BrakingDecelerationWalking = DefaultDeceleration - BoostDecelerationDecrease * boostStage;
+		MaxSpeed		= DefaultMaxSpeed + BoostSpeedIncrease * boostStage;
+		Acceleration	= DefaultMaxAcceleration + BoostAccelerationIncrease * boostStage;
+		Deceleration	= DefaultDeceleration - BoostDecelerationDecrease * boostStage;
 	}
 
 #pragma region STOP UPDATE
-	GroundFriction = _currentBrakingGroundFriction;
-	BrakingDecelerationWalking += _currentBrakingDecelerationIncrease;
+	HoverFriction	= _currentBrakingGroundFriction;
+	Deceleration	+= _currentBrakingDecelerationIncrease;
 #pragma endregion
 
 #pragma region JUMP UPDATE
 	if (_isJumping && _jumpKeyHoldTime < JumpMaxKeyHoldTime)
 	{
-		_jumpKeyHoldTime += DeltaTime;
-		Velocity.Z = JumpZVelocity;
+		_jumpKeyHoldTime	+= DeltaTime;
+		Velocity.Z			= JumpZVelocity;
 	}
 	else
 		_isJumping = false;
@@ -79,7 +78,6 @@ void URushCharacterMovementComponent::StartJump()
 {
 	_isJumping = true;
 	_jumpKeyHoldTime = 0.0f;
-	SetMovementMode(MOVE_Falling);
 }
 
 
