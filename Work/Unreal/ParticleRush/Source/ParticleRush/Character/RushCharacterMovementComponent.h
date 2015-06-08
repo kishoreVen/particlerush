@@ -34,7 +34,7 @@ protected:
 
 
 #pragma region Movement States Setup - Walk
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Wallk"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))
 	float DefaultMaxSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Movement Params - Walk"))
