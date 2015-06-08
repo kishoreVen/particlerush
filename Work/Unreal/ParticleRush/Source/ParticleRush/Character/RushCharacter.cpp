@@ -66,8 +66,6 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	RushSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RushSkeletalMesh"));
 	if (RushSkeletalMesh)
 	{
-		RushSkeletalMesh->AlwaysLoadOnClient				= true;
-		RushSkeletalMesh->AlwaysLoadOnServer				= true;
 		RushSkeletalMesh->bOwnerNoSee						= false;
 		RushSkeletalMesh->MeshComponentUpdateFlag			= EMeshComponentUpdateFlag::AlwaysTickPose;
 		RushSkeletalMesh->bCastDynamicShadow				= true;
@@ -76,7 +74,7 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 		RushSkeletalMesh->bChartDistanceFactor				= true;
 		RushSkeletalMesh->bGenerateOverlapEvents			= false;
 		RushSkeletalMesh->bCanEverAffectNavigation			= false;
-
+		
 		RushSkeletalMesh->AttachParent = SphereCollision;
 
 		static FName CollisionProfileName(TEXT("CharacterMesh"));

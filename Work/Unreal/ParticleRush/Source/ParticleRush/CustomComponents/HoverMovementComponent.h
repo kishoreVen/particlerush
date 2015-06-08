@@ -5,6 +5,22 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "HoverMovementComponent.generated.h"
 
+
+#pragma region CUSTOM DATA STRUCTURES
+/* Movement mode for hovering component*/
+UENUM()
+namespace EHoverMode
+{
+	enum Type
+	{
+		Falling,
+		Rising,
+		Hovering
+	};
+}
+#pragma endregion
+
+
 /**
  * Custom movement component for object that hover, i.e fly and react to gravity
  */
@@ -21,7 +37,14 @@ protected:
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
+public:
 	virtual float GetMaxSpeed() const override;
+
+	virtual bool IsMovingOnGround() const override;
+			
+	virtual bool IsFalling() const override;
+
+	virtual bool IsRising() const;
 #pragma endregion
 	
 
@@ -49,11 +72,21 @@ protected:
 	UPROPERTY(EditAnywhere, Meta = (Category = "Gravity"))
 	float MaxHoverForce;
 
+	/* Threshold That will determine if the actor is falling or rising or settling in hover height */
+	UPROPERTY(EditAnywhere, Meta = (Category = "Gravity"))
+	float ForceThreshold;
+
 	UPROPERTY(EditAnywhere, Meta = (Category = "Gravity"))
 	float HoverHeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Gravity"))
 	float CurrentSurfaceDistance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Gravity"))
+	float CurrentAppliedHoverForce;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Movement"))
+	TEnumAsByte<EHoverMode::Type> MovementMode;
 
 	UPROPERTY(EditAnywhere, Meta = (Category = "Jump"))
 	float JumpZVelocity;
@@ -130,5 +163,21 @@ FORCEINLINE FRotator UHoverMovementComponent::GetDeltaRotationRate(float DeltaTi
 FORCEINLINE float UHoverMovementComponent::GetHoverForce(const float SurfaceDistance)
 {
 	return FMath::Max(0.0f, mHoverForceFallingCoffiecient * SurfaceDistance + mHoverForceFallingOffset);
+}
+
+FORCEINLINE bool UHoverMovementComponent::IsMovingOnGround() const
+{
+	return MovementMode == EHoverMode::Hovering;
+}
+
+FORCEINLINE bool UHoverMovementComponent::IsFalling() const
+{
+	return MovementMode == EHoverMode::Falling;
+}
+
+
+FORCEINLINE bool UHoverMovementComponent::IsRising() const
+{
+	return MovementMode == EHoverMode::Rising;
 }
 #pragma endregion
