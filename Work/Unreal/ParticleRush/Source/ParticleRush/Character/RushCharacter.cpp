@@ -12,87 +12,36 @@
 
 
 ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
+: Super(ObjectInitializer.SetDefaultSubobjectClass<URushCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	#pragma region COMPONENT
-	// Create Collision Component
-	SphereCollision = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("CollisionSphere"));
-	if (SphereCollision)
-	{
-		SphereCollision->InitSphereRadius(48.0f);
-
-		SphereCollision->CanCharacterStepUpOn			= ECB_No;
-		SphereCollision->bShouldUpdatePhysicsVolume		= true;
-		SphereCollision->bCheckAsyncSceneOnMove			= false;
-		SphereCollision->bCanEverAffectNavigation		= false;
-
-		RootComponent = SphereCollision;
-
-		static FName CollisionProfileName(TEXT("Pawn"));
-		SphereCollision->SetCollisionProfileName(CollisionProfileName);
-
-		//Set Callbacks
-		SphereCollision->OnComponentHit.AddDynamic(this, &ARushCharacter::OnCapsuleCollision);
-	}
+#pragma region Component Definitions
+	// Create Capsule Component
+	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
+	capsuleComponent->InitCapsuleSize(34.0f, 48.0f);
+	capsuleComponent->OnComponentHit.AddDynamic(this, &ARushCharacter::OnCapsuleCollision);
 
 	// Create a spring arm component
 	RushCameraBoom = ObjectInitializer.CreateDefaultSubobject<URushCameraArmComponent>(this, TEXT("RushCameraBoom"));
-	if (RushCameraBoom)
-	{
-		RushCameraBoom->AttachParent = SphereCollision;
-	}
+	RushCameraBoom->AttachTo(capsuleComponent);	
 	
 	// Create camera component 
 	RushCamera = ObjectInitializer.CreateDefaultSubobject<URushCameraComponent>(this, TEXT("RushCamera"));
-	if (RushCamera)
-	{
-		RushCamera->AttachTo(RushCameraBoom, USpringArmComponent::SocketName);
-		RushCamera->bUsePawnControlRotation = false;
-	}
+	RushCamera->AttachTo(RushCameraBoom, USpringArmComponent::SocketName);
+	RushCamera->bUsePawnControlRotation = false;
 
-	// Controller Setup
-	bUseControllerRotationYaw	= true;
-	bUseControllerRotationRoll	= false;
-	bUseControllerRotationPitch = false;
+	// Create action sphere component
+	RushActionSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RushActionSphere"));
+	RushActionSphere->AttachTo(RootComponent);
+	RushActionSphere->OnComponentBeginOverlap.AddDynamic(this, &ARushCharacter::OnRushActionSphereBeginOverlap);
+	RushActionSphere->OnComponentEndOverlap.AddDynamic(this, &ARushCharacter::OnRushActionSphereEndOverlap);
 
 	// Create Point Light Component
 	RushNavigationLight = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, TEXT("RushNavigationLight"));
-	if (RushNavigationLight)
-	{
-		RushNavigationLight->AttachParent = RootComponent;
-	}
-
-	// Mesh creation
-	RushSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RushSkeletalMesh"));
-	if (RushSkeletalMesh)
-	{
-		RushSkeletalMesh->AlwaysLoadOnClient				= true;
-		RushSkeletalMesh->AlwaysLoadOnServer				= true;
-		RushSkeletalMesh->bOwnerNoSee						= false;
-		RushSkeletalMesh->MeshComponentUpdateFlag			= EMeshComponentUpdateFlag::AlwaysTickPose;
-		RushSkeletalMesh->bCastDynamicShadow				= true;
-		RushSkeletalMesh->bAffectDynamicIndirectLighting	= true;
-		RushSkeletalMesh->PrimaryComponentTick.TickGroup	= TG_PrePhysics;
-		RushSkeletalMesh->bChartDistanceFactor				= true;
-		RushSkeletalMesh->bGenerateOverlapEvents			= false;
-		RushSkeletalMesh->bCanEverAffectNavigation			= false;
-
-		RushSkeletalMesh->AttachParent = SphereCollision;
-
-		static FName CollisionProfileName(TEXT("CharacterMesh"));
-		RushSkeletalMesh->SetCollisionProfileName(CollisionProfileName);
-	}
-
-	// Setup Movement Component
-	RushMovementComponent = ObjectInitializer.CreateDefaultSubobject<URushCharacterMovementComponent>(this, TEXT("RushMovementComponent"));
-	if (RushMovementComponent)
-	{
-		RushMovementComponent->UpdatedComponent = SphereCollision;
-	}
-	#pragma endregion
+	RushNavigationLight->AttachTo(RootComponent);
+#pragma endregion
 
 
-	#pragma region BEHAVIOR INITIALIZE
+#pragma region Behavior Parameter Setups
 	InitializeBehaviorMovement();
 
 	InitializeBehaviorBounce();
@@ -100,27 +49,19 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 	InitializeBehaviorBoost();
 
 	InitializeBehaviorRefraction();
-	#pragma endregion
+#pragma endregion
 
 
-	#pragma region DEBUG SETUP
+#pragma region DEBUG SETUP
 	_shouldDrawCharacterStats = false;
 	_shouldDrawWallCollisionResults = false;
-	#pragma endregion
-}
-
-
-#pragma region EXPOSED
-USkeletalMeshComponent* ARushCharacter::GetMesh() const
-{
-	return RushSkeletalMesh;
-}
-
-URushCharacterMovementComponent* ARushCharacter::GetRushMovementComponent() const
-{
-	return RushMovementComponent;
-}
 #pragma endregion
+
+
+#pragma region Rush Action Sphere Timer Management
+	ResetRushTimeScale();
+#pragma endregion
+}
 
 
 #pragma region OVERRIDES
@@ -215,6 +156,17 @@ void ARushCharacter::OnCapsuleCollision(class AActor* OtherActor, class UPrimiti
 
 	RefractAgainstObstacle(OtherActor, HitResult);
 }
+
+void ARushCharacter::OnRushActionSphereBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+void ARushCharacter::OnRushActionSphereEndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+#pragma region Has Collision with Wall Ended?
+
+#pragma endregion
+}
 #pragma endregion
 
 
@@ -263,6 +215,38 @@ bool ARushCharacter::IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF)
 	int32 maskedInput = _inputDOFMask & (int32)InputDOF; // Eg. 1001 & 0010 = 0000 ... 2nd bit is off mean EInputDOF::TURN was deactivated
 
 	return !(maskedInput == 0); // If the result is not 0, the one bit is active, meaning that state is active
+}
+#pragma endregion
+
+
+#pragma region Rush Action Sphere Timer Management
+void ARushCharacter::SetRushTargetTimeScale(float timeScale)
+{
+	_targetRushTimeScale = timeScale;
+}
+
+void ARushCharacter::ResetRushTimeScale()
+{
+	_targetRushTimeScale = 1.0f;
+}
+
+void ARushCharacter::ExecuteRushTimeScaleUpdatePerTick(float DeltaSeconds)
+{
+	if (_targetRushTimeScale == -1.0f)
+		return;
+
+	UWorld* world = GetWorld();
+	if (world != NULL)
+	{
+		float timeScale = FMath::FInterpTo(UGameplayStatics::GetGlobalTimeDilation(world), _targetRushTimeScale, DeltaSeconds, 8.0f);
+
+		if (timeScale == _targetRushTimeScale)
+		{
+			_targetRushTimeScale = -1.0f;
+		}
+
+		UGameplayStatics::SetGlobalTimeDilation(world, timeScale);
+	}
 }
 #pragma endregion
 

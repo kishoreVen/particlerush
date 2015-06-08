@@ -12,8 +12,7 @@ void ARushCharacter::InitializeBehaviorMovement()
 
 void ARushCharacter::OnBeginPlayBehaviorMovement()
 {
-	if (RushSkeletalMesh != NULL)
-		_defaultMeshRotator = RushSkeletalMesh->RelativeRotation;
+	_defaultMeshRotator = GetMesh()->RelativeRotation;
 }
 
 
@@ -70,18 +69,20 @@ void ARushCharacter::ActivateSharpTurn(float value)
 
 void ARushCharacter::ExecuteMeshRotationPerTick(float DeltaTime)
 {
-	if (RushSkeletalMesh == NULL)
+	USkeletalMeshComponent* mesh = GetMesh();
+
+	if (mesh == NULL)
 		return;
 
 	FRotator targetRotator(0.0f, 0.0f, _targetMeshTurningRollAngle);
-	FRotator currentMeshRotator = RushSkeletalMesh->RelativeRotation;
+	FRotator currentMeshRotator = mesh->RelativeRotation;
 	FRotator currentRotator = currentMeshRotator - _defaultMeshRotator;
 
 	FRotator DeltaRotation = FMath::RInterpTo(currentRotator, targetRotator, DeltaTime, RushData.MeshTurningSpeed);
 	DeltaRotation.Yaw = _defaultMeshRotator.Yaw;
 
 	if (!DeltaRotation.IsNearlyZero())
-		RushSkeletalMesh->SetRelativeRotation(DeltaRotation);
+		mesh->SetRelativeRotation(DeltaRotation);
 }
 
 

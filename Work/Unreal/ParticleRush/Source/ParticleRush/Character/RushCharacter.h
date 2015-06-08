@@ -3,7 +3,7 @@
 #pragma once
 
 /* Engine Headers */
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 
 /* Custom Headers */
 #include "RushData.h"
@@ -21,7 +21,7 @@
  * The gameplay class for the main character "Rush"
  */
 UCLASS(Blueprintable)
-class PARTICLERUSH_API ARushCharacter : public APawn
+class PARTICLERUSH_API ARushCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -31,20 +31,14 @@ public:
 	ARushCharacter(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
-	class USkeletalMeshComponent* RushSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Collision"))
-	class USphereComponent* SphereCollision;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Collision"))
-	class URushCharacterMovementComponent* RushMovementComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Camera"))
 	class URushCameraArmComponent* RushCameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Camera"))
-	class URushCameraComponent* RushCamera;	
+	class URushCameraComponent* RushCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Action"))
+	class USphereComponent* RushActionSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Lighting"))
 	class UPointLightComponent* RushNavigationLight;
@@ -58,12 +52,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Rush Exposed Data"))
 	struct FRushFlags RushFlags;
-
-	UFUNCTION(Meta = (Category = "Mesh"))
-	class USkeletalMeshComponent* GetMesh() const;
-
-	UFUNCTION(Meta = (Category = "Movement"))
-	class URushCharacterMovementComponent* GetRushMovementComponent() const;
 #pragma endregion
 
 
@@ -84,6 +72,12 @@ protected:
 #pragma region PHYSICS
 	UFUNCTION()
 	void OnCapsuleCollision(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
+
+	UFUNCTION()
+	void OnRushActionSphereBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnRushActionSphereEndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
 
 
@@ -230,6 +224,22 @@ public:
 
 	UFUNCTION()
 	void TurnCameraRoll(float value);
+#pragma endregion
+
+
+#pragma region TIMER
+private:
+	float _targetRushTimeScale;
+
+	void SetRushTargetTimeScale(float timeScale);
+
+	void ResetRushTimeScale();
+
+	void ExecuteRushTimeScaleUpdatePerTick(float DeltaSeconds);
+
+protected:
+
+public:
 #pragma endregion
 
 
