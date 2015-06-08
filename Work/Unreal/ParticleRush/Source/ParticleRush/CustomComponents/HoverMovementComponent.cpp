@@ -6,11 +6,8 @@
 
 
 UHoverMovementComponent::UHoverMovementComponent(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
 {
 	mGravityDir = -FVector::UpVector;
-
-	MovementMode = EHoverMode::Hovering;
 
 	ResetMoveState();
 }
@@ -133,7 +130,8 @@ void UHoverMovementComponent::ApplyLinearInput(float DeltaTime)
 			{
 				speedToApply = FMath::Max(currentSpeed - FMath::Abs(Deceleration) * DeltaTime, 0.f);
 			}
-			Velocity = Velocity.GetSafeNormal() *speedToApply;
+
+			Velocity = Velocity.GetSafeNormal() * speedToApply;
 		}
 	}
 
@@ -157,17 +155,9 @@ FVector UHoverMovementComponent::ResolveHoverForces(const FVector& InitialVeloci
 	float hoverForce = (CurrentSurfaceDistance < 0.0f) ? 0.0f : GetHoverForce(CurrentSurfaceDistance);
 
 	/* Net Acceleration = G - F*/
-	CurrentAppliedHoverForce = (GravityForce - hoverForce) * DeltaTime;
-	FVector netAccelerationPerDeltaTime = mGravityDir * CurrentAppliedHoverForce;
+	FVector netAcceleration = mGravityDir * (GravityForce - hoverForce);
 
-	Result += netAccelerationPerDeltaTime;
-
-	if (CurrentAppliedHoverForce > ForceThreshold)
-		MovementMode = EHoverMode::Falling;
-	else if (CurrentAppliedHoverForce < -ForceThreshold)
-		MovementMode = EHoverMode::Rising;
-	else
-		MovementMode = EHoverMode::Hovering;
+	Result += netAcceleration * DeltaTime;
 
 	return Result;
 }

@@ -121,7 +121,7 @@ void URushCameraArmComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 
 void URushCameraArmComponent::RequestCameraStageSwitch()
 {
-	if (RushCamera == NULL || CameraSwitchTransforms.Num() == 0)
+	if (RushCamera == NULL)
 		return;
 
 	int32 stage = _currentCameraSwitchStage;
@@ -133,10 +133,13 @@ void URushCameraArmComponent::RequestCameraStageSwitch()
 
 void URushCameraArmComponent::RequestCameraStageSwitch(int32 stage)
 {
-	if (RushCamera == NULL || CameraSwitchTransforms.Num() == 0)
+	if (RushCamera == NULL)
 		return;
 
 	_currentCameraSwitchStage = stage;
+
+	if (CameraSwitchTransforms.Num() == 0)
+		return;
 
 	FCameraDataVector requestValue = CameraSwitchTransforms[_currentCameraSwitchStage];
 	_targetTargetArmLength = requestValue.TargetArmLength;
