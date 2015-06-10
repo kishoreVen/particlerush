@@ -38,4 +38,10 @@ struct FRushFlags
 	*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Flags"))
 	int32 ChainBounceStage;
+
+	/**
+	* TODO: Indicate if character is on one of the accelerator tracks.
+	*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Flags"))
+	bool IsCharacterOnAcceleratorTrack;
 };

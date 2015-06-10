@@ -3,6 +3,7 @@
 #include "ParticleRush.h"
 #include "Character/RushCharacter.h"
 #include "Character/RushCharacterMovementComponent.h"
+#include "Level/AcceleratorTrack/AcceleratorTrackGenerator.h"
 
 
 void ARushCharacter::InitializeBehaviorMovement()
@@ -31,7 +32,20 @@ void ARushCharacter::TurnRight(float value)
 	if (Controller == NULL || !IsInputDOFActive(EInputDOF::TURN))
 		return;
 
-	AddControllerYawInput(value);
+	URushCharacterMovementComponent* movementComponent = static_cast<URushCharacterMovementComponent*>(GetMovementComponent());
+
+	if (movementComponent == NULL)
+		return;
+
+	if (!RushFlags.IsCharacterOnAcceleratorTrack)
+		AddControllerYawInput(value * movementComponent->GetDeltaRotation(GetWorld()->GetDeltaSeconds()).Yaw);
+	else
+	{
+		AAcceleratorTrackGenerator* acceleratorTrack = static_cast<AAcceleratorTrackGenerator*>(movementComponent->CurrentFloor.HitResult.GetActor());
+
+		if (acceleratorTrack != NULL)
+			AddControllerYawInput(value * acceleratorTrack->GetOnTrackDeltaRotation(GetWorld()->GetDeltaSeconds()).Yaw);
+	}
 
 	/* Mesh Rotation for smooth mesh movement */
 	_targetMeshTurningRollAngle = value * RushData.MeshTurningMaxAngle;
