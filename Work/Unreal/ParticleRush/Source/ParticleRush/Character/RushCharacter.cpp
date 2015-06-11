@@ -88,7 +88,7 @@ void ARushCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& Pro
 	UProperty* MemberProperty = PropertyChangedEvent.PropertyChain.GetActiveMemberNode()->GetValue();
 	FName PropertyName = (MemberProperty != NULL) ? MemberProperty->GetFName() : NAME_None;
 
-	if ((PropertyName == TEXT("RushData")))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(ARushCharacter, RushData))
 	{
 		RushData.UpdateProperty(PropertyChangedEvent);
 	}

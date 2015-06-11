@@ -19,7 +19,25 @@ struct FTrackData
 {
 	GENERATED_USTRUCT_BODY()
 
-	/* The mesh that will be used as track for this spline */
+	/* Holds spline index */
+	FVector SplinePointLocation;
+
+	/* Banking angle for curvature of tracks at turns */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh", UIMin=-90.0f, UIMax=90.0f))
+	float BankingAngle;
+
+	/* Banking angle for curvature of tracks at turns */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
-	UStaticMesh* MainTrackMesh;
+	bool IsTunnel;
+
+	/* The scale according to the mesh (not unreal units), which will specify the track width (as X) and thickness (as Y) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
+	FVector2D TrackScale;
+
+	FTrackData()
+	{
+		SplinePointLocation = FVector::ZeroVector;
+		BankingAngle = 0.0f;
+		TrackScale = FVector2D(1.0f, 1.0f);
+	}
 };

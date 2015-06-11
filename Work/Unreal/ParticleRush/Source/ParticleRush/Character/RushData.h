@@ -89,11 +89,11 @@ struct FRushData
 		UProperty* field = PropertyChangedEvent.PropertyChain.GetTail()->GetPrevNode()->GetValue();
 		FName fieldName = (field != NULL) ? field->GetFName() : NAME_None;
 
-		if (fieldName == "BounceStrength")
+		if (fieldName == GET_MEMBER_NAME_CHECKED(FRushData, BounceStrength))
 			BounceStrength.UpdateProperties();
-		else if (fieldName == "BounceJumpStrength")
+		else if (fieldName == GET_MEMBER_NAME_CHECKED(FRushData, BounceJumpStrength))
 			BounceJumpStrength.UpdateProperties();
-		else if (fieldName == "SharpTurnYawReach")
+		else if (fieldName == GET_MEMBER_NAME_CHECKED(FRushData, SharpTurnYawReach))
 			SharpTurnYawReach.UpdateProperties();
 	}
 };
