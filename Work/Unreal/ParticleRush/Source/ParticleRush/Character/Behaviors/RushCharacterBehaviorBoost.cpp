@@ -33,7 +33,7 @@ void ARushCharacter::PerformBoost()
 	RushFlags.ChainBoostStage = FMath::Clamp(RushFlags.ChainBoostStage + 1, 1, RushData.MaxBoostStages);
 	_timeLeftForBoostToEnd = RushData.BoostDuration;
 
-	OnBoostStageUp(RushFlags.ChainBoostStage);
+	OnBoostStageUp(RushFlags.ChainBoostStage, ((float)RushFlags.ChainBoostStage / (float)RushData.MaxBoostStages));
 }
 
 

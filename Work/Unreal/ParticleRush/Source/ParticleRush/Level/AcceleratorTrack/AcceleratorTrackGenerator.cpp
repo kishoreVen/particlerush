@@ -18,7 +18,6 @@ AAcceleratorTrackGenerator::AAcceleratorTrackGenerator()
 	{
 		RootComponent = TrackSpline;
 	}
-	/* Member setup */
 }
 
 // Called when the game starts or when spawned

@@ -246,7 +246,7 @@ public:
 #pragma region EVENTS
 public:
 	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
-	virtual void OnBoostStageUp(int32 stage);
+	virtual void OnBoostStageUp(int32 stage, float normalizedStage);
 
 	UFUNCTION(BlueprintImplementableEvent, Meta = (Category = "Rush Behavior Event - Boost"))
 	virtual void OnBoostEnd();
