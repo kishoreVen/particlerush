@@ -13,10 +13,16 @@ ABarrierGenerator::ABarrierGenerator()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	BarrierSpline = CreateDefaultSubobject<USplineComponent>("BarrierSpline");
-	if (BarrierSpline != NULL)
+	BarrierBase = CreateDefaultSubobject<USceneComponent>("BarrierBase");
+	if (BarrierBase != NULL)
 	{
-		RootComponent = BarrierSpline;
+		RootComponent = BarrierBase;
+	}
+
+	BarrierStart = CreateDefaultSubobject<UStaticMeshComponent>("BarrierStart");
+	if (BarrierStart != NULL)
+	{
+		BarrierStart->AttachTo(BarrierBase, NAME_None, EAttachLocation::KeepRelativeOffset, true);
 	}
 }
 
@@ -36,6 +42,25 @@ void ABarrierGenerator::OnConstruction(const FTransform& Transform)
 	if (MainBarrierMesh == NULL)
 		return;
 
+	/* Compute Mesh Params */
+	FBox meshBoundingBox = MainBarrierMesh->GetBounds().GetBox();
+	float meshWidth = meshBoundingBox.Max.X - meshBoundingBox.Min.X;
+
+	/* Set the Mesh for Barrier Start */
+	BarrierStart->SetStaticMesh(MainBarrierMesh);
+
+	/* Rotate the Parent to face in current Direction */
+	FVector flatDirectionToEndPoint = (EndPoint - BarrierStart->RelativeLocation) * FVector(1.0f, 1.0f, 0.0f);
+
+	FRotator lookAtRotation(0.0f, flatDirectionToEndPoint.Rotation().Yaw, 0.0f);
+	BarrierStart->SetWorldRotation(lookAtRotation);
+
+	int32_t count = FMath::Round(flatDirectionToEndPoint.Size() / meshWidth);
+	for (int index = 1; index <= count; index++)
+	{
+		FVector currentPosition = FVector(index * meshWidth, 0.0f, 0.0f);
+		AddBarrierElement(MainBarrierMesh, currentPosition);
+	}
 }
 
 
@@ -46,11 +71,11 @@ void ABarrierGenerator::PostEditChangeChainProperty(struct FPropertyChangedChain
 
 
 #pragma region METHODS
-void ABarrierGenerator::AddBarrierElement(UStaticMesh* staticMesh, const int32_t currentIndex)
+void ABarrierGenerator::AddBarrierElement(UStaticMesh* staticMesh, const FVector& position)
 {
-	int32_t futureIndex = (currentIndex + 1) % BarrierSpline->GetNumSplinePoints();
-
-	FBox meshBounds = staticMesh->GetBounds().GetBox();
-	float meshWidth = meshBounds.Max.X - meshBounds.Min.X;
+	UStaticMeshComponent* tempMeshComponent = ConstructObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), this);
+	tempMeshComponent->AttachTo(BarrierStart, NAME_None, EAttachLocation::KeepWorldPosition, true);
+	tempMeshComponent->SetStaticMesh(staticMesh);
+	tempMeshComponent->RelativeLocation = position;
 }
 #pragma endregion

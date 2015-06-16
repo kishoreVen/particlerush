@@ -18,7 +18,10 @@ class PARTICLERUSH_API ABarrierGenerator : public AActor
 #pragma region COMPONENTS
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Root"))
-	class USplineComponent* BarrierSpline;
+	class USceneComponent* BarrierBase;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Root"))
+	class UStaticMeshComponent* BarrierStart;
 #pragma endregion
 
 #pragma region OVERRIDES
@@ -37,6 +40,12 @@ protected:
 	/* The mesh that will be used as track for this spline */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Barrier Build"))
 	class UStaticMesh* MainBarrierMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Barrier Build", MakeEditWidget = ""))
+	FVector EndPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Barrier Build", MakeEditWidget = ""))
+	TArray<FVector> HeightPoints;
 #pragma endregion
 
 #pragma region PROPERTIY ACCESSORS
@@ -48,6 +57,6 @@ private:
 
 #pragma region METHODS
 private:
-	void AddBarrierElement(class UStaticMesh* staticMesh, const int32_t currentIndex);
+	void AddBarrierElement(class UStaticMesh* staticMesh, const FVector& position);
 #pragma endregion
 };
