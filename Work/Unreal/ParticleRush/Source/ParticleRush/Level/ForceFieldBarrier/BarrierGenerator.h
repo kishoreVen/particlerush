@@ -54,9 +54,4 @@ protected:
 #pragma region FIELDS
 private:
 #pragma endregion
-
-#pragma region METHODS
-private:
-	void AddBarrierElement(class UStaticMesh* staticMesh, const FVector& position);
-#pragma endregion
 };

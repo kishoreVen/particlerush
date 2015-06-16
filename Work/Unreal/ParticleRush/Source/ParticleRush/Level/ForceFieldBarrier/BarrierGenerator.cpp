@@ -43,24 +43,25 @@ void ABarrierGenerator::OnConstruction(const FTransform& Transform)
 		return;
 
 	/* Compute Mesh Params */
-	FBox meshBoundingBox = MainBarrierMesh->GetBounds().GetBox();
-	float meshWidth = meshBoundingBox.Max.X - meshBoundingBox.Min.X;
+	//FBox meshBoundingBox = MainBarrierMesh->GetBounds().GetBox();
+	//float meshWidth = meshBoundingBox.Max.X - meshBoundingBox.Min.X;
 
-	/* Set the Mesh for Barrier Start */
-	BarrierStart->SetStaticMesh(MainBarrierMesh);
+	///* Set the Mesh for Barrier Start */
+	//BarrierStart->SetStaticMesh(MainBarrierMesh);
 
-	/* Rotate the Parent to face in current Direction */
-	FVector flatDirectionToEndPoint = (EndPoint - BarrierStart->RelativeLocation) * FVector(1.0f, 1.0f, 0.0f);
+	///* Rotate the Parent to face in current Direction */
+	//FVector flatDirectionToEndPoint = (EndPoint - BarrierStart->RelativeLocation) * FVector(1.0f, 1.0f, 0.0f);
 
-	FRotator lookAtRotation(0.0f, flatDirectionToEndPoint.Rotation().Yaw, 0.0f);
-	BarrierStart->SetWorldRotation(lookAtRotation);
+	///* Clear all children */
+	//int32_t count = FMath::RoundToInt(flatDirectionToEndPoint.Size() / meshWidth);
+	//for (int index = 1; index <= count; index++)
+	//{
+	//	FVector currentPosition = FVector(index * meshWidth, 0.0f, 0.0f);
+	//	AddBarrierElement(MainBarrierMesh, currentPosition);
+	//}
 
-	int32_t count = FMath::Round(flatDirectionToEndPoint.Size() / meshWidth);
-	for (int index = 1; index <= count; index++)
-	{
-		FVector currentPosition = FVector(index * meshWidth, 0.0f, 0.0f);
-		AddBarrierElement(MainBarrierMesh, currentPosition);
-	}
+	//FRotator lookAtRotation(0.0f, flatDirectionToEndPoint.Rotation().Yaw, 0.0f);
+	//BarrierStart->SetWorldRotation(lookAtRotation);
 }
 
 
@@ -68,14 +69,3 @@ void ABarrierGenerator::PostEditChangeChainProperty(struct FPropertyChangedChain
 {
 	Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
-
-
-#pragma region METHODS
-void ABarrierGenerator::AddBarrierElement(UStaticMesh* staticMesh, const FVector& position)
-{
-	UStaticMeshComponent* tempMeshComponent = ConstructObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), this);
-	tempMeshComponent->AttachTo(BarrierStart, NAME_None, EAttachLocation::KeepWorldPosition, true);
-	tempMeshComponent->SetStaticMesh(staticMesh);
-	tempMeshComponent->RelativeLocation = position;
-}
-#pragma endregion

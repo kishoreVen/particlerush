@@ -25,6 +25,6 @@ struct FBarrierData
 	
 	FBarrierData()
 	{
-		BarrierLocation = FVector::ZeroVector;		
+		BarrierLocation = FVector::ZeroVector;
 	}
 };
