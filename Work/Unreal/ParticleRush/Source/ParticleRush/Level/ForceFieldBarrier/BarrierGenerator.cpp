@@ -38,30 +38,6 @@ void ABarrierGenerator::BeginPlay()
 void ABarrierGenerator::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
-	if (MainBarrierMesh == NULL)
-		return;
-
-	/* Compute Mesh Params */
-	//FBox meshBoundingBox = MainBarrierMesh->GetBounds().GetBox();
-	//float meshWidth = meshBoundingBox.Max.X - meshBoundingBox.Min.X;
-
-	///* Set the Mesh for Barrier Start */
-	//BarrierStart->SetStaticMesh(MainBarrierMesh);
-
-	///* Rotate the Parent to face in current Direction */
-	//FVector flatDirectionToEndPoint = (EndPoint - BarrierStart->RelativeLocation) * FVector(1.0f, 1.0f, 0.0f);
-
-	///* Clear all children */
-	//int32_t count = FMath::RoundToInt(flatDirectionToEndPoint.Size() / meshWidth);
-	//for (int index = 1; index <= count; index++)
-	//{
-	//	FVector currentPosition = FVector(index * meshWidth, 0.0f, 0.0f);
-	//	AddBarrierElement(MainBarrierMesh, currentPosition);
-	//}
-
-	//FRotator lookAtRotation(0.0f, flatDirectionToEndPoint.Rotation().Yaw, 0.0f);
-	//BarrierStart->SetWorldRotation(lookAtRotation);
 }
 
 
