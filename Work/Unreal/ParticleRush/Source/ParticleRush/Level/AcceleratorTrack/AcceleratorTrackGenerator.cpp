@@ -110,7 +110,7 @@ void AAcceleratorTrackGenerator::AddTrackElement(UStaticMesh* staticMesh, const 
 	TrackSpline->GetLocalLocationAndTangentAtSplinePoint(currentIndex, startPosition, startTangent);
 	TrackSpline->GetLocalLocationAndTangentAtSplinePoint(futureIndex, endPosition, endTangent);
 
-	USplineMeshComponent* tempSplineMeshComp = ConstructObject<USplineMeshComponent>(USplineMeshComponent::StaticClass(), this);
+	USplineMeshComponent* tempSplineMeshComp = NewObject<USplineMeshComponent>(this);
 	tempSplineMeshComp->AttachParent = TrackSpline;
 	tempSplineMeshComp->SetStaticMesh(staticMesh);
 	tempSplineMeshComp->SetStartAndEnd(startPosition, startTangent, endPosition, endTangent);

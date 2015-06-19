@@ -72,7 +72,7 @@ void URushCameraArmComponent::DoCameraLag(float DeltaTime)
 		FCollisionQueryParams QueryParams(TraceTagName, false, GetOwner());
 
 		FHitResult Result;
-		GetWorld()->SweepSingle(Result, ArmOrigin, DesiredLoc, FQuat::Identity, ProbeChannel, FCollisionShape::MakeSphere(ProbeSize), QueryParams);
+		GetWorld()->SweepSingleByChannel(Result, ArmOrigin, DesiredLoc, FQuat::Identity, ProbeChannel, FCollisionShape::MakeSphere(ProbeSize), QueryParams);
 
 		ResultLoc = BlendLocations(DesiredLoc, Result.Location, Result.bBlockingHit, DeltaTime);
 	}

@@ -280,10 +280,10 @@ public:
 		virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) override;
 
 	public:
-		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Collision"))
+		UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Collision"))
 		void ToggleDrawWallCollisionResults();
 
-		UFUNCTION(exec, meta = (FriendlyName = "Particle Rush Console - Gameplay"))
+		UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Gameplay"))
 		void ToggleDrawCharacterStats();
 #pragma endregion
 };
