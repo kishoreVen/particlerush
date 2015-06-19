@@ -82,5 +82,10 @@ namespace ParticleRush
 			const FRotator DeltaMove = Delta * DeltaInterpSpeed;
 			return (Current + DeltaMove).GetNormalized();
 		}
+
+		int32 GetClosestSplinePointIndex(const class USplineComponent* SplineComponent, const FVector& ReferenceLocation)
+		{
+			return 0;
+		}
 	}
 }

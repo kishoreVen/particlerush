@@ -27,5 +27,10 @@ namespace ParticleRush
 		* The ROverShootingInterpTo will help creating an oscillating effect about the target rotation.
 		*/
 		extern FRotator ROverShootingInterpTo(const FRotator& Current, const FRotator& Target, float DeltaTime, float InterpSpeed);
+		
+		/* 
+		* Gets the closest spline point along the spline point index. 
+		*/
+		extern int32 GetClosestSplinePointIndex(const class USplineComponent* SplineComponent, const FVector& ReferenceLocation); 
 	}
 }
