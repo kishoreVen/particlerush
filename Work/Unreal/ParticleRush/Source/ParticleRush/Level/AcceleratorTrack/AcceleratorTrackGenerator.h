@@ -80,7 +80,7 @@ private:
 #pragma endregion
 
 #pragma region METHODS
-private:
+protected:
 	void AddTrackElement(class UStaticMesh* staticMesh, const int32_t currentIndex);
 #pragma endregion
 };

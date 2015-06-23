@@ -34,9 +34,14 @@ protected:
 
 	// When the property is changed
 	virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, Meta = (BlueprintInternalUseOnly = "true", Category = "Barrier Build", DisplayName = "Add Barrier Element"))
+	void AddBarrierElement_Test();
 #pragma endregion
 
 #pragma region PROPERTIES
+protected:
 	/* The mesh that will be used as track for this spline */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Barrier Build"))
 	class UStaticMesh* MainBarrierMesh;
