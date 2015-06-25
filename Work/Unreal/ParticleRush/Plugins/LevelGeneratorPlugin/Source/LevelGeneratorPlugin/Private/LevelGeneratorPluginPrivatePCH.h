@@ -7,5 +7,6 @@
 #include "LevelEditorActions.h"
 #include "SharedPointer.h"
 #include "Internationalization.h"
-#include "Slate.h"
+#include "SlateBasics.h"
+#include "SlateExtras.h"
 #include "MultiBoxExtender.h"
