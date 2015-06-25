@@ -1,0 +1,21 @@
+{
+	"FileVersion" : 3,
+	
+	"FriendlyName" : "Level Generator Plugin",
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"CreatedBy" : "Kishore Venkateshan",
+	"CreatedByURL" : "http://kishorevenkateshan.com",
+	"EngineVersion" : "4.2.0",
+	"Description" : "A plugin to populate a terrain.",
+	"Category" : "Level Design",
+	"EnabledByDefault" : true,
+	
+	"Modules" :
+	[
+		{
+			"Name" : "LevelGeneratorPlugin",
+			"Type" : "Editor"
+		}
+	]
+}

@@ -26,6 +26,10 @@
 		{
 			"Name": "SoundVisualizations",
 			"Enabled": true
+		},
+		{
+			"Name": "PluginCreator",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
