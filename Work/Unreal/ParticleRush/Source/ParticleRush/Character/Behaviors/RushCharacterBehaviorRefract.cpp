@@ -4,7 +4,7 @@
 #include "Character/RushCharacter.h"
 #include "Character/RushCharacterMovementComponent.h"
 #include "Level/Obstacle/RefractObstacle.h"
-#include "Generic/Utilities.h"
+#include "Generic/ParticleRushUtils.h"
 
 void ARushCharacter::InitializeBehaviorRefraction()
 {
@@ -41,7 +41,7 @@ void ARushCharacter::PerformRefraction(FVector HitNormal, float RefractiveIndex)
 
 	FVector normal = HitNormal;	
 
-	FVector refractDirection = ParticleRush::Utilities::GetRefractionVector(rushHeading, normal, RefractiveIndex);
+	FVector refractDirection = UParticleRushUtils::GetRefractionVector(rushHeading, normal, RefractiveIndex);
 	refractDirection.Normalize();
 
 	if (!refractDirection.IsZero())

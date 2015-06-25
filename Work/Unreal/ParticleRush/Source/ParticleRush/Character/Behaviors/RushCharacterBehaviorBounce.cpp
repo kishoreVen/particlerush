@@ -4,7 +4,7 @@
 #include "Character/RushCharacter.h"
 #include "Character/RushCharacterMovementComponent.h"
 #include "Level/Obstacle/BounceObstacle.h"
-#include "Generic/Utilities.h"
+#include "Generic/ParticleRushUtils.h"
 
 void ARushCharacter::InitializeBehaviorBounce()
 {
@@ -37,7 +37,7 @@ void ARushCharacter::PerformBounce(FVector HitNormal, float OverrideZImpulseFact
 	FVector normal = HitNormal;
 	normal.Z = 0.0f;
 
-	FVector bounceDirection = ParticleRush::Utilities::GetReflectionVector(rushHeading, normal);
+	FVector bounceDirection = UParticleRushUtils::GetReflectionVector(rushHeading, normal);
 	bounceDirection.Normalize();
 
 	_bounceTargetOrientation = bounceDirection.Rotation();

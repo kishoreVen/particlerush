@@ -4,7 +4,7 @@
 #include "Character/RushCharacter.h"
 #include "Character/RushCharacterMovementComponent.h"
 #include "Level/Obstacle/RefractObstacle.h"
-#include "Generic/Utilities.h"
+#include "Generic/ParticleRushUtils.h"
 
 void ARushCharacter::InitializeBehaviorJump()
 {

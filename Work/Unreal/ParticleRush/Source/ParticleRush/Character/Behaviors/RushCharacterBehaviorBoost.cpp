@@ -3,7 +3,6 @@
 #include "ParticleRush.h"
 #include "Character/RushCharacter.h"
 #include "Character/RushCharacterMovementComponent.h"
-#include "Generic/Utilities.h"
 
 
 void ARushCharacter::InitializeBehaviorBoost()
