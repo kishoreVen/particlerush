@@ -1,6 +1,11 @@
 // Some copyright should be here...
 
 #include "SlateBasics.h"
+#include "SlateExtras.h"
+
+#include "EditorStyleSet.h"
+
+#include "LevelEditor.h"
 
 #include "PrototypeLevelGenerator.h"
 

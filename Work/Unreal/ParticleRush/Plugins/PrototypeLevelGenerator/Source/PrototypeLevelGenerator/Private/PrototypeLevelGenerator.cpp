@@ -2,14 +2,9 @@
 
 #include "PrototypeLevelGeneratorPrivatePCH.h"
 
-#include "SlateBasics.h"
-#include "SlateExtras.h"
 
 #include "PrototypeLevelGeneratorStyle.h"
 #include "PrototypeLevelGeneratorCommands.h"
-
-#include "LevelEditor.h"
-
 
 
 static const FName PrototypeLevelGeneratorTabName("PrototypeLevelGenerator");
@@ -68,10 +63,16 @@ void FPrototypeLevelGeneratorModule::ShutdownModule()
 TSharedRef<SDockTab> FPrototypeLevelGeneratorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
 {
 	return SNew(SDockTab)
+		.Label(LOCTEXT("TabTitle", "PrototypeLevelGeneratorTab"))
 		.TabRole(ETabRole::NomadTab)
+		.ContentPadding(5)
 		[
-			// Put your tab content here!
-			SNullWidget::NullWidget
+			SNew(SBorder)
+			.Padding(4)
+			.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+			[
+				SNullWidget::NullWidget
+			]
 		];
 }
 

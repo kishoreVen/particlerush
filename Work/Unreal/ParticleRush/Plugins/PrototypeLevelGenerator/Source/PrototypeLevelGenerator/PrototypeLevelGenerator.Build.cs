@@ -28,8 +28,6 @@ public class PrototypeLevelGenerator : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
-				
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -38,12 +36,17 @@ public class PrototypeLevelGenerator : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+                "Engine",
 				"Projects",
 				"InputCore",
 				"UnrealEd",
 				"LevelEditor",
-				"Slate", "SlateCore"
-				
+				"Slate", 
+                "SlateCore",
+                "Core",
+				"EditorStyle",
+				"CoreUObject",
+
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
