@@ -5,6 +5,7 @@
 
 #include "PrototypeLevelGeneratorStyle.h"
 #include "PrototypeLevelGeneratorCommands.h"
+#include "PrototypeLevelGeneratorWindow.h"
 
 
 static const FName PrototypeLevelGeneratorTabName("PrototypeLevelGenerator");
@@ -69,9 +70,9 @@ TSharedRef<SDockTab> FPrototypeLevelGeneratorModule::OnSpawnPluginTab(const FSpa
 		[
 			SNew(SBorder)
 			.Padding(4)
-			.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+			.BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
 			[
-				SNullWidget::NullWidget
+				SNew(PrototypeLevelGeneratorWindow)
 			]
 		];
 }

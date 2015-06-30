@@ -7,6 +7,8 @@
 
 #include "LevelEditor.h"
 
+#include "PropertyEditing.h"
+
 #include "PrototypeLevelGenerator.h"
 
 // You should place include statements to your module's private header files here.  You only need to

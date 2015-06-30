@@ -46,7 +46,9 @@ public class PrototypeLevelGenerator : ModuleRules
                 "Core",
 				"EditorStyle",
 				"CoreUObject",
-
+                "EditorWidgets",
+                "PropertyEditor",
+                "ParticleRush",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
