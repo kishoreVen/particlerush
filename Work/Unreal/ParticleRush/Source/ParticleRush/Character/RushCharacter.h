@@ -270,21 +270,30 @@ public:
 
 
 #pragma region DEBUG
-	private:
-		bool _shouldDrawWallCollisionResults;
-		bool _shouldDrawCharacterStats;
+private:
+	bool _shouldDrawWallCollisionResults;
+	bool _shouldDrawCharacterStats;
 
-		void DrawCharacterStats();
+	void DrawCharacterStats();
 
-	protected:
-		virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) override;
+protected:
+	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) override;
 
-	public:
-		UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Collision"))
-		void ToggleDrawWallCollisionResults();
+public:
+	UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Collision"))
+	void ToggleDrawWallCollisionResults();
 
-		UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Gameplay"))
-		void ToggleDrawCharacterStats();
+	UFUNCTION(exec, meta = (DisplayName = "Particle Rush Console - Gameplay"))
+	void ToggleDrawCharacterStats();
+#pragma endregion
+
+
+#pragma region STATIC
+private:
+	static ARushCharacter* mRushInstance;
+
+public:
+	static ARushCharacter* GetRush();
 #pragma endregion
 };
 

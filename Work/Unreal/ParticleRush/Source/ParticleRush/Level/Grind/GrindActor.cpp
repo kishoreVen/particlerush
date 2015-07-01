@@ -4,12 +4,13 @@
 #include "GrindActor.h"
 #include "Components/SplineComponent.h"
 #include "Generic/ParticleRushUtils.h"
+#include "Character/RushCharacter.h"
 
 // Sets default values
 AGrindActor::AGrindActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	#pragma region Component Setup
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
@@ -20,36 +21,73 @@ AGrindActor::AGrindActor()
 	SplineComp->AttachParent = RootComponent;
 	#pragma endregion
 
+	mShouldActivateRamp = false;
+
+	mPreviousClosestPoint = 0;
+
+	mRushPtr = NULL;
 }
 
 // Called when the game starts or when spawned
 void AGrindActor::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 }
 
 // Called every frame
 void AGrindActor::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
+
+	if (mShouldActivateRamp == false || mRushPtr == NULL)
+		return;
+
+	FVector refLoc = mRushPtr.Get()->GetActorLocation();
+	int32 numSplinePoints = SplineComp->GetNumSplinePoints();
+	int32 closestSplinePoint = UParticleRushUtils::GetClosestSplinePointIndex(SplineComp, refLoc, mPreviousClosestPoint, SplineSearchDistanceSqrdThreshold);
+
+	/* Cant Find that point */
+	if (closestSplinePoint == -1 || closestSplinePoint >= numSplinePoints)
+		return;
+
+	FVector closestSplinePointLocation, closestSplinePointTangent;
+	SplineComp->GetLocalLocationAndTangentAtSplinePoint(closestSplinePoint, closestSplinePointLocation, closestSplinePointTangent);
+
+	FVector nextSplinePointLocation, nextSplinePointTangent;
+	SplineComp->GetLocalLocationAndTangentAtSplinePoint(closestSplinePoint + 1, nextSplinePointLocation, nextSplinePointTangent);
+
+	FVector movementDirection = nextSplinePointLocation - closestSplinePointTangent;
+
+	mRushPtr.Get()->AddActorLocalOffset(movementDirection * DeltaTime, true);
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, SplinePointLocation.ToString());
+
+	mPreviousClosestPoint = closestSplinePoint;
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	FVector RefLoc = OtherActor->GetActorLocation();
-	int32 BeginSplineSearch = 0;
-	float DistThreshSquared = 100.0f;
-	int32 NumSplinePoints = SplineComp->GetNumSplinePoints();
-	int32 ClosestSplinePoint = UParticleRushUtils::GetClosestSplinePointIndex(SplineComp, RefLoc, BeginSplineSearch, DistThreshSquared);
+	/* Try to get it for the first time */
+	ARushCharacter* rushActor = static_cast<ARushCharacter*>(OtherActor);
+	if (rushActor == NULL)
+		return;
 
-	for (ClosestSplinePoint = BeginSplineSearch; ClosestSplinePoint < NumSplinePoints; ClosestSplinePoint++)
-	{
-		FVector SplinePointLocation, SplinePointTangent;
-		SplineComp->GetLocalLocationAndTangentAtSplinePoint(ClosestSplinePoint, SplinePointLocation, SplinePointTangent);
-		
-		OtherActor->SetActorLocation(SplinePointLocation);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, SplinePointLocation.ToString());
-	}
+	mRushPtr = rushActor;
+	mShouldActivateRamp = true;
+}
+
+void AGrindActor::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+
+	/* Try to get it for the first time */
+	ARushCharacter* rushActor = static_cast<ARushCharacter*>(OtherActor);
+	if (rushActor == NULL)
+		return;
+
+	mRushPtr = NULL;
+
+	mShouldActivateRamp = false;
+	mPreviousClosestPoint = 0;
 }

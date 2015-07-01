@@ -11,6 +11,8 @@
 #include "RushCameraArmComponent.h"
 
 
+ARushCharacter* ARushCharacter::mRushInstance = NULL;
+
 ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer.SetDefaultSubobjectClass<URushCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
@@ -60,6 +62,12 @@ ARushCharacter::ARushCharacter(const class FObjectInitializer& ObjectInitializer
 
 #pragma region Rush Action Sphere Timer Management
 	ResetRushTimeScale();
+#pragma endregion
+
+
+#pragma region Instance Setup
+	if (mRushInstance == NULL)
+		mRushInstance = this;
 #pragma endregion
 }
 
@@ -284,5 +292,13 @@ void ARushCharacter::ToggleDrawWallCollisionResults()
 void ARushCharacter::ToggleDrawCharacterStats()
 {
 	_shouldDrawCharacterStats = !_shouldDrawCharacterStats;
+}
+#pragma endregion
+
+
+#pragma region STATIC
+ARushCharacter* ARushCharacter::GetRush()
+{
+	return mRushInstance;
 }
 #pragma endregion

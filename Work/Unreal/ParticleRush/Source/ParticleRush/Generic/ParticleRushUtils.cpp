@@ -86,16 +86,15 @@ int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* Spl
 	int32 numSplinePoints = SplineComponent->GetNumSplinePoints();
 
 	int32 closestSplinePointIndex = -1;
-	float minDistance = DistanceThresholdSqrd;
+	float maxDistanceSqrd = DistanceThresholdSqrd;
 
 	/* Start from the index specified at Search Start At */
 	for (int32 splineIndex = SearchStartAt; splineIndex < numSplinePoints; splineIndex++)
 	{
-		FVector location, tangent;
-		SplineComponent->GetLocalLocationAndTangentAtSplinePoint(splineIndex, location, tangent);
+		FVector location = SplineComponent->GetWorldLocationAtSplinePoint(splineIndex);
 
-		float distance = (location - ReferenceLocation).SizeSquared();
-		if (distance < minDistance)
+		float distanceSqrd = (location - ReferenceLocation).SizeSquared();
+		if (distanceSqrd < maxDistanceSqrd)
 			closestSplinePointIndex = splineIndex;
 	}
 
@@ -103,11 +102,10 @@ int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* Spl
 	{
 		for (int32 splineIndex = 0; splineIndex < SearchStartAt; splineIndex++)
 		{
-			FVector location, tangent;
-			SplineComponent->GetLocalLocationAndTangentAtSplinePoint(splineIndex, location, tangent);
+			FVector location = SplineComponent->GetWorldLocationAtSplinePoint(splineIndex);
 
-			float distance = (location - ReferenceLocation).SizeSquared();
-			if (distance < minDistance)
+			float distanceSqrd = (location - ReferenceLocation).SizeSquared();
+			if (distanceSqrd < maxDistanceSqrd)
 				closestSplinePointIndex = splineIndex;
 		}
 	}
