@@ -21,5 +21,6 @@ struct FGrindData
 //Grind properties go here. 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Basic Data"))
 	float Speed; 
+	FVector Location;
 };
 

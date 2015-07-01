@@ -18,6 +18,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
 	class USplineComponent* SplineComp;
+
 #pragma endregion
 
 #pragma region Constructor
@@ -35,5 +36,8 @@ public:
 	virtual void BeginPlay() override;
 	
 	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;	
+	virtual void Tick( float DeltaSeconds ) override;
+
+	//Called every time actors collide
+	virtual void NotifyActorBeginOverlap(class AActor* OtherActor) override; 
 };
