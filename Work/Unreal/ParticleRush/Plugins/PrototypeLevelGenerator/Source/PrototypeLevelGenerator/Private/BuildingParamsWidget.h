@@ -6,7 +6,7 @@
 class BuildingParamsWidget : public SCompoundWidget
 {
 private:
-	const FName DefaultBuildingMesh;
+	const FName DefaultBuildingMeshName;
 
 	TSharedPtr<IPropertyHandle>			StaticMeshPropertyHandle;
 	TSharedPtr<FAssetThumbnail>			AssetThumbnail;
@@ -34,8 +34,31 @@ private:
 	void OnClearStaticMesh();
 	bool CanUseClearButton();
 
+	/* Clear Dimensions Button Events */
+	void OnClearDimensionsMin();
+	bool CanUseClearDimesnionsMinButton();
+
+	void OnClearDimensionsMax();
+	bool CanUseClearDimesnionsMaxButton();
+
 	/* Set Asset for DropTarget, Selection using ComboButton and Use Button asset selection*/
 	void SetBuildingMesh(class UObject* NewAsset);
+
+	/* Building Dimension Events */
+	/*--Min--*/
+	void SetMinBuildingDimensionsX(float NewScaleX, ETextCommit::Type TextCommitType) { MinDimension.X = NewScaleX; }
+	void SetMinBuildingDimensionsY(float NewScaleY, ETextCommit::Type TextCommitType) { MinDimension.Y = NewScaleY; }
+	void SetMinBuildingDimensionsZ(float NewScaleZ, ETextCommit::Type TextCommitType) { MinDimension.Z = NewScaleZ; }
+	TOptional<float> GetMinBuildingDimensionsX() const { return MinDimension.X; }
+	TOptional<float> GetMinBuildingDimensionsY() const { return MinDimension.Y; }
+	TOptional<float> GetMinBuildingDimensionsZ() const { return MinDimension.Z; }
+	/*--Max--*/
+	void SetMaxBuildingDimensionsX(float NewScaleX, ETextCommit::Type TextCommitType) { MaxDimension.X = NewScaleX; }
+	void SetMaxBuildingDimensionsY(float NewScaleY, ETextCommit::Type TextCommitType) { MaxDimension.Y = NewScaleY; }
+	void SetMaxBuildingDimensionsZ(float NewScaleZ, ETextCommit::Type TextCommitType) { MaxDimension.Z = NewScaleZ; }
+	TOptional<float> GetMaxBuildingDimensionsX() const { return MaxDimension.X; }
+	TOptional<float> GetMaxBuildingDimensionsY() const { return MaxDimension.Y; }
+	TOptional<float> GetMaxBuildingDimensionsZ() const { return MaxDimension.Z; }
 
 	/* Selected asset name and tooltip */
 	FText GetSelectedAssetName() const;
@@ -45,9 +68,13 @@ private:
 	UStaticMesh* LoadMeshFromPath(const FName& Path);
 
 public:
-	TWeakObjectPtr<class UStaticMesh>	BuildingMeshPtr;
-	TWeakObjectPtr<class UStaticMesh>	DefaultBuildingMeshPtr;
-	FColor								BSPBuildingColor;
+	TWeakObjectPtr<UStaticMesh>								BuildingMeshPtr;
+	static TWeakObjectPtr<UStaticMesh>						DefaultBuildingMeshPtr;
+	FColor													BSPBuildingColor;
+	static FVector											DefaultMinDimension;
+	static FVector											DefaultMaxDimension;
+	FVector													MinDimension;
+	FVector													MaxDimension;
 
 	BuildingParamsWidget();
 	~BuildingParamsWidget();
@@ -67,6 +94,13 @@ public:
 
 	/* Public Interface to Identify Set mesh vs default mesh */
 	bool IsDefaultMesh();
+
+	/* Public Interface to Get Mesh Dimensions */
+	FVector GetMinDimension();
+	FVector GetMaxDimension();
+
+	/* Interface to Min Dimension */
+	void UpdateDefaultDimensions(FVector NewMinDimension, FVector NewMaxDimension);
 };
 
 /* Inline Methods */

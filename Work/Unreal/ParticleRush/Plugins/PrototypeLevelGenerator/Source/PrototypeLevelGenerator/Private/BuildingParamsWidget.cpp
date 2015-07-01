@@ -8,13 +8,22 @@
 
 #define LOCTEXT_NAMESPACE "BuildingParamsWidget"
 
+/* Static Members */
+TWeakObjectPtr<UStaticMesh> BuildingParamsWidget::DefaultBuildingMeshPtr = NULL;
+FVector						BuildingParamsWidget::DefaultMinDimension = FVector(0, 0, 0);
+FVector						BuildingParamsWidget::DefaultMaxDimension = FVector(0, 0, 0);
+
+
 BuildingParamsWidget::BuildingParamsWidget()
 	: BuildingMeshPtr(NULL),
 	  BSPBuildingColor(FColorList::Blue),
-	  DefaultBuildingMesh("/Game/Assets/Prototype/DefaultBuildingMesh")
+	  DefaultBuildingMeshName("/Game/Assets/Prototype/DefaultBuildingMesh"),
+	  MinDimension(DefaultMinDimension),
+	  MaxDimension(DefaultMaxDimension)
 {
 	
 }
+
 
 BuildingParamsWidget::~BuildingParamsWidget()
 {
@@ -29,7 +38,7 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 
 	/* Create Local Cache */
 	BSPBuildingColor = InArgs._BuildingColor;
-	DefaultBuildingMeshPtr = LoadMeshFromPath(DefaultBuildingMesh);
+	DefaultBuildingMeshPtr = LoadMeshFromPath(DefaultBuildingMeshName);
 
 	/* Setting up Asset Widget */
 	AssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(1024, InArgs._AreRealTimeThumbnailsAllowed));
@@ -68,42 +77,79 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 
 	const TSharedRef<SWidget> ClearButton = PropertyCustomizationHelpers::MakeClearButton(FSimpleDelegate::CreateSP(this, &BuildingParamsWidget::OnClearStaticMesh));
 	ClearButton->SetEnabled(TAttribute<bool>::Create(TAttribute<bool>::FGetter::CreateSP(this, &BuildingParamsWidget::CanUseClearButton)));
+	ClearButton->SetToolTipText(LOCTEXT("ClearMeshButton", "Clear Mesh to Default"));
+
+	const TSharedRef<SWidget> ClearDimensionMinButton = PropertyCustomizationHelpers::MakeClearButton(FSimpleDelegate::CreateSP(this, &BuildingParamsWidget::OnClearDimensionsMin));
+	ClearDimensionMinButton->SetEnabled(TAttribute<bool>::Create(TAttribute<bool>::FGetter::CreateSP(this, &BuildingParamsWidget::CanUseClearDimesnionsMinButton)));
+	ClearDimensionMinButton->SetToolTipText(LOCTEXT("ClearMinDimensionButton", "Clear Min Dimensions to Use Default Values"));
+
+	const TSharedRef<SWidget> ClearDimensionMaxButton = PropertyCustomizationHelpers::MakeClearButton(FSimpleDelegate::CreateSP(this, &BuildingParamsWidget::OnClearDimensionsMax));
+	ClearDimensionMaxButton->SetEnabled(TAttribute<bool>::Create(TAttribute<bool>::FGetter::CreateSP(this, &BuildingParamsWidget::CanUseClearDimesnionsMaxButton)));
+	ClearDimensionMaxButton->SetToolTipText(LOCTEXT("ClearMaxDimensionButton", "Clear Max Dimensions to Use Default Values"));
 
 	TSharedRef<SWidget> ButtonsColumnWidget =
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
 		.Padding(1.0f)
 		.AutoHeight()
 		[
 			UseButton
 		]
 	+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
 		.Padding(1.0f)
 		.AutoHeight()
 		[
 			BrowseButton
-		];
-
-	TSharedRef<SWidget> ClearColumnWidget =
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
+		]
+	+SVerticalBox::Slot()
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
 		.Padding(1.0f)
 		.AutoHeight()
 		[
 			ClearButton
 		];
 
+	TSharedRef<SWidget> ClearColumnWidget =
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		.Padding(1.0f)
+		.AutoHeight()
+		[
+			ClearButton
+		];
+
+	TSharedRef<SWidget> ClearDimensionsColumnWidget =
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		.Padding(1.0f)
+		.AutoHeight()
+		[
+			ClearDimensionMinButton
+		]
+		+ SVerticalBox::Slot()
+			.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		.Padding(1.0f)
+		.AutoHeight()
+		[
+			ClearDimensionMaxButton
+		];
+
+
 	TSharedRef<SWidget> ThumbnailWidget =
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
 		.Padding(1.0f)
 		.AutoHeight()
 		[
@@ -113,8 +159,8 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 	TSharedRef<SWidget> ColorBlockWidget =
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
 		.Padding(1.0f)
 		.MaxHeight(ThumbnailSize.Y)
 		[
@@ -124,70 +170,140 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 			.ToolTipText(LOCTEXT("BuildingMeshColor", "The Color for this class of Building Mesh"))
 		];
 
+	TSharedRef<SWidget> DimesnionsBlockWidget = 
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Fill)
+		.Padding(1.0f)
+		.AutoHeight()
+		[
+			SNew(SVectorInputBox)
+			.bColorAxisLabels(true)
+			.X(this, &BuildingParamsWidget::GetMinBuildingDimensionsX)
+			.Y(this, &BuildingParamsWidget::GetMinBuildingDimensionsY)
+			.Z(this, &BuildingParamsWidget::GetMinBuildingDimensionsZ)
+			.OnXCommitted(this, &BuildingParamsWidget::SetMinBuildingDimensionsX)
+			.OnYCommitted(this, &BuildingParamsWidget::SetMinBuildingDimensionsY)
+			.OnZCommitted(this, &BuildingParamsWidget::SetMinBuildingDimensionsZ)
+		]
+		+ SVerticalBox::Slot()
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		.HAlign(EHorizontalAlignment::HAlign_Fill)
+		.Padding(1.0f)
+		.AutoHeight()
+		[
+			SNew(SVectorInputBox)
+			.bColorAxisLabels(true)
+			.X(this, &BuildingParamsWidget::GetMaxBuildingDimensionsX)
+			.Y(this, &BuildingParamsWidget::GetMaxBuildingDimensionsY)
+			.Z(this, &BuildingParamsWidget::GetMaxBuildingDimensionsZ)
+			.OnXCommitted(this, &BuildingParamsWidget::SetMaxBuildingDimensionsX)
+			.OnYCommitted(this, &BuildingParamsWidget::SetMaxBuildingDimensionsY)
+			.OnZCommitted(this, &BuildingParamsWidget::SetMaxBuildingDimensionsZ)
+		];
+
 	ChildSlot
 		[
-			SNew(SSplitter)
-
-			+ SSplitter::Slot()
-			.Value(0.2f)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.VAlign(EVerticalAlignment::VAlign_Center)
+			.Padding(1.0f)
+			.AutoHeight()
 			[
-				ColorBlockWidget
-			]
+				SNew(SSplitter)
 
-			+ SSplitter::Slot()
-			.Value(0.8f)
-			[
-				SNew(SHorizontalBox)
-
-				+ SHorizontalBox::Slot()
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				.FillWidth(0.8f)
-				.Padding(FMargin(5, 0, 5, 0))
+				+ SSplitter::Slot()
+				.Value(0.2f)
 				[
-					SAssignNew(ComboButton, SComboButton)
-					.ToolTipText(this, &BuildingParamsWidget::OnGetToolTip)
-					.ButtonStyle(FEditorStyle::Get(), "PropertyEditor.AssetComboStyle")
-					.ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
-					.OnGetMenuContent(this, &BuildingParamsWidget::OnGetMenuContent)
-					.ContentPadding(2.0f)
-					.ButtonContent()
+					ColorBlockWidget
+				]
+
+				+ SSplitter::Slot()
+				.Value(0.8f)
+				[
+					SNew(SHorizontalBox)
+
+					+ SHorizontalBox::Slot()
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					.FillWidth(0.8f)
+					.Padding(FMargin(5, 0, 5, 0))
 					[
-						SNew(SHorizontalBox)
-
-						+ SHorizontalBox::Slot()
-						.VAlign(EVerticalAlignment::VAlign_Center)
-						.FillWidth(0.3f)
-						.Padding(FMargin(5, 0, 5, 0))
+						SAssignNew(ComboButton, SComboButton)
+						.ToolTipText(this, &BuildingParamsWidget::OnGetToolTip)
+						.ButtonStyle(FEditorStyle::Get(), "PropertyEditor.AssetComboStyle")
+						.ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+						.OnGetMenuContent(this, &BuildingParamsWidget::OnGetMenuContent)
+						.ContentPadding(2.0f)
+						.ButtonContent()
 						[
-							ThumbnailWidget
-						]
+							SNew(SHorizontalBox)
+							
+							+ SHorizontalBox::Slot()
+							.VAlign(EVerticalAlignment::VAlign_Center)
+							.FillWidth(0.3f)
+							.Padding(FMargin(5, 0, 5, 0))
+							[
+								ThumbnailWidget
+							]
 
-						+ SHorizontalBox::Slot()
-						.VAlign(EVerticalAlignment::VAlign_Center)
-						.FillWidth(0.5f)
-						.Padding(FMargin(5, 0, 5, 0))
-						[
-							SNew(STextBlock)
-							.Text(this, &BuildingParamsWidget::GetSelectedAssetName)
-							.ToolTipText(this, &BuildingParamsWidget::GetSelectedAssetPath)
+							+ SHorizontalBox::Slot()
+							.VAlign(EVerticalAlignment::VAlign_Center)
+							.FillWidth(0.7f)
+							.Padding(FMargin(5, 0, 5, 0))
+							[
+								SNew(STextBlock)
+								.Text(this, &BuildingParamsWidget::GetSelectedAssetName)
+								.ToolTipText(this, &BuildingParamsWidget::GetSelectedAssetPath)
+							]
 						]
 					]
-				]
 
-				+ SHorizontalBox::Slot()
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				.FillWidth(0.1f)
-				.Padding(FMargin(5, 0, 5, 0))
-				[
-					ButtonsColumnWidget
+					+ SHorizontalBox::Slot()
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					.FillWidth(0.1f)
+					.Padding(FMargin(5, 0, 5, 0))
+					[
+						ButtonsColumnWidget
+					]
 				]
+			]
 
-				+ SHorizontalBox::Slot()
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				.FillWidth(0.1f)
-				.Padding(FMargin(5, 0, 5, 0))
+			+ SVerticalBox::Slot()
+			.VAlign(VAlign_Center)
+			.Padding(1.0f)
+			.AutoHeight()
+			[
+				SNew(SSplitter)
+			
+				+ SSplitter::Slot()
+				.Value(0.2f)
 				[
-					ClearColumnWidget
+					SNullWidget::NullWidget
+				]
+			
+				+ SSplitter::Slot()
+				.Value(0.8f)
+				[
+					SNew(SHorizontalBox)
+			
+					+ SHorizontalBox::Slot()
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					.HAlign(EHorizontalAlignment::HAlign_Fill)
+					.FillWidth(0.8f)
+					.Padding(FMargin(5, 0, 5, 0))
+					[
+						DimesnionsBlockWidget
+					]
+			
+					+ SHorizontalBox::Slot()
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					.HAlign(EHorizontalAlignment::HAlign_Left)
+					.FillWidth(0.2f)
+					.Padding(FMargin(5, 0, 5, 0))
+					[
+						ClearDimensionsColumnWidget
+					]
 				]
 			]
 		];
@@ -324,6 +440,30 @@ bool BuildingParamsWidget::CanUseClearButton()
 }
 
 
+void BuildingParamsWidget::OnClearDimensionsMin()
+{
+	MinDimension = DefaultMinDimension;
+}
+
+
+bool BuildingParamsWidget::CanUseClearDimesnionsMinButton()
+{
+	return !((DefaultMinDimension - MinDimension).IsNearlyZero());
+}
+
+
+void BuildingParamsWidget::OnClearDimensionsMax()
+{
+	MaxDimension = DefaultMaxDimension;
+}
+
+
+bool BuildingParamsWidget::CanUseClearDimesnionsMaxButton()
+{
+	return !((DefaultMaxDimension - MaxDimension).IsNearlyZero());
+}
+
+
 FText BuildingParamsWidget::GetSelectedAssetName() const
 {
 	UStaticMesh* staticMesh = BuildingMeshPtr.Get();
@@ -352,4 +492,29 @@ bool BuildingParamsWidget::IsDefaultMesh()
 	UStaticMesh* defaultMesh = DefaultBuildingMeshPtr.Get();
 
 	return staticMesh == defaultMesh;
+}
+
+
+FVector BuildingParamsWidget::GetMinDimension()
+{
+	return (DefaultMinDimension - MinDimension).IsNearlyZero() ? DefaultMinDimension : MinDimension;
+}
+
+
+FVector BuildingParamsWidget::GetMaxDimension()
+{
+	return (DefaultMaxDimension - MaxDimension).IsNearlyZero() ? DefaultMaxDimension : MaxDimension;
+}
+
+void BuildingParamsWidget::UpdateDefaultDimensions(FVector NewMinDimension, FVector NewMaxDimension)
+{
+	if ((DefaultMinDimension - MinDimension).IsNearlyZero())
+	{
+		MinDimension = NewMinDimension;
+	}
+
+	if ((DefaultMaxDimension - MaxDimension).IsNearlyZero())
+	{
+		MaxDimension = NewMaxDimension;
+	}
 }

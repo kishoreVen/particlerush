@@ -14,7 +14,8 @@ PrototypeLevelGeneratorWindow::PrototypeLevelGeneratorWindow()
 	mMinBuildingDimensions(FVector(5, 5, 5)),
 	mMaxBuildingDimensions(FVector(10, 10, 10))
 {
-
+	BuildingParamsWidget::DefaultMinDimension = mMinBuildingDimensions;
+	BuildingParamsWidget::DefaultMaxDimension = mMaxBuildingDimensions;
 }
 
 
@@ -250,7 +251,7 @@ void PrototypeLevelGeneratorWindow::UpdateBuildingClassesSlot()
 	{
 		BuildingClassesVerticalSlot->AddSlot()
 			.AutoHeight()
-			.Padding(3)
+			.Padding(10)
 			[
 				SAssignNew(BuildingMeshes[i], BuildingParamsWidget)
 				.BuildingColor(colorList.GetFColorByIndex(colorIndex))
@@ -279,7 +280,7 @@ UWorld* PrototypeLevelGeneratorWindow::GetWorld()
 }
 
 
-void PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position, FVector dimension)
+void PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position)
 {
 	static FName BaseColorParamName("BaseColor");
 
@@ -289,8 +290,10 @@ void PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParam
 	UStaticMesh* buildingMesh = buildingParams->BuildingMeshPtr.Get();
 	FLinearColor linearBaseColor(buildingParams->BSPBuildingColor);
 
-	ABaseMeshActor* spawnedBuilding = world->SpawnActor<ABaseMeshActor>(ABaseMeshActor::StaticClass());
+	FActorSpawnParameters spawnParams = FActorSpawnParameters();
+	ABaseMeshActor* spawnedBuilding = world->SpawnActor<ABaseMeshActor>(ABaseMeshActor::StaticClass(), position, FRotator::ZeroRotator, spawnParams);
 	spawnedBuilding->SetStaticMesh(buildingMesh);
+	spawnedBuilding->SetActorScale3D(buildingParams->GetMinDimension());
 
 	if (buildingParams->IsDefaultMesh())
 	{
@@ -304,8 +307,20 @@ FReply PrototypeLevelGeneratorWindow::GeneratePrototypeLevelClicked()
 {
 	UWorld* world = GetWorld();
 
-	GenerateLevelObject(BuildingMeshes[0], FVector(0, 0, 0), FVector(1, 1, 1));
-	GenerateLevelObject(BuildingMeshes[1], FVector(100, 0, 0), FVector(1, 1.5, 2));
+	GenerateLevelObject(BuildingMeshes[0], FVector(0, 0, 0));
+	GenerateLevelObject(BuildingMeshes[1], FVector(100, 0, 0));
 
 	return FReply::Handled();
+}
+
+
+void PrototypeLevelGeneratorWindow::UpdateBuildingParams(FVector NewMinDimension, FVector NewMaxDimension)
+{
+	for (int i = 0; i < mNumBuildingClasses; i++)
+	{
+		BuildingMeshes[i]->UpdateDefaultDimensions(NewMinDimension, NewMaxDimension);
+	}
+
+	BuildingParamsWidget::DefaultMinDimension = mMinBuildingDimensions;
+	BuildingParamsWidget::DefaultMaxDimension = mMaxBuildingDimensions;
 }
