@@ -2,17 +2,18 @@
 
 #include "PrototypeLevelGeneratorWindow.h"
 #include "Generic/BaseMeshActor.h"
+#include "Landscape.h"
+#include "EditorActorFolders.h"
 
 #define LOCTEXT_NAMESPACE "PrototypeLevelGeneratorWindow"
 
 
 PrototypeLevelGeneratorWindow::PrototypeLevelGeneratorWindow()
-:	mMapSizeX(64),
-	mMapSizeY(64),
-	mNumBuildingClasses(4),
-	mAlleySpacing(10.0f),
-	mMinBuildingDimensions(FVector(5, 5, 5)),
-	mMaxBuildingDimensions(FVector(10, 10, 10))
+:	mNumBuildingClasses(4),
+	mAlleySpacingMin(10.0f),
+	mAlleySpacingMax(100.0f),
+	mMinBuildingDimensions(FVector(2, 2, 2)),
+	mMaxBuildingDimensions(FVector(3, 3, 3))
 {
 	BuildingParamsWidget::DefaultMinDimension = mMinBuildingDimensions;
 	BuildingParamsWidget::DefaultMaxDimension = mMaxBuildingDimensions;
@@ -47,7 +48,7 @@ void PrototypeLevelGeneratorWindow::Construct(const FArguments& args)
 			+ SHorizontalBox::Slot()
 			.VAlign(EVerticalAlignment::VAlign_Center)
 			[
-				SNew(STextBlock).Text(LOCTEXT("MapSize", "Map Size"))
+				SNew(STextBlock).Text(LOCTEXT("AlleySpacing", "Alley Spacing (Min, Max)"))
 			]
 
 			+ SHorizontalBox::Slot()
@@ -59,56 +60,30 @@ void PrototypeLevelGeneratorWindow::Construct(const FArguments& args)
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				.Padding(FMargin(0, 0, 5, 0))
 				[
-					SNew(SNumericEntryBox<int32>)
+					SNew(SNumericEntryBox<float>)
 					.AllowSpin(true)
-					.MinValue(64)
-					.MaxValue(8192)
-					.MinSliderValue(64)
-					.MaxSliderValue(8192)
-					.Value(this, &PrototypeLevelGeneratorWindow::GetMapSizeX)
-					.OnValueChanged(this, &PrototypeLevelGeneratorWindow::SetMapSizeX)
+					.MinValue(1.0f)
+					.MaxValue(10000.0f)
+					.MinSliderValue(1.0f)
+					.MaxSliderValue(10000.0f)
+					.Value(this, &PrototypeLevelGeneratorWindow::GetAlleySpacingMin)
+					.OnValueChanged(this, &PrototypeLevelGeneratorWindow::SetAlleySpacingMin)
 				]
 
 				+ SHorizontalBox::Slot()
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				.Padding(FMargin(5, 0, 0, 0))
 				[
-					SNew(SNumericEntryBox<int32>)
-					.AllowSpin(true)
-					.MinValue(64)
-					.MaxValue(8192)
-					.MinSliderValue(64)
-					.MaxSliderValue(8192)
-					.Value(this, &PrototypeLevelGeneratorWindow::GetMapSizeY)
-					.OnValueChanged(this, &PrototypeLevelGeneratorWindow::SetMapSizeY)
-				]
-			]
-		];
-
-	verticalBox->AddSlot()
-		.AutoHeight()
-		.Padding(5)
-		[
-			SNew(SHorizontalBox)
-
-			+ SHorizontalBox::Slot()
-			.VAlign(EVerticalAlignment::VAlign_Center)
-			[
-				SNew(STextBlock).Text(LOCTEXT("AlleySpacing", "Alley Spacing"))
-			]
-
-			+ SHorizontalBox::Slot()
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
 					SNew(SNumericEntryBox<float>)
 					.AllowSpin(true)
-					.MinValue(0.0f)
-					.MaxValue(50000.0f)
-					.MinSliderValue(0.0f)
-					.MaxSliderValue(50000.0f)
-					.Value(this, &PrototypeLevelGeneratorWindow::GetAlleySpacing)
-					.OnValueChanged(this, &PrototypeLevelGeneratorWindow::SetAlleySpacing)
+					.MinValue(1.0f)
+					.MaxValue(10000.0f)
+					.MinSliderValue(1.0f)
+					.MaxSliderValue(10000.0f)
+					.Value(this, &PrototypeLevelGeneratorWindow::GetAlleySpacingMax)
+					.OnValueChanged(this, &PrototypeLevelGeneratorWindow::SetAlleySpacingMax)
 				]
+			]
 		];
 
 	verticalBox->AddSlot()
@@ -262,6 +237,18 @@ void PrototypeLevelGeneratorWindow::UpdateBuildingClassesSlot()
 }
 
 
+void PrototypeLevelGeneratorWindow::UpdateBuildingParams(FVector NewMinDimension, FVector NewMaxDimension)
+{
+	for (int i = 0; i < mNumBuildingClasses; i++)
+	{
+		BuildingMeshes[i]->UpdateDefaultDimensions(NewMinDimension, NewMaxDimension);
+	}
+
+	BuildingParamsWidget::DefaultMinDimension = mMinBuildingDimensions;
+	BuildingParamsWidget::DefaultMaxDimension = mMaxBuildingDimensions;
+}
+
+
 UWorld* PrototypeLevelGeneratorWindow::GetWorld()
 {
 	UWorld* world = NULL;
@@ -280,7 +267,7 @@ UWorld* PrototypeLevelGeneratorWindow::GetWorld()
 }
 
 
-void PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position)
+const AActor* PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position, FName sceneOutlinerFolderName)
 {
 	static FName BaseColorParamName("BaseColor");
 
@@ -292,35 +279,80 @@ void PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<BuildingParam
 
 	FActorSpawnParameters spawnParams = FActorSpawnParameters();
 	ABaseMeshActor* spawnedBuilding = world->SpawnActor<ABaseMeshActor>(ABaseMeshActor::StaticClass(), position, FRotator::ZeroRotator, spawnParams);
+	if (spawnedBuilding == NULL)
+		return NULL;
+
+	/* Move To Corresponding Folder */
+	spawnedBuilding->SetFolderPath(sceneOutlinerFolderName);
+
+	FVector minDimension = buildingParams->GetMinDimension();
+	FVector maxDimension = buildingParams->GetMaxDimension();
+	FVector dimension(FMath::FRandRange(minDimension.X, maxDimension.X), FMath::FRandRange(minDimension.Y, maxDimension.Y), FMath::FRandRange(minDimension.Z, maxDimension.Z));
+
 	spawnedBuilding->SetStaticMesh(buildingMesh);
-	spawnedBuilding->SetActorScale3D(buildingParams->GetMinDimension());
+	spawnedBuilding->SetActorScale3D(minDimension);
 
 	if (buildingParams->IsDefaultMesh())
 	{
 		UMaterialInstanceDynamic* materialInstance = spawnedBuilding->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, buildingMesh->GetMaterial(0));
 		materialInstance->SetVectorParameterValue(BaseColorParamName, linearBaseColor);
 	}
+
+	return spawnedBuilding;
 }
 
 
 FReply PrototypeLevelGeneratorWindow::GeneratePrototypeLevelClicked()
 {
+	static FName GeneratedRootFolderName("Generated_Root");
+
+
 	UWorld* world = GetWorld();
 
-	GenerateLevelObject(BuildingMeshes[0], FVector(0, 0, 0));
-	GenerateLevelObject(BuildingMeshes[1], FVector(100, 0, 0));
+	TActorIterator<ALandscape> landscapeIterator(world);
+	ALandscape* landscape = *landscapeIterator;
 
-	return FReply::Handled();
-}
+	FIntRect landscapeBounds = landscape->GetBoundingRect(); // Should return number of components
+	FVector landscapeScale = landscape->GetActorScale3D(); // should return scale of each component
+	FVector landscapeLocation = landscape->GetActorLocation(); // should return top left position of the landscape when viewed in top down
+	FVector landscapeEndLocation(landscapeLocation);
+	landscapeEndLocation.X += landscapeBounds.Max.X * landscapeScale.X;
+	landscapeEndLocation.Y += landscapeBounds.Max.Y * landscapeScale.Y;
 
 
-void PrototypeLevelGeneratorWindow::UpdateBuildingParams(FVector NewMinDimension, FVector NewMaxDimension)
-{
-	for (int i = 0; i < mNumBuildingClasses; i++)
+	/* Check if Head folder exists*/
+	FActorFolders& SceneOutlinerFolder = FActorFolders::Get();
+	FActorFolderProps* folderProps = SceneOutlinerFolder.GetFolderProperties(*world, GeneratedRootFolderName);
+	if (folderProps == NULL)
 	{
-		BuildingMeshes[i]->UpdateDefaultDimensions(NewMinDimension, NewMaxDimension);
+		SceneOutlinerFolder.DeleteFolder(*world, GeneratedRootFolderName);
 	}
 
-	BuildingParamsWidget::DefaultMinDimension = mMinBuildingDimensions;
-	BuildingParamsWidget::DefaultMaxDimension = mMaxBuildingDimensions;
+	/* Create Head Folder */
+	SceneOutlinerFolder.CreateFolder(*world, GeneratedRootFolderName);
+
+	for (float x = landscapeLocation.X; x < landscapeEndLocation.X;)
+	{
+		float maxWidth = 0;
+
+		for (float y = landscapeLocation.Y; y < landscapeEndLocation.Y;)
+		{
+			int buildingType = FMath::RandRange(0, mNumBuildingClasses - 1);
+			const AActor* spawnedActor = GenerateLevelObject(BuildingMeshes[buildingType], FVector(x, y, 0.0f), GeneratedRootFolderName);
+
+			/* Update position */
+			FVector origin, bounds;
+			spawnedActor->GetActorBounds(true, origin, bounds);
+			
+			y += bounds.Y * 2 + FMath::FRandRange(mAlleySpacingMin, mAlleySpacingMax);
+
+			if (bounds.X > maxWidth)
+				maxWidth = bounds.X;
+		}
+		
+
+		x += maxWidth * 2 + FMath::FRandRange(mAlleySpacingMin, mAlleySpacingMax);
+	}
+
+	return FReply::Handled();
 }

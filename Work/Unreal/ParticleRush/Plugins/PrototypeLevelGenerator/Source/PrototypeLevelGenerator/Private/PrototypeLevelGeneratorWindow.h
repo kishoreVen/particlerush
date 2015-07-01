@@ -5,14 +5,13 @@
 class PrototypeLevelGeneratorWindow : public SCompoundWidget
 {
 private:
-	int32		mMapSizeX;
-	int32		mMapSizeY;
 	int32		mNumBuildingClasses;
 
 	FVector		mMinBuildingDimensions;
 	FVector		mMaxBuildingDimensions;
 
-	float		mAlleySpacing;
+	float		mAlleySpacingMin;
+	float		mAlleySpacingMax;
 
 	TArray<TSharedPtr<BuildingParamsWidget>> BuildingMeshes;
 
@@ -27,18 +26,14 @@ private:
 
 	/* Generate Button Click Events and Helpers */
 	FReply GeneratePrototypeLevelClicked();	
-	void GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position);
+	const AActor* GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position, FName sceneOutlinerFolderName);
 
 	/* Accessors */
-	/* Map Size Events */
-	void SetMapSizeX(int32 value) { mMapSizeX = value; }
-	TOptional<int32> GetMapSizeX() const { return mMapSizeX; }
-	void SetMapSizeY(int32 value) { mMapSizeY = value; }
-	TOptional<int32> GetMapSizeY() const { return mMapSizeY; }
-
 	/* Alley Spacing Events */
-	void SetAlleySpacing(float value) { mAlleySpacing = value; }
-	TOptional<float> GetAlleySpacing() const { return mAlleySpacing; }
+	void SetAlleySpacingMin(float value) { mAlleySpacingMin = value; }
+	TOptional<float> GetAlleySpacingMin() const { return mAlleySpacingMin; }
+	void SetAlleySpacingMax(float value) { mAlleySpacingMax = value; }
+	TOptional<float> GetAlleySpacingMax() const { return mAlleySpacingMax; }
 
 	/* Num Building Classes Events */
 	void SetNumBuildingClasses(int32 value) { mNumBuildingClasses = value; UpdateBuildingClassesSlot(); }
