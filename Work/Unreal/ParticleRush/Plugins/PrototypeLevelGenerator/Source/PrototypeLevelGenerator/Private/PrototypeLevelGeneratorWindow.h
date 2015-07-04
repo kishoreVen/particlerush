@@ -25,9 +25,8 @@ private:
 	void UpdateBuildingParams(FVector NewMinDimension, FVector NewMaxDimension);
 
 	/* Generate Button Click Events and Helpers */
-	FReply GeneratePrototypeLevelClicked();	
-	const AActor* GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position, FName sceneOutlinerFolderName);
-
+	FReply GeneratePrototypeLevelClicked();
+	
 	/* Accessors */
 	/* Alley Spacing Events */
 	void SetAlleySpacingMin(float value) { mAlleySpacingMin = value; }
@@ -54,6 +53,15 @@ private:
 	TOptional<float> GetMaxBuildingDimensionsX() const { return mMaxBuildingDimensions.X; }
 	TOptional<float> GetMaxBuildingDimensionsY() const { return mMaxBuildingDimensions.Y; }
 	TOptional<float> GetMaxBuildingDimensionsZ() const { return mMaxBuildingDimensions.Z; }
+
+
+#pragma region LEVEL GENERATION
+	void GenerateLevel();
+
+	void GenerateBuildingInVolume(class ATriggerBox* generationVolume, const FName volumeFolder);
+
+	const AActor* GenerateLevelObject(TSharedPtr<BuildingParamsWidget> buildingParams, FVector position, FName sceneOutlinerFolderName);
+#pragma endregion
 
 public:
 	PrototypeLevelGeneratorWindow();

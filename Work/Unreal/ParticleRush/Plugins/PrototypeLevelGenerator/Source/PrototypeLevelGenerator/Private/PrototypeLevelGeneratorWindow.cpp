@@ -4,6 +4,7 @@
 #include "Generic/BaseMeshActor.h"
 #include "Landscape.h"
 #include "EditorActorFolders.h"
+#include "Engine/TriggerBox.h"
 
 #define LOCTEXT_NAMESPACE "PrototypeLevelGeneratorWindow"
 
@@ -271,6 +272,10 @@ const AActor* PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<Buil
 {
 	static FName BaseColorParamName("BaseColor");
 
+	float shouldSpawnProb = FMath::FRand();
+	if (shouldSpawnProb > 0.7f)
+		return NULL;
+
 	UWorld* world = GetWorld();
 
 	/* Extract Info */
@@ -290,7 +295,7 @@ const AActor* PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<Buil
 	FVector dimension(FMath::FRandRange(minDimension.X, maxDimension.X), FMath::FRandRange(minDimension.Y, maxDimension.Y), FMath::FRandRange(minDimension.Z, maxDimension.Z));
 
 	spawnedBuilding->SetStaticMesh(buildingMesh);
-	spawnedBuilding->SetActorScale3D(minDimension);
+	spawnedBuilding->SetActorScale3D(dimension);
 
 	if (buildingParams->IsDefaultMesh())
 	{
@@ -304,55 +309,70 @@ const AActor* PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<Buil
 
 FReply PrototypeLevelGeneratorWindow::GeneratePrototypeLevelClicked()
 {
-	static FName GeneratedRootFolderName("Generated_Root");
+	GenerateLevel();
 
+	return FReply::Handled();
+}
+
+
+void PrototypeLevelGeneratorWindow::GenerateLevel()
+{
+	static FName GeneratedRootFolderName("Generated_Root");
+	static FString FolderSeparator("/");
 
 	UWorld* world = GetWorld();
 
-	TActorIterator<ALandscape> landscapeIterator(world);
-	ALandscape* landscape = *landscapeIterator;
-
-	FIntRect landscapeBounds = landscape->GetBoundingRect(); // Should return number of components
-	FVector landscapeScale = landscape->GetActorScale3D(); // should return scale of each component
-	FVector landscapeLocation = landscape->GetActorLocation(); // should return top left position of the landscape when viewed in top down
-	FVector landscapeEndLocation(landscapeLocation);
-	landscapeEndLocation.X += landscapeBounds.Max.X * landscapeScale.X;
-	landscapeEndLocation.Y += landscapeBounds.Max.Y * landscapeScale.Y;
-
-
-	/* Check if Head folder exists*/
+	/* Enclose all generated objects in the root folder */
 	FActorFolders& SceneOutlinerFolder = FActorFolders::Get();
-	FActorFolderProps* folderProps = SceneOutlinerFolder.GetFolderProperties(*world, GeneratedRootFolderName);
-	if (folderProps == NULL)
-	{
-		SceneOutlinerFolder.DeleteFolder(*world, GeneratedRootFolderName);
-	}
-
-	/* Create Head Folder */
 	SceneOutlinerFolder.CreateFolder(*world, GeneratedRootFolderName);
 
-	for (float x = landscapeLocation.X; x < landscapeEndLocation.X;)
+	for (TActorIterator<ATriggerBox> triggerVolumeItr(world); triggerVolumeItr; ++triggerVolumeItr)
+	{
+		ATriggerBox* generatorTriggerVolume = *triggerVolumeItr;
+		FString volumeFolderPath = GeneratedRootFolderName.ToString() + FolderSeparator + generatorTriggerVolume->GetName();
+		FName volumeFolderPathName = FName(*volumeFolderPath);
+
+		/* Enclose all objects inside current volume in one folder */
+		SceneOutlinerFolder.CreateFolder(*world, volumeFolderPathName);
+
+		/* Generate objects in this volume */
+		GenerateBuildingInVolume(generatorTriggerVolume, volumeFolderPathName);
+	}
+}
+
+
+void PrototypeLevelGeneratorWindow::GenerateBuildingInVolume(ATriggerBox* generationVolume, const FName volumeFolder)
+{
+	UWorld* world = GetWorld();
+
+	FVector generationVolumeHalfSize = generationVolume->GetComponentsBoundingBox().GetExtent(); // Half Width
+	FVector generationVolumeLocation = generationVolume->GetActorLocation(); 
+
+	/* Fetch min and max locations */
+	FVector generationVolumeMin = generationVolumeLocation - generationVolumeHalfSize;
+	FVector generationVolumeMax = generationVolumeLocation + generationVolumeHalfSize;
+
+	for (float x = generationVolumeMin.X; x < generationVolumeMax.X;)
 	{
 		float maxWidth = 0;
 
-		for (float y = landscapeLocation.Y; y < landscapeEndLocation.Y;)
+		for (float y = generationVolumeMin.Y; y < generationVolumeMax.Y;)
 		{
 			int buildingType = FMath::RandRange(0, mNumBuildingClasses - 1);
-			const AActor* spawnedActor = GenerateLevelObject(BuildingMeshes[buildingType], FVector(x, y, 0.0f), GeneratedRootFolderName);
+			const AActor* spawnedActor = GenerateLevelObject(BuildingMeshes[buildingType], FVector(x, y, 0.0f), volumeFolder);
 
 			/* Update position */
 			FVector origin, bounds;
-			spawnedActor->GetActorBounds(true, origin, bounds);
-			
+			if (spawnedActor != NULL)
+				spawnedActor->GetActorBounds(true, origin, bounds);
+
 			y += bounds.Y * 2 + FMath::FRandRange(mAlleySpacingMin, mAlleySpacingMax);
 
 			if (bounds.X > maxWidth)
 				maxWidth = bounds.X;
 		}
-		
+
 
 		x += maxWidth * 2 + FMath::FRandRange(mAlleySpacingMin, mAlleySpacingMax);
 	}
-
-	return FReply::Handled();
 }
