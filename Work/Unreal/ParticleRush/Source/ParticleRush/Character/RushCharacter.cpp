@@ -205,9 +205,14 @@ void ARushCharacter::SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, boo
 	case EInputDOF::EVERYTHING:
 		requestedMask = requestedMask - 1;		// We care about every enum before everything ( 2 ^ n - 1)
 		if (enable)
+		{
 			_inputDOFMask = requestedMask;		// Requested everything to be turned on
+		}
 		else
+		{
+			_lastDisableDOFMask = _inputDOFMask;
 			_inputDOFMask = 0;					// Requested everything to be turned off
+		}	
 		break;
 	default:
 		if (enable)
@@ -216,6 +221,11 @@ void ARushCharacter::SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, boo
 			_inputDOFMask &= (~requestedMask);	// Eg. 1011 & (~0010) = 1011 & (1101) = 1001 ... 2nd bit was activated i.e EInputDOF::TURN was deactivated
 		break;
 	}
+}
+
+void ARushCharacter::ResetInputDOFStateToLastDisableMask()
+{
+	_inputDOFMask = _lastDisableDOFMask;
 }
 
 bool ARushCharacter::IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF)

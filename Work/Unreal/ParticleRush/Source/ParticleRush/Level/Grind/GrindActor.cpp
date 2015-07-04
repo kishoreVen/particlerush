@@ -73,6 +73,7 @@ void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
 	if (rushActor == NULL)
 		return;
 
+	rushActor->SetInputDOFState(EInputDOF::EVERYTHING, false);
 	mRushPtr = rushActor;
 	mShouldActivateRamp = true;
 }
@@ -86,6 +87,7 @@ void AGrindActor::NotifyActorEndOverlap(AActor* OtherActor)
 	if (rushActor == NULL)
 		return;
 
+	rushActor->ResetInputDOFStateToLastDisableMask();
 	mRushPtr = NULL;
 
 	mShouldActivateRamp = false;

@@ -258,10 +258,15 @@ private:
 	/* The 32-bit mask in which each bit represents an Input DOF */
 	int32 _inputDOFMask;
 
+	int32 _lastDisableDOFMask;
+
 public:
 	/* Turns on / off a particular input state, hence disabling or enabling input processing for that particlur DOF */
 	UFUNCTION(Meta = (Category = "Input Masking"))
 	void SetInputDOFState(TEnumAsByte<EInputDOF::Type> InputDOF, bool enable);
+
+	UFUNCTION(Meta = (Category = "Input Masking"))
+	void ResetInputDOFStateToLastDisableMask();
 
 	/* Returns if the given InputDOF is enabled or disabled */
 	UFUNCTION(Meta = (Category = "Input Masking"))
