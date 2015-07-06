@@ -1,1 +1,0 @@
-1pqlamz0 -- Textures Folder For Artist
