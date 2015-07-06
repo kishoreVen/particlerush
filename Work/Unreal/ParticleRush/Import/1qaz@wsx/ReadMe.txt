@@ -1,1 +1,0 @@
-## Asset Name: 1qaz@wsx ##
