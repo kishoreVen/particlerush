@@ -5,6 +5,7 @@
 #include "Components/SplineComponent.h"
 #include "Generic/ParticleRushUtils.h"
 #include "Character/RushCharacter.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values
 AGrindActor::AGrindActor()
@@ -58,7 +59,8 @@ void AGrindActor::Tick( float DeltaTime )
 
 	FVector movementDirection = nextSplinePointLocation - closestSplinePointTangent;
 
-	mRushPtr.Get()->AddActorLocalOffset(movementDirection * DeltaTime, true);
+	//mRushPtr.Get()->AddActorLocalOffset(movementDirection * DeltaTime, true);
+	mRushPtr->SetActorLocation(FMath::VInterpConstantTo(mRushPtr->GetActorLocation(), closestSplinePointLocation, DeltaTime, 1.f));
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, SplinePointLocation.ToString());
 
 	mPreviousClosestPoint = closestSplinePoint;
