@@ -74,10 +74,7 @@ void ARushCharacter::ExecuteBouncePerTick(float DeltaTime)
 	}
 	else
 	{
-		if (Controller != NULL)
-		{
-			FRotator interpRotation = FMath::RInterpTo(Controller->GetControlRotation(), _bounceTargetOrientation, DeltaTime, RushData.BounceOrientationStrength);
-			Controller->SetControlRotation(interpRotation);
-		}
+		FRotator interpRotation = FMath::RInterpTo(GetControllerRotation(), _bounceTargetOrientation, DeltaTime, RushData.BounceOrientationStrength);
+		SetControllerRotation(interpRotation);
 	}
 }

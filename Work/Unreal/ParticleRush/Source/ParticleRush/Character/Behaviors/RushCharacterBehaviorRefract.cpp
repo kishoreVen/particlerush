@@ -78,7 +78,7 @@ void ARushCharacter::ExecuteRefractionPerTick(float DeltaTime)
 
 	_timeBeforeRegainingControlFromRefraction -= DeltaTime;
 
-	FRotator currentOrientation = Controller->GetControlRotation();
+	FRotator currentOrientation = GetControllerRotation();
 
 	if ((_timeBeforeRegainingControlFromRefraction < 0.0f) || 
 		((currentOrientation - _refractTargetOrientation).IsNearlyZero())
@@ -89,10 +89,7 @@ void ARushCharacter::ExecuteRefractionPerTick(float DeltaTime)
 	}
 	else
 	{
-		if (Controller != NULL)
-		{
-			FRotator interpRotation = FMath::RInterpTo(currentOrientation, _refractTargetOrientation, DeltaTime, RushData.RefractOrientationStrength);
-			Controller->SetControlRotation(interpRotation);
-		}
+		FRotator interpRotation = FMath::RInterpTo(currentOrientation, _refractTargetOrientation, DeltaTime, RushData.RefractOrientationStrength);
+		SetControllerRotation(interpRotation);
 	}
 }

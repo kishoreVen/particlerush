@@ -274,6 +274,13 @@ public:
 #pragma endregion
 
 
+#pragma region WRAPPER
+	FRotator GetControllerRotation();
+
+	void SetControllerRotation(FRotator NewRotation);
+#pragma endregion
+
+
 #pragma region DEBUG
 private:
 	bool _shouldDrawWallCollisionResults;

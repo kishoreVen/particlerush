@@ -237,6 +237,25 @@ bool ARushCharacter::IsInputDOFActive(TEnumAsByte<EInputDOF::Type> InputDOF)
 #pragma endregion
 
 
+#pragma region WRAPPER
+FRotator ARushCharacter::GetControllerRotation()
+{
+	if (Controller == NULL)
+		return FRotator::ZeroRotator;
+
+	return Controller->GetControlRotation();
+}
+
+void ARushCharacter::SetControllerRotation(FRotator NewRotation)
+{
+	if (Controller == NULL)
+		return;
+
+	Controller->SetControlRotation(NewRotation);
+}
+#pragma endregion
+
+
 #pragma region Rush Action Sphere Timer Management
 void ARushCharacter::SetRushTargetTimeScale(float timeScale)
 {

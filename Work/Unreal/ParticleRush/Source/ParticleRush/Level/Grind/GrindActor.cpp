@@ -24,8 +24,6 @@ AGrindActor::AGrindActor()
 
 	mShouldActivateRamp = false;
 
-	mPreviousClosestPoint = 0;
-
 	mRushPtr = NULL;
 }
 
@@ -45,25 +43,43 @@ void AGrindActor::Tick( float DeltaTime )
 
 	FVector refLoc = mRushPtr.Get()->GetActorLocation();
 	int32 numSplinePoints = SplineComp->GetNumSplinePoints();
-	int32 closestSplinePoint = UParticleRushUtils::GetClosestSplinePointIndex(SplineComp, refLoc, mPreviousClosestPoint, SplineSearchDistanceSqrdThreshold);
+	int32 closestSplinePoint = UParticleRushUtils::GetClosestSplinePointIndex(SplineComp, refLoc, SplineSearchDistanceSqrdThreshold);
 
 	/* Cant Find that point */
-	if (closestSplinePoint == -1 || closestSplinePoint >= numSplinePoints)
+	if (closestSplinePoint == -1 || closestSplinePoint >= numSplinePoints - 1)
 		return;
 
-	FVector closestSplinePointLocation, closestSplinePointTangent;
-	SplineComp->GetLocalLocationAndTangentAtSplinePoint(closestSplinePoint, closestSplinePointLocation, closestSplinePointTangent);
+	FVector closestSplinePointLocation	= SplineComp->GetWorldLocationAtSplinePoint(closestSplinePoint);
+	FVector nextSplinePointLocation		= SplineComp->GetWorldLocationAtSplinePoint(closestSplinePoint + 1);
 
-	FVector nextSplinePointLocation, nextSplinePointTangent;
-	SplineComp->GetLocalLocationAndTangentAtSplinePoint(closestSplinePoint + 1, nextSplinePointLocation, nextSplinePointTangent);
+	/* Direction from one spline point to the next. This gives the direction we are supposed to move along the spline */
+	FVector directionOfMovementAlongSpline	= nextSplinePointLocation - closestSplinePointLocation;
+	directionOfMovementAlongSpline.Z		= 0;
+	directionOfMovementAlongSpline			= directionOfMovementAlongSpline.GetSafeNormal();
 
-	FVector movementDirection = nextSplinePointLocation - closestSplinePointTangent;
+	/* Direction from rush to the next spline point. This will give the gap we are supposed bridge as we move along the spline */
+	FVector directionToNextClosestPoint		= nextSplinePointLocation - refLoc;
+	directionToNextClosestPoint.Z			= 0;
+	directionToNextClosestPoint				= directionToNextClosestPoint.GetSafeNormal();
 
-	//mRushPtr.Get()->AddActorLocalOffset(movementDirection * DeltaTime, true);
-	mRushPtr->SetActorLocation(FMath::VInterpConstantTo(mRushPtr->GetActorLocation(), closestSplinePointLocation, DeltaTime, 1.f));
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, SplinePointLocation.ToString());
+	FVector netMovementDirection = directionToNextClosestPoint /*+ directionOfMovementAlongSpline*/;
+	netMovementDirection = netMovementDirection.GetSafeNormal();
 
-	mPreviousClosestPoint = closestSplinePoint;
+	FRotator currentActorRotation = mRushPtr.Get()->GetControllerRotation();
+	FRotator finalActorRotation = netMovementDirection.Rotation();
+
+	FRotator interpedRotation = FMath::RInterpTo(currentActorRotation, finalActorRotation, DeltaTime, 0.7f);
+
+	if (GEngine)
+	{
+		DrawDebugDirectionalArrow(GetWorld(), refLoc, refLoc + netMovementDirection * 50.0f, 5.0f, FColor::Yellow);
+		DrawDebugSphere(GetWorld(), refLoc, 10.0f, 16, FColor::Green);
+		DrawDebugSphere(GetWorld(), closestSplinePointLocation, 10.0f, 16, FColor::Red);
+		DrawDebugSphere(GetWorld(), nextSplinePointLocation, 10.0f, 16, FColor::Blue);
+	}
+
+	mRushPtr.Get()->SetControllerRotation(interpedRotation);
+	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), 0.1f);
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
@@ -93,5 +109,4 @@ void AGrindActor::NotifyActorEndOverlap(AActor* OtherActor)
 	mRushPtr = NULL;
 
 	mShouldActivateRamp = false;
-	mPreviousClosestPoint = 0;
 }

@@ -32,8 +32,6 @@ public:
 private:
 	bool mShouldActivateRamp;
 
-	int mPreviousClosestPoint;
-
 	TWeakObjectPtr<class ARushCharacter> mRushPtr;
 #pragma endregion
 	

@@ -34,8 +34,7 @@ public:
 	
 	/* 
 	* Gets the closest spline point along the spline point index. Returns -1 if threshold distance condition is not met.
-	* If being used recursively and there is a possibility that the character is moving from point to point, use StartSearchAt to specify previously found point.
 	*/
 	UFUNCTION(BlueprintCallable, Meta = (Category = "Spline Utilities"))
-	static int32 GetClosestSplinePointIndex(const class USplineComponent* SplineComponent, const FVector& ReferenceLocation, int32 StartSearchAt = 0, float DistanceThresholdSqrd = 100.0f);
+	static int32 GetClosestSplinePointIndex(const class USplineComponent* SplineComponent, const FVector& ReferenceLocation, float DistanceThresholdSqrd = 1.0E06f);
 };

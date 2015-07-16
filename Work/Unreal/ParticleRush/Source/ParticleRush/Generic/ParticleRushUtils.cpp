@@ -81,32 +81,23 @@ FRotator UParticleRushUtils::ROverShootingInterpTo(const FRotator& Current, cons
 	return (Current + DeltaMove).GetNormalized();
 }
 
-int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* SplineComponent, const FVector& ReferenceLocation, int32 SearchStartAt, float DistanceThresholdSqrd)
+int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* SplineComponent, const FVector& ReferenceLocation, float DistanceThresholdSqrd)
 {
 	int32 numSplinePoints = SplineComponent->GetNumSplinePoints();
 
 	int32 closestSplinePointIndex = -1;
-	float maxDistanceSqrd = DistanceThresholdSqrd;
+	float minDistanceSqrd = DistanceThresholdSqrd;
 
 	/* Start from the index specified at Search Start At */
-	for (int32 splineIndex = SearchStartAt; splineIndex < numSplinePoints; splineIndex++)
+	for (int32 splineIndex = 0; splineIndex < numSplinePoints; splineIndex++)
 	{
 		FVector location = SplineComponent->GetWorldLocationAtSplinePoint(splineIndex);
 
 		float distanceSqrd = (location - ReferenceLocation).SizeSquared();
-		if (distanceSqrd < maxDistanceSqrd)
-			closestSplinePointIndex = splineIndex;
-	}
-
-	if (-1 == closestSplinePointIndex)
-	{
-		for (int32 splineIndex = 0; splineIndex < SearchStartAt; splineIndex++)
+		if (distanceSqrd < minDistanceSqrd)
 		{
-			FVector location = SplineComponent->GetWorldLocationAtSplinePoint(splineIndex);
-
-			float distanceSqrd = (location - ReferenceLocation).SizeSquared();
-			if (distanceSqrd < maxDistanceSqrd)
-				closestSplinePointIndex = splineIndex;
+			closestSplinePointIndex = splineIndex;
+			minDistanceSqrd = distanceSqrd;
 		}
 	}
 
