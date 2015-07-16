@@ -13,9 +13,12 @@ private:
 	float		mAlleySpacingMin;
 	float		mAlleySpacingMax;
 
+	/* Widget References */
 	TArray<TSharedPtr<BuildingParamsWidget>> BuildingMeshes;
 
 	TSharedPtr<SVerticalBox> BuildingClassesVerticalSlot;
+
+	TSharedPtr<class IDetailsView> DetailsPanel;
 
 	/* Construction Helpers */
 	void UpdateBuildingClassesSlot();
@@ -54,6 +57,10 @@ private:
 	TOptional<float> GetMaxBuildingDimensionsY() const { return mMaxBuildingDimensions.Y; }
 	TOptional<float> GetMaxBuildingDimensionsZ() const { return mMaxBuildingDimensions.Z; }
 
+
+	/* Brush Methods */
+	bool GetIsPropertyVisible(const FPropertyAndParent& PropertyAndParent) const;
+	FEdModeLandscape* GetEditorMode() const;
 
 #pragma region LEVEL GENERATION
 	void GenerateLevel();

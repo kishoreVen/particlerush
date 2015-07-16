@@ -1,5 +1,9 @@
 // Some copyright should be here...
 
+#include "UnrealEd.h"
+#include "Editor/UnrealEd/Public/Toolkits/BaseToolkit.h"
+#include "Editor/UnrealEd/Public/EditorModes.h"
+
 #include "SlateBasics.h"
 #include "SlateExtras.h"
 
@@ -8,6 +12,12 @@
 #include "LevelEditor.h"
 
 #include "PropertyEditing.h"
+#include "ClassViewerModule.h"
+#include "ClassViewerFilter.h"
+
+#include "LandscapeEditorCommands.h"
+#include "LandscapeEdMode.h"
+#include "LandscapeEditorObject.h"
 
 #include "PrototypeLevelGenerator.h"
 

@@ -5,6 +5,7 @@
 #include "Landscape.h"
 #include "EditorActorFolders.h"
 #include "Engine/TriggerBox.h"
+#include "PrototypeLevelGeneratorEdMode.h"
 
 #define LOCTEXT_NAMESPACE "PrototypeLevelGeneratorWindow"
 
@@ -28,6 +29,19 @@ void PrototypeLevelGeneratorWindow::Construct(const FArguments& args)
 
 	/* A one time update when the window loads for the first time. */
 	UpdateBuildingClassesSlot();
+
+	/* Building the Bursh */
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea);
+
+	DetailsPanel = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+	DetailsPanel->SetIsPropertyVisibleDelegate(FIsPropertyVisible::CreateSP(this, &PrototypeLevelGeneratorWindow::GetIsPropertyVisible));
+
+	FEdModeLandscape* LandscapeEdMode = GetEditorMode();
+	if (LandscapeEdMode)
+	{
+		DetailsPanel->SetObject(LandscapeEdMode->UISettings);
+	}
 
 	ChildSlot
 	[
@@ -177,6 +191,13 @@ void PrototypeLevelGeneratorWindow::Construct(const FArguments& args)
 		];
 
 	verticalBox->AddSlot()
+		.AutoHeight()
+		.Padding(5)
+		[
+			DetailsPanel.ToSharedRef()
+		];
+
+	verticalBox->AddSlot()
 	.AutoHeight()
 	.Padding(5)
 	[
@@ -309,7 +330,9 @@ const AActor* PrototypeLevelGeneratorWindow::GenerateLevelObject(TSharedPtr<Buil
 
 FReply PrototypeLevelGeneratorWindow::GeneratePrototypeLevelClicked()
 {
-	GenerateLevel();
+	//GenerateLevel();
+
+	GLevelEditorModeTools().ActivateMode(FPrototypeLevelGeneratorEdMode::EM_PrototypeLevelGenerator);
 
 	return FReply::Handled();
 }
@@ -375,4 +398,75 @@ void PrototypeLevelGeneratorWindow::GenerateBuildingInVolume(ATriggerBox* genera
 
 		x += maxWidth * 2 + FMath::FRandRange(mAlleySpacingMin, mAlleySpacingMax);
 	}
+}
+
+
+bool PrototypeLevelGeneratorWindow::GetIsPropertyVisible(const FPropertyAndParent& PropertyAndParent) const
+{
+	const UProperty& Property = PropertyAndParent.Property;
+
+	FEdModeLandscape* LandscapeEdMode = GetEditorMode();
+	if (LandscapeEdMode != NULL && LandscapeEdMode->CurrentTool != NULL)
+	{
+		if (Property.HasMetaData("ShowForMask"))
+		{
+			const bool bMaskEnabled = LandscapeEdMode->CurrentTool &&
+				LandscapeEdMode->CurrentTool->SupportsMask() &&
+				LandscapeEdMode->CurrentToolTarget.LandscapeInfo.IsValid() &&
+				LandscapeEdMode->CurrentToolTarget.LandscapeInfo->SelectedRegion.Num() > 0;
+
+			if (bMaskEnabled)
+			{
+				return true;
+			}
+		}
+		if (Property.HasMetaData("ShowForTools"))
+		{
+			const FName CurrentToolName = LandscapeEdMode->CurrentTool->GetToolName();
+
+			TArray<FString> ShowForTools;
+			Property.GetMetaData("ShowForTools").ParseIntoArray(ShowForTools, TEXT(","), true);
+			if (!ShowForTools.Contains(CurrentToolName.ToString()))
+			{
+				return false;
+			}
+		}
+		if (Property.HasMetaData("ShowForBrushes"))
+		{
+			const FName CurrentBrushSetName = LandscapeEdMode->LandscapeBrushSets[LandscapeEdMode->CurrentBrushSetIndex].BrushSetName;
+			// const FName CurrentBrushName = LandscapeEdMode->CurrentBrush->GetBrushName();
+
+			TArray<FString> ShowForBrushes;
+			Property.GetMetaData("ShowForBrushes").ParseIntoArray(ShowForBrushes, TEXT(","), true);
+			if (!ShowForBrushes.Contains(CurrentBrushSetName.ToString()))
+				//&& !ShowForBrushes.Contains(CurrentBrushName.ToString())
+			{
+				return false;
+			}
+		}
+		if (Property.HasMetaData("ShowForTargetTypes"))
+		{
+			static const TCHAR* TargetTypeNames[] = { TEXT("Heightmap"), TEXT("Weightmap"), TEXT("Visibility") };
+
+			TArray<FString> ShowForTargetTypes;
+			Property.GetMetaData("ShowForTargetTypes").ParseIntoArray(ShowForTargetTypes, TEXT(","), true);
+
+			const ELandscapeToolTargetType::Type CurrentTargetType = LandscapeEdMode->CurrentToolTarget.TargetType;
+			if (CurrentTargetType == ELandscapeToolTargetType::Invalid ||
+				ShowForTargetTypes.FindByKey(TargetTypeNames[CurrentTargetType]) == nullptr)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+FEdModeLandscape* PrototypeLevelGeneratorWindow::GetEditorMode() const
+{
+	return (FEdModeLandscape*)GLevelEditorModeTools().GetActiveMode(FBuiltinEditorModes::EM_Landscape);
 }

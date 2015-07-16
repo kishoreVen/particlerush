@@ -14,12 +14,36 @@ FVector						BuildingParamsWidget::DefaultMinDimension = FVector(0, 0, 0);
 FVector						BuildingParamsWidget::DefaultMaxDimension = FVector(0, 0, 0);
 
 
+/* Filter Class */
+class FBuildingParamsClassFilter : public IClassViewerFilter
+{
+public:
+
+	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		if (InClass != nullptr)
+		{
+			return !InClass->HasAnyClassFlags(CLASS_Abstract) &&
+				InClass->HasAnyClassFlags(CLASS_EditInlineNew) &&
+				InClass->IsChildOf(AActor::StaticClass());
+		}
+		return false;
+	}
+
+	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		return InUnloadedClassData->IsChildOf(AActor::StaticClass());
+	}
+};
+
+
 BuildingParamsWidget::BuildingParamsWidget()
 	: BuildingMeshPtr(NULL),
 	  BSPBuildingColor(FColorList::Blue),
 	  DefaultBuildingMeshName("/Game/Assets/Prototype/DefaultBuildingMesh"),
 	  MinDimension(DefaultMinDimension),
-	  MaxDimension(DefaultMaxDimension)
+	  MaxDimension(DefaultMaxDimension),
+	  BuildingClass(NULL)
 {
 	
 }
@@ -203,6 +227,16 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 			.OnZCommitted(this, &BuildingParamsWidget::SetMaxBuildingDimensionsZ)
 		];
 
+		TSharedRef<SWidget> ClassViewerWidget =
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.VAlign(EVerticalAlignment::VAlign_Center)
+			[
+				SNew(SComboButton)
+				.OnGetMenuContent(this, &BuildingParamsWidget::CreateClassViewerMenu)
+			];
+
+
 	ChildSlot
 		[
 			SNew(SVerticalBox)
@@ -279,7 +313,7 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 				+ SSplitter::Slot()
 				.Value(0.2f)
 				[
-					SNullWidget::NullWidget
+					ClassViewerWidget
 				]
 			
 				+ SSplitter::Slot()
@@ -308,6 +342,7 @@ void BuildingParamsWidget::Construct(const FArguments& InArgs)
 			]
 		];
 }
+
 
 void BuildingParamsWidget::SetBuildingMesh(UObject* NewAsset)
 {
@@ -486,6 +521,34 @@ FText BuildingParamsWidget::GetSelectedAssetPath() const
 }
 
 
+TSharedRef<SWidget> BuildingParamsWidget::CreateClassViewerMenu() const
+{
+	FClassViewerInitializationOptions Options;
+	Options.bShowUnloadedBlueprints = true;
+	Options.bShowDisplayNames = true;
+	Options.ClassFilter = MakeShareable(new FBuildingParamsClassFilter);
+
+	FOnClassPicked OnPicked(FOnClassPicked::CreateRaw(this, &BuildingParamsWidget::SetBuildingClass));
+
+	return
+		SNew(SBox)
+		[	
+			FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(Options, OnPicked)
+		];
+}
+
+
+void BuildingParamsWidget::SetBuildingClass(UClass* NewBuildingClass)
+{
+	FSlateApplication::Get().DismissAllMenus();
+
+	check(NewBuildingClass);
+	check(NewBuildingClass->IsChildOf(AActor::StaticClass()));
+
+	BuildingClass = NewBuildingClass;
+}
+
+
 bool BuildingParamsWidget::IsDefaultMesh()
 {
 	UStaticMesh* staticMesh = BuildingMeshPtr.Get();
@@ -505,6 +568,7 @@ FVector BuildingParamsWidget::GetMaxDimension()
 {
 	return (DefaultMaxDimension - MaxDimension).IsNearlyZero() ? DefaultMaxDimension : MaxDimension;
 }
+
 
 void BuildingParamsWidget::UpdateDefaultDimensions(FVector NewMinDimension, FVector NewMaxDimension)
 {

@@ -50,6 +50,9 @@ public class PrototypeLevelGenerator : ModuleRules
                 "PropertyEditor",
                 "ParticleRush",
                 "Landscape",
+                "LandscapeEditor",
+                "ClassViewer",
+                "RenderCore",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -60,6 +60,11 @@ private:
 	TOptional<float> GetMaxBuildingDimensionsY() const { return MaxDimension.Y; }
 	TOptional<float> GetMaxBuildingDimensionsZ() const { return MaxDimension.Z; }
 
+	/* Building Class Events */
+	void SetBuildingClass(UClass* NewBuildingClass);
+
+	TSharedRef<SWidget> CreateClassViewerMenu() const;
+
 	/* Selected asset name and tooltip */
 	FText GetSelectedAssetName() const;
 	FText GetSelectedAssetPath() const;
@@ -69,6 +74,7 @@ private:
 
 public:
 	TWeakObjectPtr<UStaticMesh>								BuildingMeshPtr;
+	UClass*													BuildingClass;
 	static TWeakObjectPtr<UStaticMesh>						DefaultBuildingMeshPtr;
 	FColor													BSPBuildingColor;
 	static FVector											DefaultMinDimension;
