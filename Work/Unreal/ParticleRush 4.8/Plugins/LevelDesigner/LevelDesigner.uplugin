@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"FriendlyName": "Level Designer",
+	"Version": 1,
+	"VersionName": "1.0",
+	"CreatedBy": "Kishore Venkateshan",
+	"CreatedByURL": "http://kishorevenkateshan.com",
+	"Category": "Level",
+	"Description": "Upgrade from Prototype Level Generator",
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "LevelDesigner",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}
