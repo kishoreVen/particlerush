@@ -19,14 +19,20 @@ public:
 	}
 	
 	
-	/** Commands for the foliage brush settings. */
+	/** Commands for the brush settings. */
 	TSharedPtr< FUICommandInfo > IncreaseBrushSize;
 	TSharedPtr< FUICommandInfo > DecreaseBrushSize;
 
 	/** Commands for the tools toolbar. */
-	TSharedPtr< FUICommandInfo > SetErase;
+	TSharedPtr< FUICommandInfo > EraseMode;
+	TSharedPtr< FUICommandInfo > DesignMode;
 
 	virtual void RegisterCommands() override;
 
 public:
+
+	TMap<FName, TSharedPtr<FUICommandInfo>> NameToCommandMap;
+
+	static FName EraseModeName;
+	static FName DesignModeName;
 };

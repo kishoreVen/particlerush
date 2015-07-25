@@ -16,15 +16,23 @@ struct FLevelDesignerUISettings
 	void Save();
 
 	// tool
-	float GetRadius() const { return Radius; }
-	void SetRadius(float InRadius) { Radius = InRadius; }
-	
-	bool IsAnyToolActive() { return (bEraseToolSelected == true); }
-	
+	float GetBrushRadius() const { return BrushRadius; }
+	void SetBrushRadius(float value) { BrushRadius = value; }
+
+	int32 GetNumBuildingClasses() const { return NumBuildingClasses; }
+	void SetNumBuildingClasses(int32 value) { NumBuildingClasses = value; }
+
+	FVector2D GetDefaultAlleySpacing() const { return DefaultAlleySpacing; }
+	void SetDefaultAlleySpacing(const FVector2D& value) { DefaultAlleySpacing = value; }
+
+	float GetRotationalVariance() const { return RotationalVariance; }
+	void SetRotationalVariance(float value) { RotationalVariance = value; }
 
 	FLevelDesignerUISettings()
-		: Radius(512.f)
-		, bEraseToolSelected(false)
+		: BrushRadius(512.f),
+		  NumBuildingClasses(4),
+		  DefaultAlleySpacing(10.0f, 10.0f),
+		  RotationalVariance(90.0f)
 	{
 	}
 
@@ -35,15 +43,25 @@ struct FLevelDesignerUISettings
 private:
 	
 	/* Brush Settings */
-	float Radius;
+	float BrushRadius;
 
-public:
-	bool bEraseToolSelected;
+	int32 NumBuildingClasses;
+
+	FVector2D DefaultAlleySpacing;
+
+	float RotationalVariance;
 };
 
 /**
  * Foliage editor mode
  */
+enum ELevelDesignerModeTools : int8
+{
+	MT_Erase	= 0,
+	MT_Design	= 1
+};
+
+
 class FLevelDesignerEdMode : public FEdMode
 {
 public:
@@ -60,6 +78,9 @@ public:
 	/** Destructor */
 	virtual ~FLevelDesignerEdMode();
 
+	/* Set Tool wrapper */
+	void SetCurrentLevelDesignerTool(ELevelDesignerModeTools ToolModeID);
+
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
@@ -74,13 +95,7 @@ public:
 	/** FEdMode: Called after an Undo operation */
 	virtual void PostUndo() override;
 
-	/** Setup before call to ApplyBrush */
-	void PreApplyBrush();
-
-	/** Apply brush */
-	void ApplyBrush(FEditorViewportClient* ViewportClient);
-
-	void BrushTrace(FEditorViewportClient* ViewportClient, int32 MouseX, int32 MouseY);
+	virtual bool UsesToolkits() const override;
 	
 	/**
 	 * Called when the mouse is moved over the viewport
@@ -143,17 +158,12 @@ public:
 	virtual bool UsesTransformWidget() const override;
 	virtual EAxisList::Type GetWidgetAxisToDraw(FWidget::EWidgetMode InWidgetMode) const override;
 
+	virtual bool ShowModeWidgets() const override;
+
 	virtual bool DisallowMouseDeltaTracking() const override;
 
 	/** Forces real-time perspective viewports */
 	void ForceRealTimeViewports(const bool bEnable, const bool bStoreCurrentState);
-
-	/** Generate start/end points for a random trace inside the sphere brush.
-	    returns a line segment inside the sphere parallel to the view direction */
-	void GetRandomVectorInBrush(FVector& OutStart, FVector& OutEnd);
-
-	/** Adjusts the radius of the foliage brush by the specified amount */
-	void AdjustBrushRadius(float Adjustment);
 
 	typedef TMap<FName, TMap<ULandscapeComponent*, TArray<uint8> > > LandscapeLayerCacheData;
 
@@ -161,27 +171,19 @@ public:
 private:
 
 	void BindCommands();
-	bool CurrentToolUsesBrush() const;
 
 	/** Called when the user changes the current tool in the UI */
 	void HandleToolChanged();
 
-	/** Deselects all tools */
-	void ClearAllToolSelection();
-
-	/** Sets the tool mode to Paint. */
+	/** Sets the tool mode to Erase. */
 	void OnSetEraseTool();
 
-	bool bBrushTraceValid;
-	FVector BrushLocation;
-	FVector BrushTraceDirection;
-	UStaticMeshComponent* SphereBrushComponent;
+	/** Sets the tool mode to Design. */
+	void OnSetDesignTool();
+
+	bool CurrentToolUsesBrush();
 
 	// Landscape layer cache data
 	LandscapeLayerCacheData LandscapeLayerCaches;
-
-	bool bToolActive;
-	bool bIsDragging;
-	bool bAdjustBrushRadius;
 };
 

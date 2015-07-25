@@ -2,6 +2,12 @@
 
 #pragma once
 
+#include "LevelDesignerEdMode.h"
+
+/* Forward Declerations */
+class FLevelDesignerToolKit;
+class SLevelDesignerModeControls;
+
 /** Geometry Mode widget for controls */
 class SLevelDesignerModeControls : public SCompoundWidget, public FNotifyHook
 {
@@ -12,19 +18,30 @@ public:
 public:
 
 	/** SCompoundWidget functions */
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, TSharedRef<FLevelDesignerToolKit> InParentToolkit);
 
 protected:
 
 private:
-	void CreateLayout();
+	TSharedPtr<SVerticalBox> ContentWidget;
 
-	/** Returns a reference to the geometry mode tool */
-	class FModeTool* GetModeTool() const;
+	void UpdateContentWidget();
+
+	void CreateLayout(const FArguments& InArgs);
+
+	void OnChangeMode(ELevelDesignerModeTools ModeID);
+
+	bool IsModeEnabled(ELevelDesignerModeTools ModeID) const;
+
+	bool IsModeActive(ELevelDesignerModeTools ModeID) const;
 
 private:
 	/** Pointer to the parent window, so we know to destroy it when done */
 	TWeakPtr<SWindow> ParentWindow;
+
+	TSharedPtr<FUICommandList> CommandList;
+
+	TSharedPtr<FLevelDesignerToolKit> ParentToolKit;
 };
 
 /**
@@ -46,6 +63,7 @@ public:
 	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
 
 private:
+
 	/** Geometry tools widget */
 	TSharedPtr<class SLevelDesignerModeControls> LevelGeneratorWidget;
 };

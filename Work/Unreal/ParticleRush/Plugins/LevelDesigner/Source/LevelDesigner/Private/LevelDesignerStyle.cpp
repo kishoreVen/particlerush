@@ -41,10 +41,16 @@ const FVector2D Icon40x40(40.0f, 40.0f);
 
 TSharedRef< FSlateStyleSet > FLevelDesignerStyle::Create()
 {
+	static FVector2D Icon64x64(64.0f, 64.0f);
+
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("LevelDesignerStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("LevelDesigner")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("LevelDesigner.PluginAction", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("LevelDesigner.PluginAction",	new IMAGE_BRUSH(TEXT("ButtonIcon_40x"),			Icon40x40));
+	Style->Set("LevelDesigner.DesignMode",		new IMAGE_BRUSH(TEXT("Icon_Design"),			Icon40x40));
+	Style->Set("LevelDesigner.EraseMode",		new IMAGE_BRUSH(TEXT("Icon_Erase"),				Icon40x40));
+	Style->Set("LevelDesigner.DesignDelete",	new IMAGE_BRUSH(TEXT("Icon_DeleteEverything"),	Icon40x40));
+	Style->Set("LevelDesigner.BoxTrigger",		new IMAGE_BRUSH(TEXT("Icon_BoxTrigger"),		Icon40x40));
 
 	return Style;
 }
@@ -63,4 +69,9 @@ void FLevelDesignerStyle::ReloadTextures()
 const ISlateStyle& FLevelDesignerStyle::Get()
 {
 	return *StyleInstance;
+}
+
+const FSlateBrush* FLevelDesignerStyle::GetBrush(FName PropertyName, const ANSICHAR* Specifier)
+{
+	return StyleInstance->GetBrush(PropertyName, Specifier);
 }

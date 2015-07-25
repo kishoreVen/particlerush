@@ -134,9 +134,6 @@ public:
 	/** FEdMode: Render HUD elements for this tool */
 	virtual void DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas) override;
 
-	/** FEdMode: Handling SelectActor */
-	virtual bool Select(AActor* InActor, bool bInSelected) override;
-
 	/** FEdMode: Check to see if an actor can be selected in this mode - no side effects */
 	virtual bool IsSelectionAllowed(AActor* InActor, bool bInSelection) const override;
 

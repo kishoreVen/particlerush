@@ -249,10 +249,10 @@ bool FPrototypeLevelGeneratorEdMode::DisallowMouseDeltaTracking() const
 /** FEdMode: Called once per frame */
 void FPrototypeLevelGeneratorEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
 {
-	if (bToolActive)
-	{
-		ApplyBrush(ViewportClient);
-	}
+	//if (bToolActive)
+	//{
+	//	ApplyBrush(ViewportClient);
+	//}
 
 	FEdMode::Tick(ViewportClient, DeltaTime);
 
@@ -295,14 +295,14 @@ void FPrototypeLevelGeneratorEdMode::Tick(FEditorViewportClient* ViewportClient,
  */
 bool FPrototypeLevelGeneratorEdMode::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY)
 {
-	BrushTrace(ViewportClient, MouseX, MouseY);
+	/*BrushTrace(ViewportClient, MouseX, MouseY);
 
 	if (bIsDragging)
 	{
-		FSphere collisionSphere(BrushLocation, UISettings.GetRadius());
-		TArray<AActor*> OverlappingActors;
-		SphereBrushComponent->GetOverlappingActors(OverlappingActors);
-	}
+	FSphere collisionSphere(BrushLocation, UISettings.GetRadius());
+	TArray<AActor*> OverlappingActors;
+	SphereBrushComponent->GetOverlappingActors(OverlappingActors);
+	}*/
 
 	return false;
 }
@@ -467,59 +467,59 @@ bool FPrototypeLevelGeneratorEdMode::InputKey(FEditorViewportClient* ViewportCli
 	}
 	
 	bool bHandled = false;
-	if (UISettings.bRandomSpawnToolSelected || UISettings.bEraseToolSelected)
-	{
-		// Require Ctrl or not as per user preference
-		
-		if (Key == EKeys::LeftMouseButton && Event == IE_Pressed)
-		{
-			// Only activate tool if we're not already moving the camera and we're not trying to drag a transform widget
-			// Not using "if (!ViewportClient->IsMovingCamera())" because it's wrong in ortho viewports :D
-			bool bMovingCamera = Viewport->KeyState(EKeys::MiddleMouseButton) || Viewport->KeyState(EKeys::RightMouseButton) || IsAltDown(Viewport);
+	//if (UISettings.bRandomSpawnToolSelected || UISettings.bEraseToolSelected)
+	//{
+	//	// Require Ctrl or not as per user preference
+	//	
+	//	if (Key == EKeys::LeftMouseButton && Event == IE_Pressed)
+	//	{
+	//		// Only activate tool if we're not already moving the camera and we're not trying to drag a transform widget
+	//		// Not using "if (!ViewportClient->IsMovingCamera())" because it's wrong in ortho viewports :D
+	//		bool bMovingCamera = Viewport->KeyState(EKeys::MiddleMouseButton) || Viewport->KeyState(EKeys::RightMouseButton) || IsAltDown(Viewport);
 
-			if ((Viewport->IsPenActive() && Viewport->GetTabletPressure() > 0.f) ||
-				(!bMovingCamera && ViewportClient->GetCurrentWidgetAxis() == EAxisList::None))
-			{
-				if (!bToolActive)
-				{
-					GEditor->BeginTransaction(NSLOCTEXT("UnrealEd", "PrototypeLevelGeneratorMode_EditTransaction", "Level Editing"));
-					PreApplyBrush();
-					ApplyBrush(ViewportClient);
-					bToolActive = true;
+	//		if ((Viewport->IsPenActive() && Viewport->GetTabletPressure() > 0.f) ||
+	//			(!bMovingCamera && ViewportClient->GetCurrentWidgetAxis() == EAxisList::None))
+	//		{
+	//			if (!bToolActive)
+	//			{
+	//				GEditor->BeginTransaction(NSLOCTEXT("UnrealEd", "PrototypeLevelGeneratorMode_EditTransaction", "Level Editing"));
+	//				PreApplyBrush();
+	//				ApplyBrush(ViewportClient);
+	//				bToolActive = true;
 
-					bHandled = true;
-				}
-			}
-		}
-		else if (bToolActive && Event == IE_Released &&
-			(Key == EKeys::LeftMouseButton))
-		{
-			//Set the cursor position to that of the slate cursor so it wont snap back
-			Viewport->SetPreCaptureMousePosFromSlateCursor();
-			GEditor->EndTransaction();
-			LandscapeLayerCaches.Empty();
-			bToolActive = false;
-			
-			bHandled = true;
-		}
-		else if (IsCtrlDown(Viewport))
-		{
-			// Control + scroll adjusts the brush radius
-			static const float RadiusAdjustmentAmount = 25.f;
-			if (Key == EKeys::MouseScrollUp)
-			{
-				AdjustBrushRadius(RadiusAdjustmentAmount);
-				
-				bHandled = true;
-			}
-			else if (Key == EKeys::MouseScrollDown)
-			{
-				AdjustBrushRadius(-RadiusAdjustmentAmount);
-				
-				bHandled = true;
-			}
-		}
-	}
+	//				bHandled = true;
+	//			}
+	//		}
+	//	}
+	//	else if (bToolActive && Event == IE_Released &&
+	//		(Key == EKeys::LeftMouseButton))
+	//	{
+	//		//Set the cursor position to that of the slate cursor so it wont snap back
+	//		Viewport->SetPreCaptureMousePosFromSlateCursor();
+	//		GEditor->EndTransaction();
+	//		LandscapeLayerCaches.Empty();
+	//		bToolActive = false;
+	//		
+	//		bHandled = true;
+	//	}
+	//	else if (IsCtrlDown(Viewport))
+	//	{
+	//		// Control + scroll adjusts the brush radius
+	//		static const float RadiusAdjustmentAmount = 25.f;
+	//		if (Key == EKeys::MouseScrollUp)
+	//		{
+	//			AdjustBrushRadius(RadiusAdjustmentAmount);
+	//			
+	//			bHandled = true;
+	//		}
+	//		else if (Key == EKeys::MouseScrollDown)
+	//		{
+	//			AdjustBrushRadius(-RadiusAdjustmentAmount);
+	//			
+	//			bHandled = true;
+	//		}
+	//	}
+	//}
 
 	return bHandled;
 }
@@ -543,17 +543,6 @@ bool FPrototypeLevelGeneratorEdMode::IsSelectionAllowed(AActor* InActor, bool bI
 	return false;
 }
 
-/** FEdMode: Handling SelectActor */
-bool FPrototypeLevelGeneratorEdMode::Select(AActor* InActor, bool bInSelected)
-{
-	// return true if you filter that selection
-	// however - return false if we are trying to deselect so that it will infact do the deselection
-	if (bInSelected == false)
-	{
-		return false;
-	}
-	return true;
-}
 
 /** FEdMode: Called when the currently selected actor has changed */
 void FPrototypeLevelGeneratorEdMode::ActorSelectionChangeNotify()
@@ -588,17 +577,17 @@ bool FPrototypeLevelGeneratorEdMode::HandleClick(FEditorViewportClient* InViewpo
 {
 	UE_LOG(LevelGeneratorEdModeLog, Warning, TEXT("Clicked in Editor"));
 
-	if (UISettings.bEraseToolSelected || UISettings.bRandomSpawnToolSelected)
-	{
-		if (HitProxy && HitProxy->IsA(HActor::StaticGetType()))
-		{
-			GEditor->BeginTransaction(NSLOCTEXT("UnrealEd", "FPrototypeLevelGeneratorEdMode_EditTransaction", "Level Editing"));
-			
-			GEditor->EndTransaction();
-		}
+	//if (UISettings.bEraseToolSelected || UISettings.bRandomSpawnToolSelected)
+	//{
+	//	if (HitProxy && HitProxy->IsA(HActor::StaticGetType()))
+	//	{
+	//		GEditor->BeginTransaction(NSLOCTEXT("UnrealEd", "FPrototypeLevelGeneratorEdMode_EditTransaction", "Level Editing"));
+	//		
+	//		GEditor->EndTransaction();
+	//	}
 
-		return true;
-	}
+	//	return true;
+	//}
 
 
 	return FEdMode::HandleClick(InViewportClient, HitProxy, Click);
