@@ -7,6 +7,12 @@
 
 TSharedPtr< FSlateStyleSet > FLevelDesignerStyle::StyleInstance = NULL;
 
+TSharedRef< FLinearColor > FLevelDesignerStyle::SelectionColor_LinearRef(MakeShareable(new FLinearColor(0.728f, 0.364f, 0.003f)));
+TSharedRef< FLinearColor > FLevelDesignerStyle::SelectionColor_Pressed_LinearRef(MakeShareable(new FLinearColor(0.701f, 0.225f, 0.003f)));
+
+FSlateColor FLevelDesignerStyle::SelectionColor(SelectionColor_LinearRef);
+FSlateColor FLevelDesignerStyle::SelectionColor_Pressed(SelectionColor_Pressed_LinearRef);
+
 void FLevelDesignerStyle::Initialize()
 {
 	if (!StyleInstance.IsValid())
@@ -52,6 +58,14 @@ TSharedRef< FSlateStyleSet > FLevelDesignerStyle::Create()
 	Style->Set("LevelDesigner.DesignDelete",	new IMAGE_BRUSH(TEXT("Icon_DeleteEverything"),	Icon40x40));
 	Style->Set("LevelDesigner.BoxTrigger",		new IMAGE_BRUSH(TEXT("Icon_BoxTrigger"),		Icon40x40));
 
+	Style->Set("LevelDesigner.ToggleButton", FButtonStyle()
+		.SetNormal(FSlateNoResource())
+		.SetHovered(BOX_BRUSH(TEXT("RoundedSelection_16x"), 4.0f / 16.0f, SelectionColor))
+		.SetPressed(BOX_BRUSH("RoundedSelection_16x", 4.0f / 16.0f, SelectionColor_Pressed))
+		.SetDisabled(BOX_BRUSH("RoundedSelection_16x", 4.0f / 16.0f, SelectionColor))
+		.SetNormalPadding(FMargin(2, 2, 2, 2))
+		.SetPressedPadding(FMargin(2, 3, 2, 1))
+		);
 	return Style;
 }
 
