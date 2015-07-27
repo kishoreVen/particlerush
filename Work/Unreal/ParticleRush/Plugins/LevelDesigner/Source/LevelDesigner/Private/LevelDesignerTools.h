@@ -6,6 +6,8 @@
 
 #include "LevelDesignerEdMode.h"
 
+class FLevelDesignerBuilding;
+
 /*
 * Base Mode Tool class for LevelDesignerTools
 */
@@ -101,6 +103,8 @@ private:
 class FLevelDesigner_DesignModeTool : public FLevelDesigner_BaseModeTool
 {
 public:
+	TArray<FLevelDesignerBuilding*> DesignerBuildings;
+
 	FLevelDesigner_DesignModeTool(FLevelDesignerUISettings& InUISettings);
 
 	virtual FString GetName() const override { return TEXT("DesignModeTool"); }
@@ -144,5 +148,7 @@ protected:
 
 private:
 	FLevelDesignerUISettings& UISettings;
+
+	void UpdateDesignerBuildings();
 };
 
