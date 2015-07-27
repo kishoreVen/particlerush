@@ -7,12 +7,6 @@
 class FLevelDesignerStyle
 {
 public:
-	FLevelDesignerStyle();
-
-	static TSharedRef< FLinearColor > SelectionColor_LinearRef;
-	static TSharedRef< FLinearColor > SelectionColor_Pressed_LinearRef;
-	static FSlateColor SelectionColor;
-	static FSlateColor SelectionColor_Pressed;
 
 	static void Initialize();
 

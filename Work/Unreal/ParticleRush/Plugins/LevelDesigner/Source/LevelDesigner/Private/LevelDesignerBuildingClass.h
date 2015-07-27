@@ -3,46 +3,33 @@
 class FLevelDesignerBuilding;
 class SLevelDesignerBuildingWidget;
 
-class FAssetThumbnail;
-class FAssetThumbnailPool;
 
 class FLevelDesignerBuilding
 {
 private:
-	UObject*				SpawnableBuildingPtr;
+	UClass*					SpawnableBuildingPtr;
 	FColor					BuildingClassColor;
 
 public:
-	FLevelDesignerBuilding(const FColor& buildingClassColor);
+	FLevelDesignerBuilding();
 	~FLevelDesignerBuilding();
 
-	void SetBuildingObject(class UObject* NewAsset);
-	class UObject* GetBuildingObject() const;
-
-	TSharedRef<SLevelDesignerBuildingWidget> MakeWidget();
-
-	TSharedRef<SColorBlock> MakeColorBlockWidget();
+	TSharedPtr<SLevelDesignerBuildingWidget> MakeWidget();
 };
 
 
 class SLevelDesignerBuildingWidget : public SCompoundWidget
 {
-private:
-	TSharedPtr<FAssetThumbnail>			AssetThumbnail;
-	TSharedPtr<FAssetThumbnailPool>		AssetThumbnailPool;
-
 public:
 	SLATE_BEGIN_ARGS(SLevelDesignerBuildingWidget)
+		: _BuildingClassColor(FColorList::Blue)
 	{
 	}
+		SLATE_ARGUMENT(FColor, BuildingClassColor)
 	SLATE_END_ARGS()
 	
 	SLevelDesignerBuildingWidget();
 	~SLevelDesignerBuildingWidget();
 	
 	void Construct(const FArguments& InArgs);
-
-	/* Properties */
-	void SetBuildingObject(class UObject* NewAsset);
-	bool IsAssetAcceptableForDrop(const UObject* InObject) const;
 };

@@ -5,7 +5,6 @@
 #include "LevelDesignerWidgets.h"
 #include "LevelDesignerTools.h"
 #include "LevelDesignerStyle.h"
-#include "LevelDesignerBuildingClass.h"
 
 #define LOCTEXT_NAMESPACE "LevelDesignerWidgets_Namespace"
 
@@ -88,24 +87,21 @@ void SLevelDesignerDesignModeWidget::Construct(const FArguments& InArgs, FLevelD
 	TSharedRef<SScrollBox> SelectorBox = SNew(SScrollBox)
 		.Orientation(EOrientation::Orient_Horizontal);
 
-	int32 numBuildings = WidgetTool->GetNumBuildingClasses();
-	for (int buildingId = 0; buildingId < numBuildings; buildingId++)
+	for (int x = 0; x < 4; x++)
 	{
-		FLevelDesignerBuilding* currentBuildingClass = WidgetTool->DesignerBuildings[buildingId];
-		
 		WidgetSwitcher->AddSlot()
 			[
-				currentBuildingClass->MakeWidget()
+				SNullWidget::NullWidget
 			];
 
 		SelectorBox->AddSlot()
 			[
 				SNew(SButton)
-				.ButtonStyle(FLevelDesignerStyle::Get(), "LevelDesigner.ToggleButton")
-				.OnClicked(this, &SLevelDesignerDesignModeWidget::SetCurrentBuildingClass, buildingId)
-				.IsEnabled(this, &SLevelDesignerDesignModeWidget::IsBuildingClassEnabled, buildingId)
+				.ButtonStyle(FEditorStyle::Get(), "ToggleButton")
+				.OnClicked(this, &SLevelDesignerDesignModeWidget::SetCurrentBuildingClass, x)
+				.IsEnabled(this, &SLevelDesignerDesignModeWidget::IsBuildingClassEnabled, x)
 				[
-					currentBuildingClass->MakeColorBlockWidget()
+					SNew(SImage)
 				]
 			];
 	}
