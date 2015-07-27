@@ -62,7 +62,7 @@ TSharedRef< FSlateStyleSet > FLevelDesignerStyle::Create()
 		.SetNormal(FSlateNoResource())
 		.SetHovered(BOX_BRUSH(TEXT("RoundedSelection_16x"), 4.0f / 16.0f, SelectionColor))
 		.SetPressed(BOX_BRUSH("RoundedSelection_16x", 4.0f / 16.0f, SelectionColor_Pressed))
-		.SetDisabled(BOX_BRUSH("RoundedSelection_16x", 4.0f / 16.0f, SelectionColor_Pressed))
+		.SetDisabled(BOX_BRUSH("RoundedSelection_16x", 4.0f / 16.0f, SelectionColor))
 		.SetNormalPadding(FMargin(2, 2, 2, 2))
 		.SetPressedPadding(FMargin(2, 3, 2, 1))
 		);
