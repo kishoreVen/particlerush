@@ -57,7 +57,7 @@ void AGrindActor::Tick( float DeltaTime )
 	directionOfMovementAlongSpline.Z		= 0;
 	directionOfMovementAlongSpline			= directionOfMovementAlongSpline.GetSafeNormal();
 
-	/* Direction from rush to the next spline point. This will give the gap we are supposed bridge as we move along the spline */
+	/* Direction from rush to the next spline point. This will give the gap we are supposed to bridge as we move along the spline */
 	FVector directionToNextClosestPoint		= nextSplinePointLocation - refLoc;
 	directionToNextClosestPoint.Z			= 0;
 	directionToNextClosestPoint				= directionToNextClosestPoint.GetSafeNormal();
@@ -78,14 +78,17 @@ void AGrindActor::Tick( float DeltaTime )
 		DrawDebugSphere(GetWorld(), nextSplinePointLocation, 10.0f, 16, FColor::Blue);
 	}
 
+	/* MyTime keeps track of time for the duration of the velocity curve. */
+	float MyTime = 0.f;
+	MyTime = MyTime + DeltaTime;
 	mRushPtr.Get()->SetControllerRotation(interpedRotation);
-	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), 0.1f);
+	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), VelocityCurve->GetFloatValue(MyTime));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
 	/* Try to get it for the first time */
 	ARushCharacter* rushActor = static_cast<ARushCharacter*>(OtherActor);
 	if (rushActor == NULL)

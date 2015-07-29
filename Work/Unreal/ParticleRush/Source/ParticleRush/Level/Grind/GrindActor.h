@@ -18,6 +18,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
 	class USplineComponent* SplineComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (Category = "Curve"))
+	class UCurveFloat* VelocityCurve;
 #pragma endregion
 
 
