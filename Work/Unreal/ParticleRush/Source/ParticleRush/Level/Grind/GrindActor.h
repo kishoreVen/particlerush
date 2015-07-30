@@ -20,7 +20,7 @@ protected:
 	class USplineComponent* SplineComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (Category = "Curve"))
-	class UCurveFloat* VelocityCurve;
+	class UCurveFloat* SpeedCurve;
 #pragma endregion
 
 
@@ -34,6 +34,7 @@ public:
 #pragma region FIELDS
 private:
 	bool mShouldActivateRamp;
+	float MyTime;
 
 	TWeakObjectPtr<class ARushCharacter> mRushPtr;
 #pragma endregion

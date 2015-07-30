@@ -78,12 +78,11 @@ void AGrindActor::Tick( float DeltaTime )
 		DrawDebugSphere(GetWorld(), nextSplinePointLocation, 10.0f, 16, FColor::Blue);
 	}
 
-	/* MyTime keeps track of time for the duration of the velocity curve. */
-	float MyTime = 0.f;
+	/* MyTime keeps track of time for the duration of the speed curve. Shit's broken though for unexplainable reasons */
 	MyTime = MyTime + DeltaTime;
 	mRushPtr.Get()->SetControllerRotation(interpedRotation);
-	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), VelocityCurve->GetFloatValue(MyTime));
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
+	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), SpeedCurve->GetFloatValue(MyTime));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
@@ -94,6 +93,7 @@ void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
 	if (rushActor == NULL)
 		return;
 
+	MyTime = 0.1f;
 	rushActor->SetInputDOFState(EInputDOF::EVERYTHING, false);
 	mRushPtr = rushActor;
 	mShouldActivateRamp = true;
