@@ -11,17 +11,29 @@ class FLevelDesignerBuilding
 private:
 	UObject*				SpawnableBuildingPtr;
 	FColor					BuildingClassColor;
+	TArray<AActor*>			SpawnedActors;
 
 public:
 	FLevelDesignerBuilding(const FColor& buildingClassColor);
 	~FLevelDesignerBuilding();
 
+	/* Building Class manipulators */
 	void SetBuildingObject(class UObject* NewAsset);
 	class UObject* GetBuildingObject() const;
 
+	/* Widget Tools */
 	TSharedRef<SLevelDesignerBuildingWidget> MakeWidget();
-
 	TSharedRef<SColorBlock> MakeColorBlockWidget();
+
+	bool IsBuildingColorEqualTo(FColor& testBuildingColor);
+
+	void RemoveAssociatedActors();
+
+	/* String Operations */
+	FString ToString();
+	static FLevelDesignerBuilding* FromString(FString& string);
+	
+	static UObject* DefaultBuildingObject;
 };
 
 

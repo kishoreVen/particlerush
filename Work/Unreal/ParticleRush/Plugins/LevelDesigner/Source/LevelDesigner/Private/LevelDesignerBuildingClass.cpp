@@ -8,15 +8,54 @@
 /*--------------------------
 Level Designer Building Class
 ----------------------------*/
+UObject* FLevelDesignerBuilding::DefaultBuildingObject = StaticLoadObject(UStaticMesh::StaticClass(), NULL, TEXT("/Game/Assets/Prototype/DefaultBuildingMesh"));
 
 FLevelDesignerBuilding::FLevelDesignerBuilding(const FColor& buildingClassColor)
-: SpawnableBuildingPtr(NULL)
-, BuildingClassColor(buildingClassColor)
+: BuildingClassColor(buildingClassColor)
+{
+	SetBuildingObject(DefaultBuildingObject);
+}
+
+FLevelDesignerBuilding::~FLevelDesignerBuilding()
 {
 	
 }
 
-FLevelDesignerBuilding::~FLevelDesignerBuilding()
+bool FLevelDesignerBuilding::IsBuildingColorEqualTo(FColor& testBuildingColor)
+{
+	return (BuildingClassColor == testBuildingColor);
+}
+
+FString FLevelDesignerBuilding::ToString()
+{
+	static FString Seperator(";;");
+	if (SpawnableBuildingPtr == NULL)
+		return Seperator;
+
+	FString levelDesignerBuildingString = BuildingClassColor.ToString() + Seperator + SpawnableBuildingPtr->GetFullName();
+
+	return levelDesignerBuildingString;
+}
+
+FLevelDesignerBuilding* FLevelDesignerBuilding::FromString(FString& string)
+{
+	TArray<FString> RelevantValues;
+	if (string.ParseIntoArray(RelevantValues, TEXT(";;"), true) == 2)
+	{
+		FColor buildingColor;
+		buildingColor.InitFromString(RelevantValues[0]);
+		UObject* buildingObject = StaticLoadObject(NULL, NULL, *RelevantValues[1]);
+
+		FLevelDesignerBuilding* levelDesignerBuilding = new FLevelDesignerBuilding(buildingColor);
+		levelDesignerBuilding->SetBuildingObject(buildingObject);
+
+		return levelDesignerBuilding;
+	}
+
+	return NULL;
+}
+
+void FLevelDesignerBuilding::RemoveAssociatedActors()
 {
 	
 }
@@ -169,10 +208,13 @@ void SLevelDesignerBuildingWidget::SetBuildingObject(UObject* NewAsset)
 		AssetThumbnail->SetAsset(NewAsset);
 		LevelDesignerBuilding->SetBuildingObject(NewAsset);
 	}
-	else if (AActor* BlueprintAsset = Cast<AActor>(NewAsset))
+	else if (UBlueprint* BlueprintAsset = Cast<UBlueprint>(NewAsset))
 	{
-		AssetThumbnail->SetAsset(NewAsset);
-		LevelDesignerBuilding->SetBuildingObject(NewAsset);
+		if (BlueprintAsset->ParentClass == AActor::StaticClass())
+		{
+			AssetThumbnail->SetAsset(NewAsset);
+			LevelDesignerBuilding->SetBuildingObject(NewAsset);
+		}
 	}
 }
 
@@ -273,7 +315,7 @@ void SLevelDesignerBuildingWidget::OnBrowseToAsset()
 		Objects.Add(buildingObject);
 		GEditor->SyncBrowserToObjects(Objects);
 	}	
-}
+} 
 
 
 bool SLevelDesignerBuildingWidget::CanBrowseToAsset()
@@ -288,7 +330,7 @@ void SLevelDesignerBuildingWidget::OnClearAsset()
 {
 	/* TODO*/
 	UObject* buildingObject = LevelDesignerBuilding->GetBuildingObject();
-	UObject* defaultBuildingObject = NULL;
+	UObject* defaultBuildingObject = FLevelDesignerBuilding::DefaultBuildingObject;
 
 	if (buildingObject != defaultBuildingObject)
 	{
@@ -300,7 +342,7 @@ void SLevelDesignerBuildingWidget::OnClearAsset()
 bool SLevelDesignerBuildingWidget::CanUseClearButton()
 {
 	const UObject* buildingObject = LevelDesignerBuilding->GetBuildingObject();
-	const UObject* defaultBuildingObject = NULL;
+	const UObject* defaultBuildingObject = FLevelDesignerBuilding::DefaultBuildingObject;
 
 	return buildingObject != defaultBuildingObject;
 }
@@ -312,9 +354,23 @@ bool SLevelDesignerBuildingWidget::OnShouldFilterAsset(const FAssetData& AssetDa
 	if (buildingObject->IsA(UBlueprint::StaticClass()))
 	{
 		const UBlueprint* blueprintBuildingObject = static_cast<const UBlueprint*>(buildingObject);
-		if (blueprintBuildingObject && blueprintBuildingObject->ParentClass != (AActor::StaticClass()))
+		if (blueprintBuildingObject)
 		{
-			return true;
+			UClass* superClass = blueprintBuildingObject->ParentClass->GetSuperClass();
+
+			bool isActorType = false;
+			while (superClass != NULL)
+			{
+				if (superClass == AActor::StaticClass())
+				{
+					isActorType = true;
+					break;
+				}
+					
+				superClass = superClass->GetSuperClass();
+			}
+
+			return !isActorType;
 		}
 	}
 

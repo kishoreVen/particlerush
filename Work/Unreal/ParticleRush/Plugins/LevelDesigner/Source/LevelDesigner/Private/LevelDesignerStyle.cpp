@@ -57,6 +57,7 @@ TSharedRef< FSlateStyleSet > FLevelDesignerStyle::Create()
 	Style->Set("LevelDesigner.EraseMode",		new IMAGE_BRUSH(TEXT("Icon_Erase"),				Icon40x40));
 	Style->Set("LevelDesigner.DesignDelete",	new IMAGE_BRUSH(TEXT("Icon_DeleteEverything"),	Icon40x40));
 	Style->Set("LevelDesigner.BoxTrigger",		new IMAGE_BRUSH(TEXT("Icon_BoxTrigger"),		Icon40x40));
+	Style->Set("LevelDesigner.EditSettings",	new IMAGE_BRUSH(TEXT("Icon_EditSettings"),		Icon40x40));
 
 	Style->Set("LevelDesigner.ToggleButton", FButtonStyle()
 		.SetNormal(FSlateNoResource())

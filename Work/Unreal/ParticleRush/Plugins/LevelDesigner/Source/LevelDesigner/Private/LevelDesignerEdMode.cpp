@@ -34,6 +34,7 @@
 
 #include "LevelDesignerEdMode.h"
 #include "LevelDesignerTools.h"
+#include "LevelDesignerBuildingClass.h"
 
 #define LOCTEXT_NAMESPACE "LevelDesignerEdMode"
 
@@ -422,6 +423,21 @@ EAxisList::Type FLevelDesignerEdMode::GetWidgetAxisToDraw(FWidget::EWidgetMode I
 /** Load UI settings from ini file */
 void FLevelDesignerUISettings::Load()
 {
+	static const FString BuildingClassSeperator(";;;");
+	FString LevelDesignerBuildingClassesString;
+	if (GConfig->GetString(TEXT("LevelDesigner"), TEXT("LevelDesignerBuilding"), LevelDesignerBuildingClassesString, GEditorPerProjectIni))
+	{
+		TArray<FString> RelevantValues;
+		if (LevelDesignerBuildingClassesString.ParseIntoArray(RelevantValues, TEXT(";;"), true) > 0)
+		{
+			LevelDesignerBuildingClasses.Empty();
+			for (int index = 0; index < RelevantValues.Num(); index++)
+			{
+				LevelDesignerBuildingClasses.Add(FLevelDesignerBuilding::FromString(RelevantValues[index]));
+			}
+		}
+	}
+
 	FString DefaultAlleySpacingString;
 	if (GConfig->GetString(TEXT("LevelDesigner"), TEXT("DefaultAlleySpacing"), DefaultAlleySpacingString, GEditorPerProjectIni))
 	{
@@ -430,18 +446,78 @@ void FLevelDesignerUISettings::Load()
 
 	GConfig->GetFloat(	TEXT("LevelDesigner"),	TEXT("BrushRadius"),				BrushRadius,						GEditorPerProjectIni);
 	GConfig->GetInt(	TEXT("LevelDesigner"),	TEXT("NumBuildingClasses"),			NumBuildingClasses,					GEditorPerProjectIni);
-	GConfig->GetFloat(	TEXT("LevelDesigner"),	TEXT("RotationalVariance"),			RotationalVariance,						GEditorPerProjectIni);
+	GConfig->GetFloat(	TEXT("LevelDesigner"),	TEXT("RotationalVariance"),			RotationalVariance,					GEditorPerProjectIni);
 }
 
 /** Save UI settings to ini file */
 void FLevelDesignerUISettings::Save()
 {
+	static const FString BuildingClassSeperator(";;;");
+	FString LevelDesignerBuildingClassesString("");
+	int numBuildingClasses = LevelDesignerBuildingClasses.Num();
+	if (numBuildingClasses > 0)
+	{
+		LevelDesignerBuildingClassesString += LevelDesignerBuildingClasses[0]->ToString();
+	}
+	for (int index = 1; index < numBuildingClasses; index++)
+	{
+		LevelDesignerBuildingClassesString += BuildingClassSeperator + LevelDesignerBuildingClasses[index]->ToString();
+	}
+	GConfig->SetString(TEXT("LevelDesigner"), TEXT("LevelDesignerBuilding"),		*LevelDesignerBuildingClassesString,			GEditorPerProjectIni);
+
 	FString DefaultAlleySpacingString = DefaultAlleySpacing.ToString();
 	GConfig->SetString(	TEXT("LevelDesigner"),	TEXT("DefaultAlleySpacing"),		*DefaultAlleySpacingString,			GEditorPerProjectIni);
 
 	GConfig->SetFloat(	TEXT("LevelDesigner"),	TEXT("BrushRadius"),				BrushRadius,						GEditorPerProjectIni);
 	GConfig->SetInt(	TEXT("LevelDesigner"),	TEXT("NumBuildingClasses"),			NumBuildingClasses,					GEditorPerProjectIni);
 	GConfig->SetFloat(	TEXT("LevelDesigner"),	TEXT("RotationalVariance"),			RotationalVariance,					GEditorPerProjectIni);
+}
+
+void FLevelDesignerUISettings::SyncBuildingClasses()
+{
+	int numBuildingClassesInArray = LevelDesignerBuildingClasses.Num();
+	if (NumBuildingClasses > LevelDesignerBuildingClasses.Num())
+	{
+		int numClassesToAdd = NumBuildingClasses - numBuildingClassesInArray;
+		
+		static FColorList colorList;
+		colorList.CreateColorMap();
+
+		for (int index = 0; index < numClassesToAdd; index++)
+		{
+			int colorIndex = 5 + numBuildingClassesInArray * 5;
+			LevelDesignerBuildingClasses.Add(new FLevelDesignerBuilding(colorList.GetFColorByIndex(colorIndex)));
+
+			numBuildingClassesInArray = LevelDesignerBuildingClasses.Num();
+		}
+	}
+	else if (NumBuildingClasses < LevelDesignerBuildingClasses.Num())
+	{
+		int numClassesToRemove = numBuildingClassesInArray - NumBuildingClasses;
+
+		for (int index = 0; index < numClassesToRemove; index++)
+		{
+			FLevelDesignerBuilding* removedBuildingClass = LevelDesignerBuildingClasses.Pop();
+			removedBuildingClass->RemoveAssociatedActors();
+
+			delete removedBuildingClass;
+		}
+	}
+}
+
+void FLevelDesignerUISettings::RemoveBuildingClass(FColor& buildingClassColor)
+{
+	int indexToRemove = -1;
+	for (int index = 0; index < NumBuildingClasses; index++)
+	{
+		if (LevelDesignerBuildingClasses[index]->IsBuildingColorEqualTo(buildingClassColor))
+		{
+			indexToRemove = index;
+		}
+	}
+
+	LevelDesignerBuildingClasses.RemoveAt(indexToRemove);
+	--NumBuildingClasses;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -15,8 +15,13 @@
 #include "ClassViewerModule.h"
 #include "ClassViewerFilter.h"
 
+#include "AssetToolsModule.h"
+#include "Toolkits/AssetEditorManager.h"
+
+#include "Engine/TriggerBox.h"
 
 #include "LevelDesigner.h"
+#include "LevelDesignerAsset.h"
 
 // You should place include statements to your module's private header files here.  You only need to
 // add includes for headers that are used in most of your module's source files though.

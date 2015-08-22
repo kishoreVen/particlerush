@@ -103,8 +103,6 @@ private:
 class FLevelDesigner_DesignModeTool : public FLevelDesigner_BaseModeTool
 {
 public:
-	TArray<FLevelDesignerBuilding*> DesignerBuildings;
-
 	FLevelDesigner_DesignModeTool(FLevelDesignerUISettings& InUISettings);
 
 	virtual FString GetName() const override { return TEXT("DesignModeTool"); }
@@ -144,11 +142,11 @@ public:
 	void SetRotationalVariance(float value);
 	float GetRotationalVariance() const;
 
+	FLevelDesignerBuilding* GetBuildingClassByUIIndex(int32 index) { return (index >= UISettings.GetNumBuildingClasses() || index < 0) ? NULL : UISettings.LevelDesignerBuildingClasses[index]; }
+
 protected:
 
 private:
 	FLevelDesignerUISettings& UISettings;
-
-	void UpdateDesignerBuildings();
 };
 

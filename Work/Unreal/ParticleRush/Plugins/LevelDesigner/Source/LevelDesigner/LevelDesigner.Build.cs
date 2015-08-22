@@ -55,7 +55,7 @@ public class LevelDesigner : ModuleRules
                 "LandscapeEditor",
                 "ClassViewer",
                 "RenderCore",
-				
+				"AssetTools"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -64,7 +64,7 @@ public class LevelDesigner : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				
+				"AssetTools"
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);

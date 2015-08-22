@@ -5,7 +5,7 @@
 #include "LevelDesignerStyle.h"
 #include "LevelDesignerCommands.h"
 #include "LevelDesignerEdMode.h"
-
+#include "LevelDesignerAsset.h"
 
 static const FName LevelDesignerTabName("LevelDesigner");
 
@@ -25,6 +25,8 @@ void FLevelDesignerModule::StartupModule()
 		LOCTEXT("LevelDesignerEditMode", "Level Designer Editor"),
 		FSlateIcon(),
 		true);
+
+	CreateLevelDesignerAsset();
 }
 
 void FLevelDesignerModule::ShutdownModule()
@@ -52,6 +54,29 @@ void FLevelDesignerModule::AddMenuExtension(FMenuBuilder& Builder)
 void FLevelDesignerModule::AddToolbarExtension(FToolBarBuilder& Builder)
 {
 	Builder.AddToolBarButton(FLevelDesignerCommands::Get().PluginAction);
+}
+
+void FLevelDesignerModule::CreateLevelDesignerAsset()
+{
+	FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools");
+
+	FString Name;
+	FString PackageName;
+	const FString PathPrefix = TEXT("/Game/");
+	const FString AssetName = TEXT("LevelDesigner");
+	const FString DefaultSuffix = TEXT("_SettingsAsset");
+
+	AssetToolsModule.Get().CreateUniqueAssetName(AssetName, DefaultSuffix, /*out*/ PackageName, /*out*/ Name);
+	const FString PackagePath = PathPrefix + FPackageName::GetLongPackagePath(PackageName);
+
+	LevelDesigner_SettingsAsset = StaticLoadObject(ULevelDesignerAsset::StaticClass(), NULL, *(PackagePath + TEXT("/") + Name));
+
+	if (LevelDesigner_SettingsAsset == NULL)
+	{
+		UObject* NewAsset = AssetToolsModule.Get().CreateAsset(Name, PackagePath, ULevelDesignerAsset::StaticClass(), NULL);
+
+		LevelDesigner_SettingsAsset = NewAsset;
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

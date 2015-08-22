@@ -379,8 +379,6 @@ bool FLevelDesigner_DesignModeTool::InputDelta(FEditorViewportClient* InViewport
 
 bool FLevelDesigner_DesignModeTool::StartModify()
 {
-	UpdateDesignerBuildings();
-
 	return true;
 }
 
@@ -459,23 +457,4 @@ void FLevelDesigner_DesignModeTool::SetRotationalVariance(float value)
 float FLevelDesigner_DesignModeTool::GetRotationalVariance() const
 {
 	return UISettings.GetRotationalVariance();
-}
-
-void FLevelDesigner_DesignModeTool::UpdateDesignerBuildings()
-{
-	static FColorList colorList;
-	colorList.CreateColorMap();
-
-	int32 numBuildings = UISettings.GetNumBuildingClasses();
-
-	DesignerBuildings.Empty();
-
-	int32 colorIndex = 2;
-
-	for (int buildingIndex = 0; buildingIndex < numBuildings; buildingIndex++)
-	{
-		DesignerBuildings.Add(new FLevelDesignerBuilding(colorList.GetFColorByIndex(colorIndex)));
-
-		colorIndex += 10;
-	}
 }

@@ -65,7 +65,6 @@ Design Mode Widget
 -------------------------------*/
 
 SLevelDesignerDesignModeWidget::SLevelDesignerDesignModeWidget()
-: mCurrentlySelectedBuildingClass(0)
 {
 	
 }
@@ -82,34 +81,6 @@ void SLevelDesignerDesignModeWidget::Construct(const FArguments& InArgs, FLevelD
 
 	WidgetTool = TSharedPtr<FLevelDesigner_DesignModeTool>(InWidgetTool);
 
-	TSharedRef<SWidgetSwitcher> WidgetSwitcher = SNew(SWidgetSwitcher)
-												.WidgetIndex(this, &SLevelDesignerDesignModeWidget::GetSelectedPanel);
-
-	TSharedRef<SScrollBox> SelectorBox = SNew(SScrollBox)
-		.Orientation(EOrientation::Orient_Horizontal);
-
-	int32 numBuildings = WidgetTool->GetNumBuildingClasses();
-	for (int buildingId = 0; buildingId < numBuildings; buildingId++)
-	{
-		FLevelDesignerBuilding* currentBuildingClass = WidgetTool->DesignerBuildings[buildingId];
-		
-		WidgetSwitcher->AddSlot()
-			[
-				currentBuildingClass->MakeWidget()
-			];
-
-		SelectorBox->AddSlot()
-			[
-				SNew(SButton)
-				.ButtonStyle(FLevelDesignerStyle::Get(), "LevelDesigner.ToggleButton")
-				.OnClicked(this, &SLevelDesignerDesignModeWidget::SetCurrentBuildingClass, buildingId)
-				.IsEnabled(this, &SLevelDesignerDesignModeWidget::IsBuildingClassEnabled, buildingId)
-				[
-					currentBuildingClass->MakeColorBlockWidget()
-				]
-			];
-	}
-
 	ChildSlot
 	[
 		SNew(SVerticalBox)
@@ -117,141 +88,116 @@ void SLevelDesignerDesignModeWidget::Construct(const FArguments& InArgs, FLevelD
 		.AutoHeight()
 		.HAlign(HAlign_Center)
 		[
-			SNew(SHorizontalBox)
-			+SHorizontalBox::Slot()
-			.AutoWidth()
-			.Padding(ButtonMargin)
-			[
-				SNew(SButton)
-				[
-					SNew(SImage)
-					.Image(FLevelDesignerStyle::GetBrush(TEXT("LevelDesigner.BoxTrigger")))
-					.ToolTipText(LOCTEXT("AddTriggerBox", "Add a Trigger Box to generate objects within the volume"))
-				]
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.Padding(ButtonMargin)
-			[
-				SNew(SButton)
-				[
-					SNew(SImage)
-					.Image(FLevelDesignerStyle::GetBrush(TEXT("LevelDesigner.DesignDelete")))
-					.ToolTipText(LOCTEXT("DeleteAll", "Delete all generated objects and start a fresh"))
-				]
-			]
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(3.0f)
-		[
-			SNew(SSeparator)
-			.Orientation(Orient_Horizontal)
-		]
-
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(SSplitter)
+			SNew(SScrollBox)
 			.Orientation(EOrientation::Orient_Horizontal)
-
-			+SSplitter::Slot()
-			.Value(0.55f)
-			[ 
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
-					SNew(STextBlock)
-					.Text(LOCTEXT("NumBuildingClasses", "Number of Building Classes"))
-				]
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
-					SNew(STextBlock)
-					.Text(LOCTEXT("DefaultSpacing", "Default Spacing Between Buildings"))
-				]
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
-					SNew(STextBlock)
-					.Text(LOCTEXT("RotationalVariance", "Rotational Variance"))
-				]
-			]
-
-			+ SSplitter::Slot()
-			.Value(0.45f)
+			
+			+ SScrollBox::Slot()
 			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(ButtonMargin)
 				[
-					SNew(SNumericEntryBox<int32>)
-					.AllowSpin(true)
-					.MinSliderValue(1)
-					.MaxSliderValue(100)
-					.MinValue(1)
-					.MaxValue(100)
-					.Value(this, &SLevelDesignerDesignModeWidget::GetNumBuildingClasses)
-					.OnValueChanged(this, &SLevelDesignerDesignModeWidget::SetNumBuildingClasses)
-				]
-
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.Padding(ButtonMargin)
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					.HAlign(EHorizontalAlignment::HAlign_Center)
 					[
-						SNew(SNumericEntryBox<float>)
-						.AllowSpin(true)
-						.MinSliderValue(1.0f)
-						.MaxSliderValue(10000.0f)
-						.MinValue(1.0f)
-						.MaxValue(10000.0f)
-						.Value(this, &SLevelDesignerDesignModeWidget::GetDefaultAlleySpacingX)
-						.OnValueChanged(this, &SLevelDesignerDesignModeWidget::SetDefaultAlleySpacingX)
+						SNew(SButton)
+						.OnClicked(this, &SLevelDesignerDesignModeWidget::AddGenerationBox)
+						.ToolTipText(LOCTEXT("AddTriggerBox", "Add a Trigger Box to generate objects within the volume"))
+						[
+							SNew(SImage)
+							.Image(FLevelDesignerStyle::GetBrush(TEXT("LevelDesigner.BoxTrigger")))
+						]
 					]
-					+ SHorizontalBox::Slot()
-					.Padding(ButtonMargin)
-					[
-						SNew(SNumericEntryBox<float>)
-						.AllowSpin(true)
-						.MinSliderValue(1.0f)
-						.MaxSliderValue(10000.0f)
-						.MinValue(1.0f)
-						.MaxValue(10000.0f)
-						.Value(this, &SLevelDesignerDesignModeWidget::GetDefaultAlleySpacingY)
-						.OnValueChanged(this, &SLevelDesignerDesignModeWidget::SetDefaultAlleySpacingY)
-					]					
+					+ SVerticalBox::Slot()
+						.AutoHeight()
+						.VAlign(EVerticalAlignment::VAlign_Center)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("AddGenerationBox", "Add Generation Box"))
+						]
 				]
 
-				+ SVerticalBox::Slot()
-				.MaxHeight(50.0f)
-				.Padding(DetailsMargin)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				[
-					SNew(SNumericEntryBox<float>)
-					.AllowSpin(true)
-					.MinSliderValue(0.0f)
-					.MaxSliderValue(360.0f)
-					.MinValue(0.0f)
-					.MaxValue(360.0f)
-					.Value(this, &SLevelDesignerDesignModeWidget::GetRotationalVariance)
-					.OnValueChanged(this, &SLevelDesignerDesignModeWidget::SetRotationalVariance)
-				]
+				+ SHorizontalBox::Slot()
+					.AutoWidth()
+					[
+						SNew(SSeparator)
+						.Orientation(Orient_Vertical)
+					]
+
+				+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.Padding(ButtonMargin)
+					[
+						SNew(SVerticalBox)
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.VAlign(EVerticalAlignment::VAlign_Center)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+						[
+							SNew(SButton)
+							.OnClicked(this, &SLevelDesignerDesignModeWidget::EditLevelDesignerSettings)
+							.ToolTipText(LOCTEXT("EditSettings", "Edit Level Designer Settings"))
+							[
+								SNew(SImage)
+								.Image(FLevelDesignerStyle::GetBrush(TEXT("LevelDesigner.EditSettings")))
+							]
+						]
+						+ SVerticalBox::Slot()
+							.AutoHeight()
+							.VAlign(EVerticalAlignment::VAlign_Center)
+							.HAlign(EHorizontalAlignment::HAlign_Center)
+							[
+								SNew(STextBlock)
+								.Text(LOCTEXT("EditLevelSettings", "Edit Designer Settings"))
+							]
+					]
+
+				+ SHorizontalBox::Slot()
+					.AutoWidth()
+					[
+						SNew(SSeparator)
+						.Orientation(Orient_Vertical)
+					]
+
+				+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.Padding(ButtonMargin)
+					[
+						SNew(SVerticalBox)
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.VAlign(EVerticalAlignment::VAlign_Center)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+						[
+							SNew(SButton)
+							.OnClicked(this, &SLevelDesignerDesignModeWidget::ClearLevel)
+							.ToolTipText(LOCTEXT("DeleteAll", "Delete all generated objects and start a fresh"))
+							[
+								SNew(SImage)
+								.Image(FLevelDesignerStyle::GetBrush(TEXT("LevelDesigner.DesignDelete")))
+							]
+						]
+						+ SVerticalBox::Slot()
+							.AutoHeight()
+							.VAlign(EVerticalAlignment::VAlign_Center)
+							.HAlign(EHorizontalAlignment::HAlign_Center)
+							[
+								SNew(STextBlock)
+								.Text(LOCTEXT("ClearEntireLevel", "Clear Entire Level"))
+							]
+					]
+
+				+ SHorizontalBox::Slot()
+					.AutoWidth()
+					[
+						SNew(SSeparator)
+						.Orientation(Orient_Vertical)
+					]
 			]
 		]
 
@@ -261,82 +207,26 @@ void SLevelDesignerDesignModeWidget::Construct(const FArguments& InArgs, FLevelD
 		[
 			SNew(SSeparator)
 			.Orientation(Orient_Horizontal)
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SelectorBox
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			WidgetSwitcher
 		]
 	];
 }
 
-
-int32 SLevelDesignerDesignModeWidget::GetSelectedPanel() const
+FReply SLevelDesignerDesignModeWidget::EditLevelDesignerSettings()
 {
-	return mCurrentlySelectedBuildingClass;
-}
-
-bool SLevelDesignerDesignModeWidget::IsBuildingClassEnabled(int32 classId) const
-{
-	return mCurrentlySelectedBuildingClass != classId;
-}
-
-FReply SLevelDesignerDesignModeWidget::SetCurrentBuildingClass(int32 classId)
-{
-	mCurrentlySelectedBuildingClass = classId;
+	FLevelDesignerModule& LevelDesignerModule = FModuleManager::LoadModuleChecked<FLevelDesignerModule>("LevelDesigner");
+	UObject* LevelDesigenerSettingsAsset = LevelDesignerModule.GetLevelDesignerSettingsAsset();
+	if (LevelDesigenerSettingsAsset != NULL)
+		FAssetEditorManager::Get().OpenEditorForAsset(LevelDesigenerSettingsAsset);
 
 	return FReply::Handled();
 }
 
-TOptional<int32> SLevelDesignerDesignModeWidget::GetNumBuildingClasses() const
+FReply SLevelDesignerDesignModeWidget::ClearLevel()
 {
-	return WidgetTool->GetNumBuildingClasses();
+	return FReply::Handled();
 }
 
-void SLevelDesignerDesignModeWidget::SetNumBuildingClasses(int32 value)
+FReply SLevelDesignerDesignModeWidget::AddGenerationBox()
 {
-	WidgetTool->SetNumBuildingClasses(value);
-}
-
-TOptional<float> SLevelDesignerDesignModeWidget::GetDefaultAlleySpacingX() const
-{
-	return WidgetTool->GetDefaultAlleySpacing().X;
-}
-
-void SLevelDesignerDesignModeWidget::SetDefaultAlleySpacingX(float value)
-{
-	FVector2D defaultAlleySpacing = WidgetTool->GetDefaultAlleySpacing();
-	defaultAlleySpacing.X = value;
-
-	WidgetTool->SetDefaultAlleySpacing(defaultAlleySpacing);
-}
-
-TOptional<float> SLevelDesignerDesignModeWidget::GetDefaultAlleySpacingY() const
-{
-	return WidgetTool->GetDefaultAlleySpacing().Y;
-}
-
-void SLevelDesignerDesignModeWidget::SetDefaultAlleySpacingY(float value)
-{
-	FVector2D defaultAlleySpacing = WidgetTool->GetDefaultAlleySpacing();
-	defaultAlleySpacing.Y = value;
-
-	WidgetTool->SetDefaultAlleySpacing(defaultAlleySpacing);
-}
-
-TOptional<float> SLevelDesignerDesignModeWidget::GetRotationalVariance() const
-{
-	return WidgetTool->GetRotationalVariance();
-}
-
-void SLevelDesignerDesignModeWidget::SetRotationalVariance(float value)
-{
-	WidgetTool->SetRotationalVariance(value);
+	return FReply::Handled();
 }

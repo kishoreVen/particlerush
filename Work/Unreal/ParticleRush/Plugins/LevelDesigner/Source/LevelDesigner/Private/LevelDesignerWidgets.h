@@ -38,27 +38,12 @@ public:
 
 	void Construct(const FArguments& InArgs, FLevelDesigner_DesignModeTool* InWidgetTool);
 
-	/* Properties */
-	TOptional<int32> GetNumBuildingClasses() const;
-	void SetNumBuildingClasses(int32 value);
+	FReply EditLevelDesignerSettings();
 
-	TOptional<float> GetDefaultAlleySpacingX() const;
-	void SetDefaultAlleySpacingX(float value);
+	FReply AddGenerationBox();
 
-	TOptional<float> GetDefaultAlleySpacingY() const;
-	void SetDefaultAlleySpacingY(float value);
-
-	TOptional<float> GetRotationalVariance() const;
-	void SetRotationalVariance(float value);
+	FReply ClearLevel();
 
 private:
 	TSharedPtr<FLevelDesigner_DesignModeTool> WidgetTool;
-
-	int32 GetSelectedPanel() const;
-
-	bool IsBuildingClassEnabled(int32 classId) const;
-
-	FReply SetCurrentBuildingClass(int32 classId);
-
-	int32 mCurrentlySelectedBuildingClass;
 };

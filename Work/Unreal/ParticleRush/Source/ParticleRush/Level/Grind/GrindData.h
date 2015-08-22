@@ -19,6 +19,5 @@ struct FGrindData
 {
 	GENERATED_USTRUCT_BODY()
 	//Grind properties go here. 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Basic Data"))
 };
 

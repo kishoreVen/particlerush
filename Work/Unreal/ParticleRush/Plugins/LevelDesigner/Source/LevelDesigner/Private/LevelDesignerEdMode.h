@@ -5,6 +5,7 @@
 
 // Forward declarations
 class ULandscapeComponent;
+class FLevelDesignerBuilding;
 
 // Log Declarations
 DECLARE_LOG_CATEGORY_EXTERN(LogLevelDesignerEdMode, Log, All)
@@ -20,7 +21,7 @@ struct FLevelDesignerUISettings
 	void SetBrushRadius(float value) { BrushRadius = value; }
 
 	int32 GetNumBuildingClasses() const { return NumBuildingClasses; }
-	void SetNumBuildingClasses(int32 value) { NumBuildingClasses = value; }
+	void SetNumBuildingClasses(int32 value) { NumBuildingClasses = value; SyncBuildingClasses(); }
 
 	FVector2D GetDefaultAlleySpacing() const { return DefaultAlleySpacing; }
 	void SetDefaultAlleySpacing(const FVector2D& value) { DefaultAlleySpacing = value; }
@@ -28,20 +29,27 @@ struct FLevelDesignerUISettings
 	float GetRotationalVariance() const { return RotationalVariance; }
 	void SetRotationalVariance(float value) { RotationalVariance = value; }
 
+	void RemoveBuildingClass(FColor& buildingClassColor);
+
 	FLevelDesignerUISettings()
 		: BrushRadius(512.f),
 		  NumBuildingClasses(4),
 		  DefaultAlleySpacing(10.0f, 10.0f),
 		  RotationalVariance(90.0f)
 	{
+		SyncBuildingClasses();
 	}
 
 	~FLevelDesignerUISettings()
 	{
 	}
 
+	/* Exposed Params */
+	TArray<FLevelDesignerBuilding*> LevelDesignerBuildingClasses;
+
 private:
-	
+	void SyncBuildingClasses();
+
 	/* Brush Settings */
 	float BrushRadius;
 

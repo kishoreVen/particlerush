@@ -12,6 +12,9 @@ class FMenuBuilder;
 class FLevelDesignerModule : public IModuleInterface
 {
 public:
+	void CreateLevelDesignerAsset();
+
+	UObject* GetLevelDesignerSettingsAsset() { return LevelDesigner_SettingsAsset; }
 
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
@@ -26,5 +29,7 @@ private:
 	void AddMenuExtension(FMenuBuilder& Builder);
 
 private:
+	UObject* LevelDesigner_SettingsAsset;
+
 	TSharedPtr<class FUICommandList> PluginCommands;
 };
