@@ -41,20 +41,27 @@ protected:
 
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 
-	virtual void PostEditMove(bool bFinished) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	virtual void PostEditMove(bool bFinished) override;
 #pragma endregion
 
 
 #pragma region PRIVATE HELPERS
 private:
+	FVector mCreationTimeMinBounds;
+	FVector mCreationTimeMaxBounds;
+
 	TArray<AActor*> GeneratedActors;
+
+	void GetGenerationBounds(FVector& minBounds, FVector& maxBounds, bool zDesired = false);
 
 	void ClearGeneratedActors();
 	void ClearGeneratedActorsWithColor(const FColor& ActorClassColor);
 
 	void PopulateWorld();
+
+	void MoveGeneratedActorsToNewLocation();
 
 	FVector SpawnActor(UClass* ActorClass, const FVector& ActorLocation, const FRotator& ActorOrienation, const FColor& ActorClassColor, UStaticMesh* ActorMesh = NULL);
 #pragma endregion

@@ -7,13 +7,15 @@
 AGenerationBoxActor::AGenerationBoxActor()
 : MinAlleySpacing(10.0f)
 , MaxAlleySpacing(100.0f)
+, mCreationTimeMaxBounds(FVector::ZeroVector)
+, mCreationTimeMinBounds(FVector::ZeroVector)
 {
-	RootSceneComponent = CreateDefaultSubobject<USceneComponent>("RootSceneComponent");
+	RootSceneComponent = CreateAbstractDefaultSubobject<USceneComponent>("RootSceneComp");
 	if (RootSceneComponent == NULL)
 		return;
-	
+
 	RootComponent = RootSceneComponent;
-	
+
 	GenerationBox = CreateAbstractDefaultSubobject<UBoxComponent>("GenerationBox");
 	if (GenerationBox == NULL)
 		return;
@@ -43,15 +45,41 @@ void AGenerationBoxActor::PostEditChangeProperty(FPropertyChangedEvent& Property
 }
 
 
+void AGenerationBoxActor::GetGenerationBounds(FVector& minBounds, FVector& maxBounds, bool zDesired)
+{
+	FVector halfBoxDimension = GenerationBox->Bounds.BoxExtent;
+	if (!zDesired)
+		halfBoxDimension.Z = 0.0f;
+
+	FVector boxOrigin = GetActorLocation();
+	
+	minBounds = boxOrigin - halfBoxDimension;
+	maxBounds = boxOrigin + halfBoxDimension;
+}
 
 void AGenerationBoxActor::PostEditMove(bool bFinished)
 {
 	Super::PostEditMove(bFinished);
 
-	if (bFinished)
+	if (!bFinished)
+		return;
+
+	FVector minBounds, maxBounds;
+	GetGenerationBounds(minBounds, maxBounds);
+
+	FVector movementDifference = minBounds - mCreationTimeMinBounds;
+	mCreationTimeMinBounds = minBounds;
+	mCreationTimeMaxBounds = maxBounds;
+
+	int generatedActorsCount = GeneratedActors.Num();
+
+	for (int index = 0; index < generatedActorsCount; index++)
 	{
-		PopulateWorld();
+		FVector currentActorLocation = GeneratedActors[index]->GetActorLocation();
+		GeneratedActors[index]->SetActorLocation(currentActorLocation + movementDifference);
 	}
+
+	PopulateWorld();
 }
 
 
@@ -86,26 +114,20 @@ UWorld* GetWorld()
 }
 
 
-
 void AGenerationBoxActor::PopulateWorld()
 {
 	ClearGeneratedActors();
 
-	FVector HalfBoxDimension = GenerationBox->Bounds.BoxExtent;
-	HalfBoxDimension.Z = 0.0f;
+	GetGenerationBounds(mCreationTimeMinBounds, mCreationTimeMaxBounds);
 
-	FVector BoxOrigin = GetActorLocation();
+	FVector CurrentActorLocation = mCreationTimeMinBounds;
 
-	FVector MinBoundsValue = BoxOrigin - HalfBoxDimension;
-	FVector MaxBoundsValue = BoxOrigin + HalfBoxDimension;
-
-	FVector CurrentActorLocation = MinBoundsValue;
-
-	for (float x = MinBoundsValue.X; x < MaxBoundsValue.X;)
+	while (CurrentActorLocation.X < mCreationTimeMaxBounds.X)
 	{
 		float MaxWidth = 0.0f;
 
-		for (float y = MinBoundsValue.Y; y < MaxBoundsValue.Y;)
+		CurrentActorLocation.Y = mCreationTimeMinBounds.Y;
+		while (CurrentActorLocation.Y < mCreationTimeMaxBounds.Y)
 		{
 			int actorClassIndex = FMath::RandRange(0, LevelDesigner_SettingsAsset->LevelDesignerBuildings.Num() - 1);
 			FLevelDesignerBuildingData actorClassData = LevelDesigner_SettingsAsset->LevelDesignerBuildings[actorClassIndex];
@@ -123,14 +145,20 @@ void AGenerationBoxActor::PopulateWorld()
 				actorDimensions = SpawnActor(actorClassData.BuildingClass, CurrentActorLocation, actorRoation, actorClassData.BuildingColor);
 			}
 
-			y += actorDimensions.Y;
+			CurrentActorLocation.Y += actorDimensions.Y + FMath::FRandRange(MinAlleySpacing, MaxAlleySpacing);
 
 			if (actorDimensions.X > MaxWidth)
 				MaxWidth = actorDimensions.X;
 		}
 
-		x += MaxWidth;
+		CurrentActorLocation.X += MaxWidth + FMath::FRandRange(MinAlleySpacing, MaxAlleySpacing);
 	}
+}
+
+
+void AGenerationBoxActor::MoveGeneratedActorsToNewLocation()
+{
+
 }
 
 
@@ -160,8 +188,9 @@ FVector AGenerationBoxActor::SpawnActor(UClass* ActorClass, const FVector& Actor
 		materialInstance->SetVectorParameterValue(BaseColorParamName, ActorClassColor);
 	}
 
-	FQuat ActorOrientationQuat(ActorOrienation);
-	spawnedActor->SetActorLocationAndRotation(ActorLocation, ActorOrientationQuat, true);
+	spawnedActor->SetActorLocation(ActorLocation);
+	spawnedActor->SetActorRotation(ActorOrienation);
+
 	spawnedActor->Tags.Add(*ActorClassColor.ToHex());
 
 	GeneratedActors.Add(spawnedActor);
@@ -186,6 +215,7 @@ void AGenerationBoxActor::ClearGeneratedActors()
 
 	GeneratedActors.Empty();
 }
+
 
 void AGenerationBoxActor::ClearGeneratedActorsWithColor(const FColor& ActorClassColor)
 {
