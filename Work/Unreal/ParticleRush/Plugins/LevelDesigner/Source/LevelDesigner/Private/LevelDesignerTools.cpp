@@ -336,10 +336,19 @@ void FLevelDesigner_EraseModeTool::SetBrushRadius(float value)
 	FLevelDesigner_DesignModeTool.
 -----------------------------------------------------------------------------*/
 
-FLevelDesigner_DesignModeTool::FLevelDesigner_DesignModeTool(FLevelDesignerUISettings& InUISettings)
-: UISettings(InUISettings)
+FLevelDesigner_DesignModeTool::FLevelDesigner_DesignModeTool()
 {
 	ID = (EModeTools)(ELevelDesignerModeTools::MT_Design);
+}
+
+void FLevelDesigner_DesignModeTool::AddGenerationBox(AGenerationBoxActor* aGenerationBoxActor)
+{
+	GenerationBoxActors.Add(aGenerationBoxActor);
+}
+
+void FLevelDesigner_DesignModeTool::RemoveGenerationBox(AGenerationBoxActor* aGenerationBoxActor)
+{
+	GenerationBoxActors.Remove(aGenerationBoxActor);
 }
 
 void FLevelDesigner_DesignModeTool::SelectNone()
@@ -423,38 +432,8 @@ TSharedRef<SVerticalBox> FLevelDesigner_DesignModeTool::MakeWidget()
 		.Padding(5)
 		[
 			SNew(SLevelDesignerDesignModeWidget, this)
+			.OnGenerationBoxAdded(FOnGenerationBoxAdded::CreateRaw(this, &FLevelDesigner_DesignModeTool::AddGenerationBox))
 		];
 
 	return box;
-}
-
-
-int32 FLevelDesigner_DesignModeTool::GetNumBuildingClasses() const
-{
-	return UISettings.GetNumBuildingClasses();
-}
-
-void FLevelDesigner_DesignModeTool::SetNumBuildingClasses(int32 value)
-{
-	UISettings.SetNumBuildingClasses(value);
-}
-
-FVector2D FLevelDesigner_DesignModeTool::GetDefaultAlleySpacing() const
-{
-	return UISettings.GetDefaultAlleySpacing();
-}
-
-void FLevelDesigner_DesignModeTool::SetDefaultAlleySpacing(const FVector2D& value)
-{
-	UISettings.SetDefaultAlleySpacing(value);
-}
-
-void FLevelDesigner_DesignModeTool::SetRotationalVariance(float value)
-{
-	UISettings.SetRotationalVariance(value);
-}
-
-float FLevelDesigner_DesignModeTool::GetRotationalVariance() const
-{
-	return UISettings.GetRotationalVariance();
 }

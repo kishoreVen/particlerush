@@ -6,6 +6,7 @@
 #include "LevelDesignerTools.h"
 #include "LevelDesignerStyle.h"
 #include "LevelDesignerBuildingClass.h"
+#include "GenerationBoxActor.h"
 
 #define LOCTEXT_NAMESPACE "LevelDesignerWidgets_Namespace"
 
@@ -79,6 +80,7 @@ void SLevelDesignerDesignModeWidget::Construct(const FArguments& InArgs, FLevelD
 	static FMargin ButtonMargin(3, 0, 3, 0);
 	static FMargin DetailsMargin(0, 3, 0, 3);
 
+	OnGenerationBoxAdded = InArgs._OnGenerationBoxAdded;
 	WidgetTool = TSharedPtr<FLevelDesigner_DesignModeTool>(InWidgetTool);
 
 	ChildSlot
@@ -226,7 +228,35 @@ FReply SLevelDesignerDesignModeWidget::ClearLevel()
 	return FReply::Handled();
 }
 
+UWorld* GetEditorWorld()
+{
+	UWorld* world = NULL;
+	const TIndirectArray<FWorldContext>& contexts = GEngine->GetWorldContexts();
+
+	for (int32 i = 0; i < contexts.Num(); i++)
+	{
+		if (contexts[i].WorldType == EWorldType::PIE)
+			return contexts[i].World();
+
+		if (contexts[i].WorldType == EWorldType::Editor)
+			world = contexts[i].World();
+	}
+
+	return world;
+}
+
 FReply SLevelDesignerDesignModeWidget::AddGenerationBox()
 {
+	UWorld* World = GetEditorWorld();
+
+	if (World == NULL)
+		return FReply::Handled();
+
+	FActorSpawnParameters spawnParams = FActorSpawnParameters();
+	AGenerationBoxActor* spawnedActor = World->SpawnActor<AGenerationBoxActor>(AGenerationBoxActor::StaticClass(), FVector(0, 0, 50), FRotator::ZeroRotator, spawnParams);
+	spawnedActor->SetActorScale3D(FVector(100, 100, 100));
+
+	OnGenerationBoxAdded.ExecuteIfBound(spawnedActor);
+
 	return FReply::Handled();
 }

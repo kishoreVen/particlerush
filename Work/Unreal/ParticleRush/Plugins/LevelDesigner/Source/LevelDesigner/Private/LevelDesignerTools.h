@@ -100,10 +100,16 @@ private:
 };
 
 
+class AGenerationBoxActor;
+
 class FLevelDesigner_DesignModeTool : public FLevelDesigner_BaseModeTool
 {
 public:
-	FLevelDesigner_DesignModeTool(FLevelDesignerUISettings& InUISettings);
+	FLevelDesigner_DesignModeTool();
+
+	void AddGenerationBox(AGenerationBoxActor* aGenerationBoxActor);
+
+	void RemoveGenerationBox(AGenerationBoxActor* aGenerationBoxActor);
 
 	virtual FString GetName() const override { return TEXT("DesignModeTool"); }
 
@@ -132,21 +138,9 @@ public:
 
 	virtual TSharedRef<SVerticalBox> MakeWidget() override;
 
-	/* Properties */
-	void SetNumBuildingClasses(int32 value);
-	int32 GetNumBuildingClasses() const;
-
-	FVector2D GetDefaultAlleySpacing() const;
-	void SetDefaultAlleySpacing(const FVector2D& value);
-
-	void SetRotationalVariance(float value);
-	float GetRotationalVariance() const;
-
-	FLevelDesignerBuilding* GetBuildingClassByUIIndex(int32 index) { return (index >= UISettings.GetNumBuildingClasses() || index < 0) ? NULL : UISettings.LevelDesignerBuildingClasses[index]; }
-
 protected:
 
 private:
-	FLevelDesignerUISettings& UISettings;
+	TArray<AGenerationBoxActor*> GenerationBoxActors;
 };
 

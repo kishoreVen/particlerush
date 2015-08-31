@@ -5,6 +5,13 @@
 
 class ULevelDesignerAsset;
 
+struct FCreationData
+{
+	FVector MinBoundsValue;
+	FVector MaxBoundsValue;
+	FVector BoxExtent;
+};
+
 /**  */
 UCLASS(BlueprintType)
 class AGenerationBoxActor : public AActor
@@ -33,6 +40,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Generation Settings"))
 	class ULevelDesignerAsset* LevelDesigner_SettingsAsset;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Native Only"))
+	bool IsPopulatedBefore;
 #pragma endregion
 
 #pragma region BASE CLASS OVERRIDES
@@ -44,25 +54,33 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	virtual void PostEditMove(bool bFinished) override;
+
+	virtual void Destroyed() override;
 #pragma endregion
 
 
 #pragma region PRIVATE HELPERS
 private:
-	FVector mCreationTimeMinBounds;
-	FVector mCreationTimeMaxBounds;
+	FCreationData CreationTimeData;
 
 	TArray<AActor*> GeneratedActors;
 
-	void GetGenerationBounds(FVector& minBounds, FVector& maxBounds, bool zDesired = false);
+	void GetGenerationBounds(FCreationData& creationData);
 
 	void ClearGeneratedActors();
+
 	void ClearGeneratedActorsWithColor(const FColor& ActorClassColor);
 
 	void PopulateWorld();
 
-	void MoveGeneratedActorsToNewLocation();
+	void MoveGeneratedActorsToNewLocation(FVector movementOffset);
 
 	FVector SpawnActor(UClass* ActorClass, const FVector& ActorLocation, const FRotator& ActorOrienation, const FColor& ActorClassColor, UStaticMesh* ActorMesh = NULL);
+#pragma endregion
+
+
+#pragma region PUBLIC INTERFACES
+public:
+	bool RemoveSpawnedActor(AActor* aAcorToRemove);
 #pragma endregion
 };

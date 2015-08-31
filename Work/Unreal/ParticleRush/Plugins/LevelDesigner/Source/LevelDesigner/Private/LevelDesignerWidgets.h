@@ -27,10 +27,14 @@ private:
 };
 
 
+DECLARE_DELEGATE_OneParam(FOnGenerationBoxAdded, class AGenerationBoxActor*);
+
 class SLevelDesignerDesignModeWidget : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SLevelDesignerDesignModeWidget) {}
+		SLATE_EVENT(FOnGenerationBoxAdded, OnGenerationBoxAdded)
+
 	SLATE_END_ARGS()
 
 	SLevelDesignerDesignModeWidget();
@@ -46,4 +50,6 @@ public:
 
 private:
 	TSharedPtr<FLevelDesigner_DesignModeTool> WidgetTool;
+
+	FOnGenerationBoxAdded OnGenerationBoxAdded;
 };

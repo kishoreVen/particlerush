@@ -7,8 +7,6 @@
 AGenerationBoxActor::AGenerationBoxActor()
 : MinAlleySpacing(10.0f)
 , MaxAlleySpacing(100.0f)
-, mCreationTimeMaxBounds(FVector::ZeroVector)
-, mCreationTimeMinBounds(FVector::ZeroVector)
 {
 	RootSceneComponent = CreateAbstractDefaultSubobject<USceneComponent>("RootSceneComp");
 	if (RootSceneComponent == NULL)
@@ -29,32 +27,34 @@ AGenerationBoxActor::~AGenerationBoxActor()
 }
 
 
+bool AGenerationBoxActor::RemoveSpawnedActor(AActor* aAcorToRemove)
+{
+	int numRemoved = GeneratedActors.Remove(aAcorToRemove);
+
+	return numRemoved > 0;
+}
+
+
 void AGenerationBoxActor::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeChainProperty(PropertyChangedEvent);
-
-	PopulateWorld();
 }
 
 
 void AGenerationBoxActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	PopulateWorld();
 }
 
 
-void AGenerationBoxActor::GetGenerationBounds(FVector& minBounds, FVector& maxBounds, bool zDesired)
+void AGenerationBoxActor::GetGenerationBounds(FCreationData& creationData)
 {
-	FVector halfBoxDimension = GenerationBox->Bounds.BoxExtent;
-	if (!zDesired)
-		halfBoxDimension.Z = 0.0f;
-
+	creationData.BoxExtent = GenerationBox->Bounds.BoxExtent;
+	
 	FVector boxOrigin = GetActorLocation();
 	
-	minBounds = boxOrigin - halfBoxDimension;
-	maxBounds = boxOrigin + halfBoxDimension;
+	creationData.MinBoundsValue = boxOrigin - creationData.BoxExtent;
+	creationData.MaxBoundsValue = boxOrigin + creationData.BoxExtent;
 }
 
 void AGenerationBoxActor::PostEditMove(bool bFinished)
@@ -64,22 +64,32 @@ void AGenerationBoxActor::PostEditMove(bool bFinished)
 	if (!bFinished)
 		return;
 
-	FVector minBounds, maxBounds;
-	GetGenerationBounds(minBounds, maxBounds);
+	SetActorRotation(FRotator::ZeroRotator);
+	GenerationBox->SetRelativeRotation(FRotator::ZeroRotator);
+	GenerationBox->SetRelativeLocation(FVector::ZeroVector);
 
-	FVector movementDifference = minBounds - mCreationTimeMinBounds;
-	mCreationTimeMinBounds = minBounds;
-	mCreationTimeMaxBounds = maxBounds;
+	FCreationData postEditCreationData;
+	GetGenerationBounds(postEditCreationData);
 
-	int generatedActorsCount = GeneratedActors.Num();
-
-	for (int index = 0; index < generatedActorsCount; index++)
+	if (CreationTimeData.BoxExtent != postEditCreationData.BoxExtent)
 	{
-		FVector currentActorLocation = GeneratedActors[index]->GetActorLocation();
-		GeneratedActors[index]->SetActorLocation(currentActorLocation + movementDifference);
+		PopulateWorld();
 	}
+	else
+	{
+		FVector movementDifference = postEditCreationData.MinBoundsValue - CreationTimeData.MinBoundsValue;
+		MoveGeneratedActorsToNewLocation(movementDifference);
 
-	PopulateWorld();
+		CreationTimeData = postEditCreationData;
+	}
+}
+
+
+void AGenerationBoxActor::Destroyed()
+{
+	Super::Destroyed();
+
+	ClearGeneratedActors();
 }
 
 
@@ -92,7 +102,15 @@ void AGenerationBoxActor::OnConstruction(const FTransform& Transform)
 	
 	LevelDesigner_SettingsAsset = static_cast<ULevelDesignerAsset*>(LevelDesignerAsset);
 
-	PopulateWorld();
+	if (!IsPopulatedBefore)
+	{
+		PopulateWorld();
+		IsPopulatedBefore = true;
+	}
+	else
+	{
+		GetGenerationBounds(CreationTimeData);
+	}
 }
 
 
@@ -117,17 +135,15 @@ UWorld* GetWorld()
 void AGenerationBoxActor::PopulateWorld()
 {
 	ClearGeneratedActors();
-
-	GetGenerationBounds(mCreationTimeMinBounds, mCreationTimeMaxBounds);
-
-	FVector CurrentActorLocation = mCreationTimeMinBounds;
-
-	while (CurrentActorLocation.X < mCreationTimeMaxBounds.X)
+	
+	GetGenerationBounds(CreationTimeData);
+	
+	FVector CurrentActorLocation = CreationTimeData.MinBoundsValue;
+	while (CurrentActorLocation.X < CreationTimeData.MaxBoundsValue.X)
 	{
 		float MaxWidth = 0.0f;
-
-		CurrentActorLocation.Y = mCreationTimeMinBounds.Y;
-		while (CurrentActorLocation.Y < mCreationTimeMaxBounds.Y)
+		CurrentActorLocation.Y = CreationTimeData.MinBoundsValue.Y;
+		while (CurrentActorLocation.Y < CreationTimeData.MaxBoundsValue.Y)
 		{
 			int actorClassIndex = FMath::RandRange(0, LevelDesigner_SettingsAsset->LevelDesignerBuildings.Num() - 1);
 			FLevelDesignerBuildingData actorClassData = LevelDesigner_SettingsAsset->LevelDesignerBuildings[actorClassIndex];
@@ -156,9 +172,14 @@ void AGenerationBoxActor::PopulateWorld()
 }
 
 
-void AGenerationBoxActor::MoveGeneratedActorsToNewLocation()
+void AGenerationBoxActor::MoveGeneratedActorsToNewLocation(FVector movementOffset)
 {
-
+	int generatedActorsCount = GeneratedActors.Num();
+	for (int index = 0; index < generatedActorsCount; index++)
+	{
+		FVector currentActorLocation = GeneratedActors[index]->GetActorLocation();
+		GeneratedActors[index]->SetActorLocation(currentActorLocation + movementOffset);
+	}
 }
 
 
