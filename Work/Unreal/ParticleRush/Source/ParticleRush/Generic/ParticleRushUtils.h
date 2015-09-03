@@ -37,10 +37,4 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Meta = (Category = "Spline Utilities"))
 	static int32 GetClosestSplinePointIndex(const class USplineComponent* SplineComponent, const FVector& ReferenceLocation, float DistanceThresholdSqrd = 1.0E06f);
-
-	/*
-	* Gets the Y value from a log curve with respect to the given X value. Only applicable with curves within the X and Y ranges of 0 to 1.
-	*/
-	UFUNCTION(BlueprintCallable, Meta = (Category = "Curve Utilities"))
-	static float GetYFromLogCurve(const class UCurveFloat* CurveFloat, float YValueForX);
 };

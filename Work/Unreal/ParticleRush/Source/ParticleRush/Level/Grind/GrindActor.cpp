@@ -23,6 +23,7 @@ AGrindActor::AGrindActor()
 	#pragma endregion
 
 	mShouldActivateRamp = false;
+	bTwoWay = true;
 
 	mRushPtr = NULL;
 }
@@ -50,6 +51,12 @@ void AGrindActor::Tick( float DeltaTime )
 		return;
 
 	FVector closestSplinePointLocation	= SplineComp->GetWorldLocationAtSplinePoint(closestSplinePoint);
+
+	if (bTwoWay = true && mRushPtr->GetActorForwardVector().X > closestSplinePointLocation.X)
+	{
+		FVector nextSplinePointLocation = SplineComp->GetWorldLocationAtSplinePoint(closestSplinePoint - 1);
+	}
+
 	FVector nextSplinePointLocation		= SplineComp->GetWorldLocationAtSplinePoint(closestSplinePoint + 1);
 
 	/* Direction from one spline point to the next. This gives the direction we are supposed to move along the spline */
@@ -78,11 +85,11 @@ void AGrindActor::Tick( float DeltaTime )
 		DrawDebugSphere(GetWorld(), nextSplinePointLocation, 10.0f, 16, FColor::Blue);
 	}
 
-	/* MyTime keeps track of time for the duration of the speed curve. Shit's broken though for unexplainable reasons */
+	/* MyTime keeps track of time for the duration of the acceleration curve. Also, very simple math in the Forward Vector: a = dV/dT */
 	MyTime = MyTime + DeltaTime;
 	mRushPtr.Get()->SetControllerRotation(interpedRotation);
-	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), SpeedCurve->GetFloatValue(MyTime));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
+	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), AccelerationCurve->GetFloatValue(MyTime) / MyTime);
+	//bGEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)

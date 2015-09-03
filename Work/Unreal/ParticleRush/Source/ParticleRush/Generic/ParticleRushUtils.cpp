@@ -104,11 +104,3 @@ int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* Spl
 	return closestSplinePointIndex;
 }
 
-float UParticleRushUtils::GetYFromLogCurve(const class UCurveFloat* CurveFloat, float YValueForX)
-{
-	float MinY = CurveFloat->GetFloatValue(0);
-	float MaxY = CurveFloat->GetFloatValue(1);
-	float CurveX = MinY + YValueForX * (MaxY - MinY);
-
-	return CurveX;
-}
