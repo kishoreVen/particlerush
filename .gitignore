@@ -167,3 +167,5 @@ Tools/Binaries/AFG
 Work/Maya/
 Work/MODO/
 *.pdb
+Work/Unreal/ParticleRush/Plugins/PrototypeLevelGenerator/Binaries/Win64/UE4Editor-PrototypeLevelGenerator.dll
+*.dll
