@@ -89,7 +89,7 @@ void AGrindActor::Tick( float DeltaTime )
 	MyTime = MyTime + DeltaTime;
 	mRushPtr.Get()->SetControllerRotation(interpedRotation);
 	mRushPtr.Get()->AddMovementInput(mRushPtr.Get()->GetActorForwardVector(), AccelerationCurve->GetFloatValue(MyTime) / MyTime);
-	//bGEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::SanitizeFloat(MyTime));
 }
 
 void AGrindActor::NotifyActorBeginOverlap(class AActor* OtherActor)
