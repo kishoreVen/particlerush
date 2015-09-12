@@ -25,6 +25,8 @@ public:
 	virtual bool IsToolActive() { return false; }
 
 	virtual bool IsSelectionAllowed() { return true; }
+
+	virtual bool Select(AActor* InActor, bool bInSelected) { return false;  }
 };
 
 
@@ -118,6 +120,8 @@ public:
 	 */
 	virtual bool InputDelta(FEditorViewportClient* InViewportClient,FViewport* InViewport,FVector& InDrag,FRotator& InRot,FVector& InScale) override;
 
+	virtual bool Select(AActor* InActor, bool bInSelected) override;
+
 	virtual bool StartModify() override;
 	virtual bool EndModify() override;
 
@@ -141,6 +145,10 @@ public:
 protected:
 
 private:
+	bool RemoveActorGenerationBox();
+
+	AActor* CurrentSelectActor;
+
 	TArray<AGenerationBoxActor*> GenerationBoxActors;
 };
 

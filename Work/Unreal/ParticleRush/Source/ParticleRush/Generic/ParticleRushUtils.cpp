@@ -83,7 +83,7 @@ FRotator UParticleRushUtils::ROverShootingInterpTo(const FRotator& Current, cons
 
 int32 UParticleRushUtils::GetClosestSplinePointIndex(const USplineComponent* SplineComponent, const FVector& ReferenceLocation, float DistanceThresholdSqrd)
 {
-	int32 numSplinePoints = SplineComponent->GetNumSplinePoints();
+	int32 numSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 
 	int32 closestSplinePointIndex = -1;
 	float minDistanceSqrd = DistanceThresholdSqrd;

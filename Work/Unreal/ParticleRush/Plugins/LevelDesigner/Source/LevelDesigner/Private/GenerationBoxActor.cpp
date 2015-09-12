@@ -8,17 +8,11 @@ AGenerationBoxActor::AGenerationBoxActor()
 : MinAlleySpacing(10.0f)
 , MaxAlleySpacing(100.0f)
 {
-	RootSceneComponent = CreateAbstractDefaultSubobject<USceneComponent>("RootSceneComp");
-	if (RootSceneComponent == NULL)
-		return;
-
-	RootComponent = RootSceneComponent;
-
 	GenerationBox = CreateAbstractDefaultSubobject<UBoxComponent>("GenerationBox");
 	if (GenerationBox == NULL)
 		return;
 
-	GenerationBox->AttachParent = RootSceneComponent;
+	RootComponent = GenerationBox;
 }
 
 AGenerationBoxActor::~AGenerationBoxActor()
@@ -44,6 +38,31 @@ void AGenerationBoxActor::PostEditChangeChainProperty(FPropertyChangedChainEvent
 void AGenerationBoxActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (!PropertyChangedEvent.Property)
+		return;
+
+	FName PropertyName = PropertyChangedEvent.Property->GetFName();
+	/* Make a Change Here */
+	if (PropertyName == "RelativeLocation")
+	{
+		FCreationData postEditCreationData;
+		GetGenerationBounds(postEditCreationData);
+
+		FVector movementDifference = postEditCreationData.MinBoundsValue - CreationTimeData.MinBoundsValue;
+		MoveGeneratedActorsToNewLocation(movementDifference);
+
+		CreationTimeData = postEditCreationData;
+	}
+	else if (PropertyName == "RelativeScale3D")
+	{
+		PopulateWorld();
+	}
+	else if (PropertyName == "RelativeRotation")
+	{
+		SetActorRotation(FRotator::ZeroRotator);
+		GenerationBox->SetRelativeRotation(FRotator::ZeroRotator);
+	}
 }
 
 
@@ -61,12 +80,8 @@ void AGenerationBoxActor::PostEditMove(bool bFinished)
 {
 	Super::PostEditMove(bFinished);
 
-	if (!bFinished)
-		return;
-
 	SetActorRotation(FRotator::ZeroRotator);
 	GenerationBox->SetRelativeRotation(FRotator::ZeroRotator);
-	GenerationBox->SetRelativeLocation(FVector::ZeroVector);
 
 	FCreationData postEditCreationData;
 	GetGenerationBounds(postEditCreationData);
@@ -148,17 +163,13 @@ void AGenerationBoxActor::PopulateWorld()
 			int actorClassIndex = FMath::RandRange(0, LevelDesigner_SettingsAsset->LevelDesignerBuildings.Num() - 1);
 			FLevelDesignerBuildingData actorClassData = LevelDesigner_SettingsAsset->LevelDesignerBuildings[actorClassIndex];
 
+			/* To Do .. Rotation Variance */
 			FRotator actorRoation = FRotator::ZeroRotator;
 
 			FVector actorDimensions;
-
-			if (actorClassData.BuildingClass == UStaticMesh::StaticClass())
+			if (actorClassData.BuildingBlueprint->GeneratedClass->IsChildOf(ABaseMeshActor::StaticClass()))
 			{
-				actorDimensions = SpawnActor(ABaseMeshActor::StaticClass(), CurrentActorLocation, actorRoation, actorClassData.BuildingColor, static_cast<UStaticMesh*>(actorClassData.BuildingObject));
-			}
-			else
-			{
-				actorDimensions = SpawnActor(actorClassData.BuildingClass, CurrentActorLocation, actorRoation, actorClassData.BuildingColor);
+				actorDimensions = SpawnActor(actorClassData, CurrentActorLocation, actorRoation);
 			}
 
 			CurrentActorLocation.Y += actorDimensions.Y + FMath::FRandRange(MinAlleySpacing, MaxAlleySpacing);
@@ -183,41 +194,37 @@ void AGenerationBoxActor::MoveGeneratedActorsToNewLocation(FVector movementOffse
 }
 
 
-FVector AGenerationBoxActor::SpawnActor(UClass* ActorClass, const FVector& ActorLocation, const FRotator& ActorOrienation, const FColor& ActorClassColor, UStaticMesh* ActorMesh)
+FVector AGenerationBoxActor::SpawnActor(const FLevelDesignerBuildingData& LevelDesignerBuildingData, const FVector& ActorLocation, const FRotator& ActorOrienation)
 {
 	static FName BaseColorParamName("BaseColor");
 	UWorld* World = GetWorld();
 
 	FActorSpawnParameters spawnParams = FActorSpawnParameters();
+	UClass* ActorClass = LevelDesignerBuildingData.BuildingBlueprint->GeneratedClass;
 	AActor* spawnedActor = World->SpawnActor<AActor>(ActorClass, ActorLocation, ActorOrienation, spawnParams);
-
 	if (spawnedActor == NULL)
 		return FVector::ZeroVector;
 
-	if (spawnedActor->IsA(ABaseMeshActor::StaticClass()))
-	{
-		ABaseMeshActor* spawnedBuilding = static_cast<ABaseMeshActor*>(spawnedActor);
-
-		spawnedBuilding->SetStaticMesh(ActorMesh);
-
-		FVector minDimension = LevelDesigner_SettingsAsset->DefaultMinDimensions;
-		FVector maxDimension = LevelDesigner_SettingsAsset->DefaultMaxDimensions;
-		FVector dimension(FMath::FRandRange(minDimension.X, maxDimension.X), FMath::FRandRange(minDimension.Y, maxDimension.Y), FMath::FRandRange(minDimension.Z, maxDimension.Z));
-		spawnedBuilding->SetActorScale3D(dimension);
-		
-		UMaterialInstanceDynamic* materialInstance = spawnedBuilding->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ActorMesh->GetMaterial(0));
-		materialInstance->SetVectorParameterValue(BaseColorParamName, ActorClassColor);
-	}
-
-	spawnedActor->SetActorLocation(ActorLocation);
-	spawnedActor->SetActorRotation(ActorOrienation);
-
-	spawnedActor->Tags.Add(*ActorClassColor.ToHex());
-
 	GeneratedActors.Add(spawnedActor);
-	
+
+	ABaseMeshActor* spawnedBuilding = static_cast<ABaseMeshActor*>(spawnedActor);
+	spawnedBuilding->SetStaticMesh(LevelDesignerBuildingData.BuildingMesh);
+
+	FVector minDimension = LevelDesignerBuildingData.MinDimensions;
+	FVector maxDimension = LevelDesignerBuildingData.MaxDimensions;
+	FVector dimension(FMath::FRandRange(minDimension.X, maxDimension.X), FMath::FRandRange(minDimension.Y, maxDimension.Y), FMath::FRandRange(minDimension.Z, maxDimension.Z));
+	spawnedBuilding->SetActorScale3D(dimension);
+		
+	UMaterialInstanceDynamic* materialInstance = spawnedBuilding->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LevelDesignerBuildingData.BuildingMesh->GetMaterial(0));
+	materialInstance->SetVectorParameterValue(BaseColorParamName, LevelDesignerBuildingData.BuildingColor);
+
+	spawnedBuilding->SetActorLocation(ActorLocation);
+	spawnedBuilding->SetActorRotation(ActorOrienation);
+
+	spawnedBuilding->Tags.Add(*(LevelDesignerBuildingData.BuildingColor.ToHex()));
+
 	FVector origin, extent;
-	spawnedActor->GetActorBounds(true, origin, extent);
+	spawnedBuilding->GetActorBounds(true, origin, extent);
 
 	extent *= 2.0f; //Twice the actual size of the box, because extent is only half size
 
@@ -257,4 +264,10 @@ void AGenerationBoxActor::ClearGeneratedActorsWithColor(const FColor& ActorClass
 	{
 		GeneratedActors.RemoveAt(RemovedIndices[removedIndex]);
 	}
+}
+
+
+void AGenerationBoxActor::RequestPopulateWorld()
+{
+	PopulateWorld();
 }

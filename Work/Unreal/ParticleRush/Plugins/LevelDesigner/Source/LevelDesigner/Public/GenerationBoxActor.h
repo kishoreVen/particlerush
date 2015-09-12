@@ -75,12 +75,14 @@ private:
 
 	void MoveGeneratedActorsToNewLocation(FVector movementOffset);
 
-	FVector SpawnActor(UClass* ActorClass, const FVector& ActorLocation, const FRotator& ActorOrienation, const FColor& ActorClassColor, UStaticMesh* ActorMesh = NULL);
+	FVector SpawnActor(const FLevelDesignerBuildingData& LevelDesignerBuildingData, const FVector& ActorLocation, const FRotator& ActorOrienation);
 #pragma endregion
 
 
 #pragma region PUBLIC INTERFACES
 public:
+	void RequestPopulateWorld();
+
 	bool RemoveSpawnedActor(AActor* aAcorToRemove);
 #pragma endregion
 };

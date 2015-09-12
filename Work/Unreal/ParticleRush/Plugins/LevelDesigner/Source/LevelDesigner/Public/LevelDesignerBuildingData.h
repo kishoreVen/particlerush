@@ -21,11 +21,17 @@ public:
 	void RemoveSpawnedActor(AActor* removedActor);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Spawn"))
-	UClass* BuildingClass;
+	UBlueprint* BuildingBlueprint;
 
 	UPROPERTY(EditAnywhere,  BlueprintReadOnly, Meta = (Category = "Spawn"))
-	UObject* BuildingObject;
+	UStaticMesh* BuildingMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Spawn"))
 	FColor BuildingColor;
+
+	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params"))
+	FVector MinDimensions;
+
+	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params"))
+	FVector MaxDimensions;
 };

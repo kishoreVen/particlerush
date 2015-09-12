@@ -78,6 +78,19 @@ bool FLevelDesignerEdMode::CurrentToolUsesBrush()
 	return GetCurrentTool()->GetID() == (EModeTools)ELevelDesignerModeTools::MT_Erase;
 }
 
+bool FLevelDesignerEdMode::Select(AActor* InActor, bool bInSelected)
+{
+	FModeTool* currentTool = GetCurrentTool();
+	if (currentTool == NULL)
+		return false;
+
+	FLevelDesigner_BaseModeTool* currentDesignerTool = static_cast<FLevelDesigner_BaseModeTool*>(currentTool);
+	if (currentDesignerTool == NULL)
+		return false;
+
+	return currentDesignerTool->Select(InActor, bInSelected);
+}
+
 void FLevelDesignerEdMode::BindCommands()
 {
 	const FLevelDesignerEditCommands& Commands = FLevelDesignerEditCommands::Get();
@@ -280,12 +293,12 @@ bool FLevelDesignerEdMode::InputKey(FEditorViewportClient* ViewportClient, FView
 	}
 	 
 	bool bHandled = false;
-	//for (const auto& Tool : Tools)
-	//{
-	//	bHandled = Tool->InputKey(ViewportClient, Viewport, Key, Event);
-	//	if (bHandled == true)
-	//		break;
-	//}
+	for (const auto& Tool : Tools)
+	{
+		bHandled = Tool->InputKey(ViewportClient, Viewport, Key, Event);
+		if (bHandled == true)
+			break;
+	}
 
 	return bHandled;
 }

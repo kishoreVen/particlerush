@@ -7,6 +7,8 @@
 #include "LevelDesignerEdMode.h"
 #include "LevelDesignerAsset.h"
 
+#include "AssetToolsModule.h"
+
 static const FName LevelDesignerTabName("LevelDesigner");
 
 #define LOCTEXT_NAMESPACE "FLevelDesignerModule"
@@ -58,7 +60,7 @@ void FLevelDesignerModule::AddToolbarExtension(FToolBarBuilder& Builder)
 
 void FLevelDesignerModule::CreateLevelDesignerAsset()
 {
-	FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
 
 	FString Name;
 	FString PackageName;

@@ -131,6 +131,8 @@ public:
 	/** FEdMode: Called when the currently selected actor has changed */
 	virtual void ActorSelectionChangeNotify() override;
 
+	virtual bool Select(AActor* InActor, bool bInSelected) override;
+
 	/** Notifies all active modes of mouse click messages. */
 	bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy *HitProxy, const FViewportClick &Click) override;
 

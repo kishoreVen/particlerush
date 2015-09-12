@@ -9,8 +9,10 @@ Level Designer Struct
 FString FLevelDesignerBuildingData::DefaultAssetName("/Game/Assets/Prototype/DefaultBuildingMesh");
 
 FLevelDesignerBuildingData::FLevelDesignerBuildingData()
+: MinDimensions(FVector(10, 10, 10))
+, MaxDimensions(FVector(20, 20, 20))
 {
-	BuildingObject = StaticLoadObject(UStaticMesh::StaticClass(), NULL, *DefaultAssetName);
+	BuildingMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *DefaultAssetName));
 }
 
 FLevelDesignerBuildingData::~FLevelDesignerBuildingData()

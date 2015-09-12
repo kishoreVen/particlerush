@@ -30,7 +30,7 @@ public:
 
 #pragma region FIELDS
 private:
-	ARushCharacter mRushPtr;
+	TWeakObjectPtr<class ARushCharacter> mRushPtr;
 #pragma endregion
 	
 

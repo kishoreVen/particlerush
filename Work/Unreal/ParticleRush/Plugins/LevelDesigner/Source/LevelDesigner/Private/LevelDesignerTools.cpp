@@ -6,6 +6,7 @@
 #include "Landscape.h"
 #include "LevelDesignerWidgets.h"
 #include "LevelDesignerBuildingClass.h"
+#include "GenerationBoxActor.h"
 /*-----------------------------------------------------------------------------
 	FLevelDesigner_EraseModeTool.
 -----------------------------------------------------------------------------*/
@@ -353,8 +354,18 @@ void FLevelDesigner_DesignModeTool::RemoveGenerationBox(AGenerationBoxActor* aGe
 
 void FLevelDesigner_DesignModeTool::SelectNone()
 {
-	
+	CurrentSelectActor = NULL;
 }
+
+
+bool FLevelDesigner_DesignModeTool::Select(AActor* InActor, bool bInSelected)
+{
+	if (!InActor->IsA(AGenerationBoxActor::StaticClass()))
+		CurrentSelectActor = InActor;
+
+	return false;
+}
+
 
 /** @return		true if something was selected/deselected, false otherwise. */
 bool FLevelDesigner_DesignModeTool::BoxSelect( FBox& InBox, bool InSelect )
@@ -383,6 +394,8 @@ void FLevelDesigner_DesignModeTool::Tick(FEditorViewportClient* ViewportClient,f
  */
 bool FLevelDesigner_DesignModeTool::InputDelta(FEditorViewportClient* InViewportClient,FViewport* InViewport,FVector& InDrag,FRotator& InRot,FVector& InScale)
 {	
+
+
 	return false;
 }
 
@@ -411,6 +424,20 @@ void FLevelDesigner_DesignModeTool::EndTrans()
  */
 bool FLevelDesigner_DesignModeTool::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
 {
+	if (EKeys::Delete == Key)
+	{
+		if (CurrentSelectActor != NULL)
+		{
+			for (AGenerationBoxActor* GenerationBoxActor : GenerationBoxActors)
+			{
+				if (GenerationBoxActor->RemoveSpawnedActor(CurrentSelectActor))
+				{
+					return true;
+				}
+			}
+		}
+	}
+
 	return FModeTool::InputKey(ViewportClient, Viewport, Key, Event);
 }
 
@@ -436,4 +463,18 @@ TSharedRef<SVerticalBox> FLevelDesigner_DesignModeTool::MakeWidget()
 		];
 
 	return box;
+}
+
+
+bool FLevelDesigner_DesignModeTool::RemoveActorGenerationBox()
+{
+	if (CurrentSelectActor != NULL)
+	{
+		for (AGenerationBoxActor* GenerationBox : GenerationBoxActors)
+		{
+			return GenerationBox->RemoveSpawnedActor(CurrentSelectActor);
+		}
+	}
+
+	return false;
 }

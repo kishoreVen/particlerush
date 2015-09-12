@@ -255,6 +255,7 @@ FReply SLevelDesignerDesignModeWidget::AddGenerationBox()
 	FActorSpawnParameters spawnParams = FActorSpawnParameters();
 	AGenerationBoxActor* spawnedActor = World->SpawnActor<AGenerationBoxActor>(AGenerationBoxActor::StaticClass(), FVector(0, 0, 50), FRotator::ZeroRotator, spawnParams);
 	spawnedActor->SetActorScale3D(FVector(100, 100, 100));
+	spawnedActor->RequestPopulateWorld();
 
 	OnGenerationBoxAdded.ExecuteIfBound(spawnedActor);
 

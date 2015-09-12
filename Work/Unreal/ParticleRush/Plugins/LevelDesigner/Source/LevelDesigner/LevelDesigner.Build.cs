@@ -19,7 +19,6 @@ public class LevelDesigner : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				"LevelDesigner/Private",
-				
 				// ... add other private include paths required here ...
 			}
 			);
@@ -54,11 +53,18 @@ public class LevelDesigner : ModuleRules
                 "Landscape",
                 "LandscapeEditor",
                 "ClassViewer",
-                "RenderCore",
-				"AssetTools"
+                "RenderCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
+
+        PrivateIncludePathModuleNames.AddRange(
+            new string[] {
+				"Settings",
+				"IntroTutorials",
+                "AssetTools"
+			}
+        );
 		
 		
 		DynamicallyLoadedModuleNames.AddRange(

@@ -26,12 +26,6 @@ public:
 	FLevelDesignerBuildingData GetRandomBuildingData();
 
 	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params"))
-	FVector DefaultMinDimensions;
-
-	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params"))
-	FVector DefaultMaxDimensions;
-
-	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params"))
 	float DefaultAlleySpacing;
 
 	UPROPERTY(EditAnywhere, Meta = (Category = "Spawn Params", UIMin = 0.0f, UIMax = 360.0f))

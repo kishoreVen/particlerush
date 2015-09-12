@@ -9,8 +9,6 @@ ULevelDesignerAsset::ULevelDesignerAsset()
 : DefaultAlleySpacing(50.0f)
 , DefaultRotationalVariance(75.0f)
 , DefaultBoxPopulationDensity(0.7f)
-, DefaultMinDimensions(FVector(5.0f, 5.0f, 5.0f))
-, DefaultMaxDimensions(FVector(10.0f, 10.0f, 10.0f))
 {
 }
 
@@ -34,11 +32,6 @@ void ULevelDesignerAsset::PostEditChangeChainProperty(FPropertyChangedChainEvent
 		{
 			FColor buildingColor = GenerateUniqueBuildingClassColor();
 			LevelDesignerBuildings[atIndex].BuildingColor = buildingColor;
-		}
-		
-		if (LevelDesignerBuildings[atIndex].BuildingObject != NULL)
-		{	
-			LevelDesignerBuildings[atIndex].BuildingClass = LevelDesignerBuildings[atIndex].BuildingObject->GetClass();
 		}
 	}
 }
