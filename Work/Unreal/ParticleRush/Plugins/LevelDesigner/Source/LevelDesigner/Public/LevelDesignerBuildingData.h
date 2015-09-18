@@ -23,8 +23,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Category = "Spawn"))
 	UBlueprint* BuildingBlueprint;
 
-	UPROPERTY(EditAnywhere,  BlueprintReadOnly, Meta = (Category = "Spawn"))
-	UStaticMesh* BuildingMesh;
+	UPROPERTY(EditAnywhere,  BlueprintReadOnly, Meta = (Category = "Spawn", DisplayName = "Default Building Mesh (If not set in BP)"))
+	UStaticMesh* DefaultBuildingMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Spawn"))
 	FColor BuildingColor;

@@ -42,7 +42,16 @@ protected:
 	class ULevelDesignerAsset* LevelDesigner_SettingsAsset;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Native Only"))
+	bool DefaultMinAlleySpacing;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Native Only"))
+	bool DefaultMaxAlleySpacing;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Native Only"))
 	bool IsPopulatedBefore;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (Category = "Native Only"))
+	TArray<AActor*> GeneratedActors;
 #pragma endregion
 
 #pragma region BASE CLASS OVERRIDES
@@ -62,8 +71,6 @@ protected:
 #pragma region PRIVATE HELPERS
 private:
 	FCreationData CreationTimeData;
-
-	TArray<AActor*> GeneratedActors;
 
 	void GetGenerationBounds(FCreationData& creationData);
 

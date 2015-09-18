@@ -6,15 +6,20 @@
 Level Designer Settings
 ---------------------------*/
 ULevelDesignerAsset::ULevelDesignerAsset()
-: DefaultAlleySpacing(50.0f)
+: DefaultMinAlleySpacing(500.0f)
+, DefaultMaxAlleySpacing(1000.0f)
 , DefaultRotationalVariance(75.0f)
-, DefaultBoxPopulationDensity(0.7f)
 {
 }
 
 void ULevelDesignerAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (DefaultMaxAlleySpacing < DefaultMinAlleySpacing)
+	{
+		DefaultMaxAlleySpacing = DefaultMinAlleySpacing + 500.0f;
+	}
 }
 
 void ULevelDesignerAsset::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)

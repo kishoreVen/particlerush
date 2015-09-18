@@ -12,7 +12,7 @@ FLevelDesignerBuildingData::FLevelDesignerBuildingData()
 : MinDimensions(FVector(10, 10, 10))
 , MaxDimensions(FVector(20, 20, 20))
 {
-	BuildingMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *DefaultAssetName));
+	DefaultBuildingMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *DefaultAssetName));
 }
 
 FLevelDesignerBuildingData::~FLevelDesignerBuildingData()

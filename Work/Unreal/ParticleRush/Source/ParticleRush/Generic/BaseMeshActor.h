@@ -14,16 +14,20 @@ class PARTICLERUSH_API ABaseMeshActor : public AActor
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (Category = "Mesh"))
 	class UStaticMeshComponent* StaticMeshComp;
-
-public:
-	class UStaticMeshComponent* GetStaticMeshComponent();
-
-	void SetStaticMesh(UStaticMesh* NewStaticMesh);
 #pragma endregion
 
 #pragma region Constructor
 public:
 	// Sets default values for this actor's properties
 	ABaseMeshActor();
+#pragma endregion
+
+#pragma region Public Interface
+public:
+	class UStaticMeshComponent* GetStaticMeshComponent();
+
+	void SetStaticMesh(UStaticMesh* NewStaticMesh);
+
+	class UStaticMesh* GetStaticMesh();
 #pragma endregion
 };

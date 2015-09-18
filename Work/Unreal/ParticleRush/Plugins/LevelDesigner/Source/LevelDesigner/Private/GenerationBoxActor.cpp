@@ -7,6 +7,8 @@
 AGenerationBoxActor::AGenerationBoxActor()
 : MinAlleySpacing(10.0f)
 , MaxAlleySpacing(100.0f)
+, DefaultMinAlleySpacing(true)
+, DefaultMaxAlleySpacing(true)
 {
 	GenerationBox = CreateAbstractDefaultSubobject<UBoxComponent>("GenerationBox");
 	if (GenerationBox == NULL)
@@ -17,7 +19,6 @@ AGenerationBoxActor::AGenerationBoxActor()
 
 AGenerationBoxActor::~AGenerationBoxActor()
 {
-	ClearGeneratedActors();
 }
 
 
@@ -32,6 +33,38 @@ bool AGenerationBoxActor::RemoveSpawnedActor(AActor* aAcorToRemove)
 void AGenerationBoxActor::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+
+	FName PropertyName = PropertyChangedEvent.Property->GetFName();
+	if (PropertyName == "MinAlleySpacing")
+	{
+		if (MinAlleySpacing != LevelDesigner_SettingsAsset->DefaultMinAlleySpacing)
+		{
+			DefaultMinAlleySpacing = false;
+		}
+
+		if (MinAlleySpacing == 0.0f || MinAlleySpacing == LevelDesigner_SettingsAsset->DefaultMinAlleySpacing)
+		{
+			MinAlleySpacing = LevelDesigner_SettingsAsset->DefaultMinAlleySpacing;
+			DefaultMinAlleySpacing = true;
+		}
+
+		PopulateWorld();
+	}
+	else if (PropertyName == "MaxAlleySpacing")
+	{
+		if (MaxAlleySpacing != LevelDesigner_SettingsAsset->DefaultMaxAlleySpacing)
+		{
+			DefaultMaxAlleySpacing = false;
+		}
+
+		if (MaxAlleySpacing == 0.0f || MaxAlleySpacing == LevelDesigner_SettingsAsset->DefaultMaxAlleySpacing)
+		{
+			MaxAlleySpacing = LevelDesigner_SettingsAsset->DefaultMaxAlleySpacing;
+			DefaultMaxAlleySpacing = true;
+		}
+
+		PopulateWorld();
+	}
 }
 
 
@@ -119,6 +152,9 @@ void AGenerationBoxActor::OnConstruction(const FTransform& Transform)
 
 	if (!IsPopulatedBefore)
 	{
+		MinAlleySpacing = LevelDesigner_SettingsAsset->DefaultMinAlleySpacing;
+		MaxAlleySpacing = LevelDesigner_SettingsAsset->DefaultMaxAlleySpacing;
+
 		PopulateWorld();
 		IsPopulatedBefore = true;
 	}
@@ -208,14 +244,16 @@ FVector AGenerationBoxActor::SpawnActor(const FLevelDesignerBuildingData& LevelD
 	GeneratedActors.Add(spawnedActor);
 
 	ABaseMeshActor* spawnedBuilding = static_cast<ABaseMeshActor*>(spawnedActor);
-	spawnedBuilding->SetStaticMesh(LevelDesignerBuildingData.BuildingMesh);
+
+	if (spawnedBuilding->GetStaticMesh() == NULL)
+		spawnedBuilding->SetStaticMesh(LevelDesignerBuildingData.DefaultBuildingMesh);
 
 	FVector minDimension = LevelDesignerBuildingData.MinDimensions;
 	FVector maxDimension = LevelDesignerBuildingData.MaxDimensions;
 	FVector dimension(FMath::FRandRange(minDimension.X, maxDimension.X), FMath::FRandRange(minDimension.Y, maxDimension.Y), FMath::FRandRange(minDimension.Z, maxDimension.Z));
 	spawnedBuilding->SetActorScale3D(dimension);
 		
-	UMaterialInstanceDynamic* materialInstance = spawnedBuilding->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LevelDesignerBuildingData.BuildingMesh->GetMaterial(0));
+	UMaterialInstanceDynamic* materialInstance = spawnedBuilding->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LevelDesignerBuildingData.DefaultBuildingMesh->GetMaterial(0));
 	materialInstance->SetVectorParameterValue(BaseColorParamName, LevelDesignerBuildingData.BuildingColor);
 
 	spawnedBuilding->SetActorLocation(ActorLocation);

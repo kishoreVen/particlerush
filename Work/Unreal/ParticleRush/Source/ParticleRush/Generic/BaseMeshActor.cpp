@@ -17,6 +17,11 @@ ABaseMeshActor::ABaseMeshActor()
 }
 
 
+UStaticMesh* ABaseMeshActor::GetStaticMesh()
+{
+	return StaticMeshComp->StaticMesh;
+}
+
 UStaticMeshComponent* ABaseMeshActor::GetStaticMeshComponent()
 {
 	return StaticMeshComp;
